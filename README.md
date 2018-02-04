@@ -1,13 +1,19 @@
 # JetFuelExecute
-Remote Procedure Call library over a super fast journaled messaging bus
+JetFuelExecute is a Remote Procedure Call (RPC) library over a super fast journaled messaging bus.
 
-JetFuel allows a developer to publish a function on a bus and any other client connected to the bus to call. The bus itself is journaled so you can easily look at fields of the request and response. 
+JetFuel allows a developer to publish a function on a bus and any other client connected to the bus to call it. The bus itself is journaled so you can easily look at fields of the request and response. This should simplify the life of developers and support staff who constantly have to degub issues.
 
-There are two easy steps to use JetFuelExecute 
+This library forms the basis of a very good command / response paradigm.
+
+Currently the only bus that is suported is http://www.crankuptheamps.com/ In the future other buses will be supported.
+
+This project currently has the java implemention, in the near future we will javascript and C implementation. This means JetFuel funcitons can be published and called from multiple languages.
+
+There are two easy steps to use JetFuelExecute  :-
 1) Publish a function
 2) Call the function
 
-Let look at step 1 first. Publishing a function on the bus is easy 
+Let look at step 1 first. Publishing a function on the bus is easy.
 ```java
             // Create amps connection
             final HAClient haClient = new HaClientFactory().createHaClient("SampleJetFuelSever",
@@ -44,7 +50,7 @@ Let look at step 1 first. Publishing a function on the bus is easy
             System.out.println("Now waiting for client calls");
 ```
 
-When you publish a function on the bus you also need to tell it how to process the function call. This is done easily by extending AbstractFunctionExecutor and passing it as a parameter to the publishFunction method
+When you publish a function on the bus you also need to tell it how to process the function call. This is done easily by extending AbstractFunctionExecutor and passing it as a parameter to the publishFunction method.
 
 ```java
     static class AbleToVoteExecutor extends AbstractFunctionExecutor {
@@ -83,7 +89,7 @@ Now lets look at step 2. Calling a function. This is even easier than publoshing
             final String id1 = jetFuelExecute.executeFunction("SampleJetFuelSever.CheckAbilityToVote",
                     new Object[]{true, 22}, new ClientFunctionResponse());
 ```
-And here is the code for ClientFunctionResponse
+And here is the code for ClientFunctionResponse.
 
 ```java
     class ClientFunctionResponse implements FunctionResponse {
