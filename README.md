@@ -12,13 +12,13 @@ This project currently has the java implemention, in the near future we will jav
 JetFuelExplorer is another tool set you can use with JetFuelExecute. With JetFuelExplorer you can do 3 important things
 
 1) View avaialble functions that are published by other servers
-![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
 
 2) Test a function - this is so useful
-![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
 
 3) View the full Request/Response message - your support team will love you
-![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
 
 
 Let quickly look how you can use JetFuelExecute in two easy steps :-
