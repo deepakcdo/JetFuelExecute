@@ -53,7 +53,7 @@ public class JetFuelExecuteServer {
                     "This function will check if a person is able to vote",
                     functionParameters,
                     Boolean.class, "Return true if person can vote else false",
-                    new AbleToVotExecutor(), FunctionAccessType.Read, FunctionExecutionType.RequestResponse);
+                    new AbleToVoteExecutor(), FunctionAccessType.Read, FunctionExecutionType.RequestResponse);
 
             System.out.println("Publishing Function");
             // publish JetFuel Function on the bus
@@ -70,7 +70,7 @@ public class JetFuelExecuteServer {
         }
     }
 
-    static class AbleToVotExecutor extends AbstractFunctionExecutor {
+    static class AbleToVoteExecutor extends AbstractFunctionExecutor {
 
         @Override
         protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
@@ -83,7 +83,6 @@ public class JetFuelExecuteServer {
             } else {
                 result.onCompleted(id, "You can vote", true);
             }
-
         }
     }
 }

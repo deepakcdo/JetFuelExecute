@@ -46,7 +46,7 @@ public class JetFuelExecuteClient {
 
     }
 
-    class ClientFunctionResponse implements FunctionResponse {
+   static class ClientFunctionResponse implements FunctionResponse {
         @Override
         public void onCompleted(String id, Object message, Object returnValue) {
             System.out.println("Got onCompleted for id '" + id + "' with message '" + message + "' and returnValue '" + returnValue + "'");
