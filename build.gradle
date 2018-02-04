@@ -1,0 +1,69 @@
+repositories {
+    mavenCentral()
+}
+apply plugin: 'java'
+apply plugin: 'idea'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: '*.jar')
+    compile("org.springframework:spring-messaging:4.3.2.RELEASE")
+    compile("com.fasterxml.jackson.core:jackson-core:2.6.0-rc2")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.6.0-rc2")
+    compile("com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc2")
+
+    compile(group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1') { exclude group: '*' }
+    compile(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1') { exclude group: '*' }
+    compile(group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.1') { exclude group: '*' }
+    compile(group: 'org.apache.logging.log4j', name: 'log4j-jcl', version: '2.1') { exclude group: '*' }
+    compile(group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.1') { exclude group: '*' }
+    compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.7.8') { exclude group: '*' }
+
+    testCompile "junit:junit:4.12"
+    testCompile "org.springframework:spring-test:4.3.2.RELEASE"
+}
+
+def props = new Properties()
+file("JetFuelExecute.properties").withInputStream { props.load(it) }
+
+jar {
+    baseName = 'JetFuelExecute-' + props.getProperty("version")
+    manifest {
+        attributes 'Company': 'Head Front Consulting',
+                'App': 'JetFuelExecute',
+                'Version': props.getProperty("version"),
+                'ContactEmail': 'deepakcdo@gmail.com',
+                'ContactNumber': '+44 7958 707 212',
+                'Owner': 'Deepak Dhayatker',
+                'Web': 'http://headfront.co.uk/'
+    }
+}
+
+task testJar(type: Jar) {
+    classifier = 'tests'
+    from sourceSets.test.output
+}
+
+def buildLoc = "build/BuildApp/JetFuelExecute-" + props.getProperty("version")
+task BuildApp {
+    delete(buildLoc)
+    mkdir(buildLoc)
+
+    copy {
+        into buildLoc + '/libs/'
+        from configurations
+    }
+
+    copy {
+        from 'build/libs'
+        into buildLoc + '/libs/'
+        include '*.jar'
+    }
+
+}
+
+task runNewBbgGateway(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'headfront.jetfuel.execute.Gateway'
+    jvmArgs '-XX:MaxGCPauseMillis=10', '-XX:SurvivorRatio=4', '-XX:+UseConcMarkSweepGC', '-Dspring.profiles.active=bbg', '-Dlog4j.configurationFile=gateways/log4j2-publisher.xml'
+    args 'gateways/Gateway.xml', 'BBG Gateway'
+}

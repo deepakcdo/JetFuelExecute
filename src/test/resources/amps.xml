@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <bean id="haClientFactory" class="headfront.jetfuel.execute.utils.HaClientFactory"></bean>
+
+    <bean id="haClient" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+
+    <bean id="jsonMapper" class="com.fasterxml.jackson.databind.ObjectMapper"></bean>
+
+
+</beans>

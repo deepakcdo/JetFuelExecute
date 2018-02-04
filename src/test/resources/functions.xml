@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <bean id="handleBankStatus" class="regressiontest.functions.UpdateBankStatusExecutor"/>
+    <bean id="handleTraderStatus" class="regressiontest.functions.UpdateBankTraderExecutor"/>
+    <bean id="getTradingDate" class="regressiontest.functions.GetTradingDateExecutor"/>
+    <bean id="updateBidOfferQuoteStatus" class="regressiontest.functions.UpdateBidOfferQuoteExecutor">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+    </bean>
+    <bean id="updateQuoteStatus" class="regressiontest.functions.UpdateQuoteStatusExecutor">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+    </bean>
+
+    <bean id="getLastQuote" class="regressiontest.functions.GetLastQuotePriceExecutor">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBidOfferQuoteStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateQuotePrice"/>
+        <constructor-arg index="1" value="Update quote status by passing trader, instrument, bidPrice and offerPrice"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name updating quote"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="instrument"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Instrument id for the the quote you want to update"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="bidPrice"/>
+                    <constructor-arg value="java.lang.Double"/>
+                    <constructor-arg value="New BidPrice"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="offerPrice"/>
+                    <constructor-arg value="java.lang.Double"/>
+                    <constructor-arg value="New OfferPrice"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="updateBidOfferQuoteStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBidQuoteStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateQuotePrice"/>
+        <constructor-arg index="1" value="Update quote status by passing trader, instrument and bidPrice only"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name updating quote"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="instrument"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Instrument id for the the quote you want to update"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="bidPrice"/>
+                    <constructor-arg value="java.lang.Double"/>
+                    <constructor-arg value="New BidPrice"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="updateBidOfferQuoteStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateQuoteStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateQuoteStatus"/>
+        <constructor-arg index="1" value="Update quote status by passing trader, instrument and quote status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name updating quote"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="instrument"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Instrument id for the the quote you want to update"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="Set true to on and false for off"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="updateQuoteStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="getLastQuoteFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="getLastQuote"/>
+        <constructor-arg index="1" value="Get the last quote published for instrument"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="instrument"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Instrument id for the the quote you want"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return Json String of the last quote"/>
+        <constructor-arg index="5" ref="getLastQuote"/>
+        <constructor-arg index="6" value="Read"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="getTradingDateFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="getTradingDate"/>
+        <constructor-arg index="1" value="Get the trading date from the market"/>
+        <constructor-arg index="2">
+            <list>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return ISO date"/>
+        <constructor-arg index="5" ref="getTradingDate"/>
+        <constructor-arg index="6" value="Refresh"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateTraderStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateTraderStatus"/>
+        <constructor-arg index="1" value="Update Trader status by passing tradername new status and optional parameters"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="options"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Use any number of the following options \n '-switchOffOnHit' will switch off the quote when hit automatically. \n '-noTraderName' will keep the identity of the trader secret if the market supports it."/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleTraderStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+
+</beans>
