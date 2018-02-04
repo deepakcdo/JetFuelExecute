@@ -9,7 +9,19 @@ Currently the only bus that is suported is http://www.crankuptheamps.com/ In the
 
 This project currently has the java implemention, in the near future we will javascript and C implementation. This means JetFuel funcitons can be published and called from multiple languages.
 
-There are two easy steps to use JetFuelExecute  :-
+JetFuelExplorer is another tool set you can use with JetFuelExecute. With JetFuelExplorer you can do 3 important things
+
+1) View avaialble functions that are published by other servers
+![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+
+2) Test a function - this is so useful
+![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+
+3) View the full Request/Response message - your support team will love you
+![screenshot](http://headfront.co.uk/JetFuel-Execute.png)
+
+
+Let quickly look how you can use JetFuelExecute in two easy steps :-
 1) Publish a function
 2) Call the function
 
