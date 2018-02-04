@@ -3,7 +3,11 @@ Remote Procedure Call library over a super fast journaled messaging bus
 
 JetFuel allows a developer to publish a function on a bus and any other client connected to the bus to call. The bus itself is journaled so you can easily look at fields of the request and response. 
 
-Publishing a function on the bus is easy 
+There are two easy steps to use JetFuelExecute 
+1) Publish a function
+2) Call the function
+
+Let look at step 1 first. Publishing a function on the bus is easy 
 ```java
             // Create amps connection
             final HAClient haClient = new HaClientFactory().createHaClient("SampleJetFuelSever",
@@ -60,4 +64,41 @@ When you publish a function on the bus you also need to tell it how to process t
         }
     }
 ```
-    
+
+Now lets look at step 2. Calling a function. This is even easier than publoshing the function. You simply call the excuteFunction with the function name, parameters and FunctionResponse listener
+
+```java
+            // Create amps connection
+            final HAClient haClient = new HaClientFactory().createHaClient("SampleJetFuelClient",
+                    "tcp://192.168.56.101:8001/amps/json", false);
+            ObjectMapper jsonMapper = new ObjectMapper();
+            System.out.println("Connected to Amps");
+
+            //Create JetFuelExecute
+            JetFuelExecute jetFuelExecute = new AmpsJetFuelExecute(haClient, jsonMapper);
+            jetFuelExecute.initialise();
+
+            // calling function
+
+            final String id1 = jetFuelExecute.executeFunction("SampleJetFuelSever.CheckAbilityToVote",
+                    new Object[]{true, 22}, new ClientFunctionResponse());
+```
+And here is the code for ClientFunctionResponse
+
+```java
+    class ClientFunctionResponse implements FunctionResponse {
+        @Override
+        public void onCompleted(String id, Object message, Object returnValue) {
+            System.out.println("Got onCompleted for id '" + id + "' with message '" + message + 
+            "' and returnValue '" + returnValue + "'");
+        }
+
+        @Override
+        public void onError(String id, Object message, Object exception) {
+            System.out.println("Got onError for id '" + id + "' with message '" + message + 
+            "' and exception '" + exception + "'");
+        }
+    }
+```
+
+This request/response is now fully jounrnaled so any audit or support staff can investigate this.
