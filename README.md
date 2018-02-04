@@ -1,17 +1,26 @@
 # JetFuelExecute
-JetFuelExecute is a Remote Procedure Call (RPC) library over a super fast journaled messaging bus.
+JetFuelExecute is a Remote Procedure Call (RPC) library over a super fast journaled and reliable messaging bus.
 
-JetFuel allows a developer to publish a function on a bus and any other client connected to the bus to call it. The bus itself is journaled so you can easily look at fields of the request and response. This should simplify the life of developers and support staff who constantly have to degub issues.
+JetFuelExecute allows a developer to publish a function on a bus and any other client connected to the bus to call it. It takes care of all message and type conversion. The bus itself is journaled so you can easily look at fields of the request and response. This should simplify the life of developers and support staff who constantly have to debug production issues.
 
-This library forms the basis of a very good command / response paradigm.
+This library forms the basis of a very good command / response paradigm. This is bread and butter for most applications. When one process has to tell another process to do something and report back.
 
-Currently the only bus that is suported is http://www.crankuptheamps.com/ In the future other buses will be supported.
 
-This project currently has the java implemention, in the near future we will javascript and C implementation. This means JetFuel funcitons can be published and called from multiple languages.
+Apart from the awesome flexibility of just publishing and calling remote function with full audit JetFuelExecute also provides these extra features :-
+1) Automatic timeout response if the publishing server goes down so you client is not waiting for ever.
+2) Removal of published functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
+3) Type safety of parameters. So when you send a integer its received as a integer
+4) Coming soon - The Ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean up action. Here a clean up action could pull all the quotes from the market for the disconnected user.
+5) Coming soon - Ability to make a function call which is executed by several publishers. e.g. if you have BankOff function published by 5 different gateways, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
+6) Coming soon - Subscriptions requests. This will allow you to create a function which can stream you continuous updates till you unsubscribe. Very useful if you want to get a stream of custom price calculations.
+
+Currently the only bus that is supported is http://www.crankuptheamps.com/ In future other buses will be supported.
+
+This project currently has the java implementation, in the near future we will javascript and C implementation. This means JetFuelExecute functions can be published and called from multiple languages.
 
 JetFuelExplorer is another tool set you can use with JetFuelExecute. With JetFuelExplorer you can do 3 important things
 
-1) View avaialble functions that are published by other servers
+1) View available functions that are published by other servers
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
 
 2) Test a function - this is so useful
@@ -83,7 +92,7 @@ When you publish a function on the bus you also need to tell it how to process t
     }
 ```
 
-Now lets look at step 2. Calling a function. This is even easier than publoshing the function. You simply call the excuteFunction with the function name, parameters and FunctionResponse listener
+Now lets look at step 2. Calling a function. This is even easier than publishing the function. You simply call the excuteFunction with the function name, parameters and FunctionResponse listener
 
 ```java
             // Create amps connection
@@ -119,4 +128,4 @@ And here is the code for ClientFunctionResponse.
     }
 ```
 
-This request/response is now fully jounrnaled so any audit or support staff can investigate this.
+This request/response is now fully journaled so any audit or support staff can investigate this.

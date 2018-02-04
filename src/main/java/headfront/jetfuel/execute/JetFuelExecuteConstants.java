@@ -13,7 +13,7 @@ public interface JetFuelExecuteConstants {
     String PUBLISH_FUNCTION_ID = "ID";
     String FUNCTION_TO_CALL = "FunctionToCall";
     String FUNCTION_DESCRIPTION = "FunctionDescription";
-    String PARAMETERS = "Parameters";
+    String PARAMETERS = "FunctionParameters";
     String PARAMETERS_NAMES = "ParametersNames";
     String PARAMETERS_TYPES = "ParametersTypes";
     String PARAMETERS_DESC = "ParametersDesc";
