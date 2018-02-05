@@ -5,7 +5,6 @@
 /classes/
 *.log
 *.class
-*.jar
 *.war
 *.ear
 *.zip

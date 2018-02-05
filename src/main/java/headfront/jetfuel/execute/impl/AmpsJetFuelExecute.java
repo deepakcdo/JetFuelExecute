@@ -45,12 +45,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final Map<String, JetFuelFunction> functionsReceivedFromAmps = new ConcurrentHashMap<>();
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
     private final Map<String, FunctionResponse> callBackBackLog = new ConcurrentHashMap<>();
+    private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
+    private final Set<CommandId> jetFuelActiveSubscriptions = new HashSet<>();
     private ExecutorService functionRequestProcessorExecutorService = null;
     private ExecutorService functionReplyProcessorExecutorService = null;
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
     private Consumer<String> onFunctionAddedListener = name -> {
     };
-    private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
 
     private Consumer<String> onFunctionRemovedListener = name -> {
     };
@@ -134,10 +135,17 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 unPublishFunction(function);
             });
             if (ampsClient != null) {
-                ampsClient.unsubscribe();
-                LOG.error("JetFuel Shutdown safely completed. We have not closed amps connection.");
+                Set<CommandId> copyOfSubscritpions = new HashSet<>(jetFuelActiveSubscriptions);
+                copyOfSubscritpions.forEach(command -> {
+                    try {
+                        ampsClient.unsubscribe(command);
+                    } catch (DisconnectedException e) {
+                        LOG.error("Unable to unsubscribe from command " + command, e);
+                    }
+                });
             }
-        } catch (DisconnectedException e) {
+            LOG.error("JetFuel Shutdown safely completed. We have not closed amps connection.");
+        } catch (Exception e) {
             LOG.error("Unable to shutdown safely ", e);
         }
     }
@@ -277,8 +285,9 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     private void subscribeToDisconnections() throws Exception {
-        ampsClient.subscribe(this::listenForClientDisconnections, CLIENT_STATUS_TOPIC,
+        final CommandId subscribe = ampsClient.subscribe(this::listenForClientDisconnections, CLIENT_STATUS_TOPIC,
                 "/ClientStatus/event='disconnect'", 10000);
+        jetFuelActiveSubscriptions.add(subscribe);
         LOG.info("Subscribed to disconnection topic");
     }
 
@@ -303,7 +312,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME + "= '" + ampsConnectionName + "' and /" +
                 JetFuelExecuteConstants.CURRENT_STATE + "!='" + FunctionState.StateNew + "'";
 
-        ampsClient.subscribe(m -> {
+        final CommandId subscribe = ampsClient.subscribe(m -> {
                     final String functionResponse = m.getData().trim();
                     if (functionResponse.length() > 0) {
                         functionReplyProcessorExecutorService.submit(() -> {
@@ -312,12 +321,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     }
                 },
                 getFunctionBusTopic(), filter, AMPS_OPTIONS, 5000);
+        jetFuelActiveSubscriptions.add(subscribe);
         LOG.info("Placed a subscription to topic " + getFunctionBusTopic() + " with filter '" + filter + "' for JetFuel function requests");
     }
 
     private void subscribeToPublishedFunctions() throws Exception {
         CountDownLatch waitForResponse = new CountDownLatch(1);
-        ampsClient.sowAndSubscribe(m -> {
+        final CommandId commandId = ampsClient.sowAndSubscribe(m -> {
                     String data = m.getData().trim();
                     try {
                         if (m.getCommand() == Message.Command.GroupEnd) {
@@ -346,6 +356,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     }
                 }, getFunctionTopic(), "",
                 100, AMPS_OPTIONS, 5000);
+        jetFuelActiveSubscriptions.add(commandId);
         LOG.info("Placed a sowAndSubscribe to topic " + getFunctionTopic() + " with filter '' so we know when new functions are published or removed");
         LOG.info("Waiting to download published Functions");
         boolean success = waitForResponse.await(10, TimeUnit.SECONDS);
@@ -517,6 +528,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 }
             }
         }
+
     }
 
     public void setNoOfFunctionRequestProcessorsThreads(int noOfFunctionRequestProcessorsThreads) {
