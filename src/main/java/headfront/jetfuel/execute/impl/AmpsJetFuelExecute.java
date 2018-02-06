@@ -265,7 +265,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             break;
                         case StateTimeout:
                             result.onError(id, "Function Timeout", map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG));
-                            callBackBackLog.remove(id);
+//                            callBackBackLog.remove(id); // allow time out not to be a final state
                             break;
                         default:
                             result.onError(id, "Unknown state " + currentState + " and message  " + map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), null);
@@ -431,7 +431,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     reply.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);
                     try {
                         String json = jsonMapper.writeValueAsString(reply);
-                        ampsClient.publish(getFunctionBusTopic(), json);
+                        ampsClient.deltaPublish(getFunctionBusTopic(), json);
                         log("Sending JetFuelExecuteFunction execution success response with id " + id + " was successful.  Message was '" + message + "' return value '" + returnValue + "' ", "and  json " + json);
                     } catch (Exception e) {
                         LOG.error("Unable to process JetFuelExecuteFunction execution request with id " + id, e);
@@ -463,7 +463,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         reply.put(JetFuelExecuteConstants.MSG_CREATION_TIME, dateTimeStr);
         try {
             String json = jsonMapper.writeValueAsString(reply);
-            ampsClient.publish(getFunctionBusTopic(), json);
+            ampsClient.deltaPublish(getFunctionBusTopic(), json);
             log("Sending JetFuelExecuteFunction execution error response with id " + id + " . Message was '" + message + "' exception '" + exception + "' ", "and json " + json);
 
         } catch (Exception e) {

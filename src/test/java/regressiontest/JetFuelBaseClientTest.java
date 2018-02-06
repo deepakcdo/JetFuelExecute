@@ -107,14 +107,14 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     // not sure what to do here @todo review behaviour
     @Test
     public void callFunctionSuccessFullAndGetTimeOutThenCorrectResponse() throws Exception {
-        String expectedMsg = "Function Timeout";
-//        String expectedMsg = "Sarah is authorised, Bank status is ON";
+//        String expectedMsg = "Function Timeout";
+        String expectedMsg = "Sarah is authorised, Bank status is ON";
         String expectedExecptionMsg = "Function publisher that published this function is not available now.";
         callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Sarah", true}, 8000 + sleepValueForTest,
                 1, true,
-//                1, true,expectedMsg, true, expectedExecptionMsg, false);
-                0,false, expectedMsg, null, expectedExecptionMsg, false);
+                1, true,expectedMsg, true, expectedExecptionMsg, false);
+//                0,false, expectedMsg, null, expectedExecptionMsg, false);
     }
 
     @Test

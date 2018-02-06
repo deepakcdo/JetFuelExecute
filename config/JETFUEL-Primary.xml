@@ -51,6 +51,9 @@
             <Key>/ID</Key>
             <MessageType>json</MessageType>
             <Expiration>25h</Expiration>
+            <Enrichment>
+                <Field>'JETFUEL-PRIMARY' as /AmpsInstanceOwner </Field>
+            </Enrichment>
         </Topic>
 
         <Topic>
@@ -93,7 +96,7 @@
                 <Options>
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE_BUS</Topic>
-                    <Filter>/CurrentState = 'StateNew'</Filter>
+                    <Filter>/CurrentState = 'StateNew' and /AmpsInstanceOwner = 'JETFUEL-PRIMARY'</Filter>
                     <Duration>5s</Duration>
                 </Options>
             </On>
