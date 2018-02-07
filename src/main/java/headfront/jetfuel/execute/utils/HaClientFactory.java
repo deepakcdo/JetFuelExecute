@@ -7,8 +7,7 @@ import com.crankuptheamps.client.exception.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Deepak on 09/04/2017.
@@ -20,8 +19,10 @@ public class HaClientFactory {
     public HAClient createHaClient(String connectionName, String connectionUrl, boolean addSuffixToConnName) throws Exception {
         DefaultServerChooser serverChooser = new ServerChooser();
         final String[] urls = connectionUrl.split(",");
-        for (int i = 0; i< urls.length; i++) {
-            serverChooser.add(urls[i]);
+        final List<String> listOfUrls = Arrays.asList(urls);
+        Collections.shuffle(listOfUrls);
+        for (String listOfUrl : listOfUrls) {
+            serverChooser.add(listOfUrl);
         }
         if (addSuffixToConnName) {
             Random random = new Random(System.currentTimeMillis());
