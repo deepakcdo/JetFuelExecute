@@ -10,15 +10,18 @@
     <bean id="updateBidOfferQuoteStatus" class="regressiontest.functions.UpdateBidOfferQuoteExecutor">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
+        <constructor-arg index="2" value="${quoteTopic}"/>
     </bean>
     <bean id="updateQuoteStatus" class="regressiontest.functions.UpdateQuoteStatusExecutor">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
+        <constructor-arg index="2" value="${quoteTopic}"/>
     </bean>
 
     <bean id="getLastQuote" class="regressiontest.functions.GetLastQuotePriceExecutor">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
+        <constructor-arg index="2" value="${quoteTopic}"/>
     </bean>
 
     <bean id="updateBankStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">

@@ -17,10 +17,12 @@ public class UpdateBidOfferQuoteExecutor extends AbstractFunctionExecutor {
 
     private HAClient ampsClient;
     private ObjectMapper jsonMapper;
+    private String quoteTopic;
 
-    public UpdateBidOfferQuoteExecutor(HAClient ampsClient, ObjectMapper jsonMapper) {
+    public UpdateBidOfferQuoteExecutor(HAClient ampsClient, ObjectMapper jsonMapper, String quoteTopic) {
         this.ampsClient = ampsClient;
         this.jsonMapper = jsonMapper;
+        this.quoteTopic = quoteTopic;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class UpdateBidOfferQuoteExecutor extends AbstractFunctionExecutor {
             data.put("OfferPrice", offerPrice);
             data.put("FunctionID", id);
             String jsonMsg = jsonMapper.writeValueAsString(data);
-            ampsClient.deltaPublish("TEST_PRICE", jsonMsg);
+            ampsClient.deltaPublish(quoteTopic, jsonMsg);
             result.onCompleted(id, "Quote update was successful", true);
 
         } catch (Exception e) {

@@ -19,10 +19,12 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
 
     private HAClient ampsClient;
     private ObjectMapper jsonMapper;
+    private String quoteTopic;
 
-    public GetLastQuotePriceExecutor(HAClient ampsClient, ObjectMapper jsonMapper) {
+    public GetLastQuotePriceExecutor(HAClient ampsClient, ObjectMapper jsonMapper, String QuoteTopic) {
         this.ampsClient = ampsClient;
         this.jsonMapper = jsonMapper;
+        quoteTopic = QuoteTopic;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
                             wait.countDown();
                         }
 
-                    }, "TEST_PRICE"
+                    }, quoteTopic
                     , "/ID='" + instrument + "'", 10, 4000);
             wait.await(4, TimeUnit.SECONDS);
             if (messages.size() == 0) {

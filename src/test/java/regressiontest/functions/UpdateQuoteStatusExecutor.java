@@ -17,10 +17,12 @@ public class UpdateQuoteStatusExecutor extends AbstractFunctionExecutor {
 
     private HAClient ampsClient;
     private ObjectMapper jsonMapper;
+    private String quoteTopic;
 
-    public UpdateQuoteStatusExecutor(HAClient ampsClient, ObjectMapper jsonMapper) {
+    public UpdateQuoteStatusExecutor(HAClient ampsClient, ObjectMapper jsonMapper, String quoteTopic) {
         this.ampsClient = ampsClient;
         this.jsonMapper = jsonMapper;
+        this.quoteTopic = quoteTopic;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class UpdateQuoteStatusExecutor extends AbstractFunctionExecutor {
             data.put("Status", status);
             data.put("FunctionID", id);
             String jsonMsg = jsonMapper.writeValueAsString(data);
-            ampsClient.deltaPublish("TEST_PRICE", jsonMsg);
+            ampsClient.deltaPublish(quoteTopic, jsonMsg);
             result.onCompleted(id, "Quote update was successful", true);
 
         } catch (Exception e) {
