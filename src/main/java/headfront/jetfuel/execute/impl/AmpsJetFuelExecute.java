@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static headfront.jetfuel.execute.JetFuelExecuteConstants.CLIENT_STATUS_TOPIC;
@@ -55,6 +56,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private Consumer<String> onFunctionRemovedListener = name -> {
     };
+
+    private Function<String, String> getNextFunctionId = FunctionUtils::getNextID;
 
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
@@ -204,7 +207,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public String executeFunction(String functionName, Object[] functionParameters, FunctionResponse response) {
-        String callID = FunctionUtils.getNextID(ampsConnectionName);
+        String callID = getNextFunctionId.apply(ampsConnectionName);
         try {
             if (functionsReceivedFromAmps.containsKey(functionName)) {
                 Map<String, Object> functionCall = new HashMap<>();

@@ -77,7 +77,7 @@ public class FunctionUtils {
     }
 
     public static String getNextID(String name) {
-        return name + "_" + DATE_TIME + "_" + counter.incrementAndGet();
+        return name + NAME_SEPARATOR + DATE_TIME + FUNCTION_SEPARATOR + counter.incrementAndGet();
     }
 
     public static String getFullFunctionName(JetFuelFunction function) {
