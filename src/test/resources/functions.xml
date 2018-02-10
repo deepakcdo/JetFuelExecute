@@ -4,6 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                     http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
+    <bean id="testInstrument" class="java.lang.String">
+        <constructor-arg value="#{'DE0124' +  new java.util.Random().nextInt(10000)}"/>
+    </bean>
+
     <bean id="handleBankStatus" class="regressiontest.functions.UpdateBankStatusExecutor"/>
     <bean id="handleTraderStatus" class="regressiontest.functions.UpdateBankTraderExecutor"/>
     <bean id="getTradingDate" class="regressiontest.functions.GetTradingDateExecutor"/>
@@ -175,7 +179,8 @@
 
     <bean id="updateTraderStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="updateTraderStatus"/>
-        <constructor-arg index="1" value="Update Trader status by passing tradername new status and optional parameters"/>
+        <constructor-arg index="1"
+                         value="Update Trader status by passing tradername new status and optional parameters"/>
         <constructor-arg index="2">
             <list>
                 <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
@@ -191,7 +196,8 @@
                 <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
                     <constructor-arg value="options"/>
                     <constructor-arg value="java.lang.String"/>
-                    <constructor-arg value="Use any number of the following options \n '-switchOffOnHit' will switch off the quote when hit automatically. \n '-noTraderName' will keep the identity of the trader secret if the market supports it."/>
+                    <constructor-arg
+                            value="Use any number of the following options \n '-switchOffOnHit' will switch off the quote when hit automatically. \n '-noTraderName' will keep the identity of the trader secret if the market supports it."/>
                 </bean>
             </list>
         </constructor-arg>

@@ -25,6 +25,9 @@ public class JetFuelBaseTests {
     public long sleepValueForTest = 3000;
 
     @Autowired
+    String testInstrument;
+
+    @Autowired
     AmpsJetFuelExecute jetFuelExecute;
     @Autowired
     JetFuelFunction updateBankStatusFunction;

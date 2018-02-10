@@ -161,7 +161,6 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     public void callUpateQuoteFunctions10Times() throws Exception {
         String expectedMsg = "Quote update was successful";
         // publish 10 prices
-        String instID = "DE012333444";
         double lastBid = 0;
         double lastOffer = 0;
         double offset = 56;
@@ -169,17 +168,17 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
             lastBid = offset + i;
             lastOffer = offset + 1 + i;
             callJetFuelFunction("updateQuotePrice", updateBidOfferQuoteStatusFunction,
-                    new Object[]{"Deepak", instID, lastBid, lastOffer}, sleepValueForTest,
+                    new Object[]{"Deepak", testInstrument, lastBid, lastOffer}, sleepValueForTest,
                     0, false, 1, true,
                     expectedMsg, true, null, false);
         }
         // check the last price is correct
-        expectedMsg = "Quote found for inst " + instID;
-        String funtionName = "getLastQuote";
+        expectedMsg = "Quote found for inst " + testInstrument;
+        String functionName = "getLastQuote";
         String responseJson = "{\"FunctionID\":\"" + jetFuelExecute.getConnectionName() + "\",\"BidPrice\":"
-                + lastBid + ",\"Trader\":\"Deepak\",\"ID\":\"DE012333444\",\"OfferPrice\":" + lastOffer + "}";
-        callJetFuelFunction(funtionName, getLastQuoteFunction,
-                new Object[]{instID}, sleepValueForTest,
+                + lastBid + ",\"Trader\":\"Deepak\",\"ID\":\"" + testInstrument + "\",\"OfferPrice\":" + lastOffer + "}";
+        callJetFuelFunction(functionName, getLastQuoteFunction,
+                new Object[]{testInstrument}, sleepValueForTest,
                 0, false,
                 1, true,
                 expectedMsg, responseJson, null, false);
