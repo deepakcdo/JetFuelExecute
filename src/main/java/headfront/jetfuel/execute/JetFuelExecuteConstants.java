@@ -36,5 +36,5 @@ public interface JetFuelExecuteConstants {
 
     String CURRENT_STATE = "CurrentState";
     String CURRENT_STATE_MSG = "CurrentStateMsg";
-    String ERROR_MESSAGE = "ErrorMessage";
+    String EXCEPTION_MESSAGE = "ExceptionMessage";
 }

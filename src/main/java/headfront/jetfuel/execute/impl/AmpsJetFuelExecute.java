@@ -262,7 +262,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             callBackBackLog.remove(id);
                             break;
                         case StateError:
-                            result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), map.get(JetFuelExecuteConstants.ERROR_MESSAGE));
+                            result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE));
                             callBackBackLog.remove(id);
                             break;
                         case StateTimeout:
@@ -458,7 +458,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         reply.put(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME, caller);
         reply.put(JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME, callerHostName);
         reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateError);
-        reply.put(JetFuelExecuteConstants.ERROR_MESSAGE, exception);
+        reply.put(JetFuelExecuteConstants.EXCEPTION_MESSAGE, exception);
         LocalDateTime date = LocalDateTime.now();
         String dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         reply.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);

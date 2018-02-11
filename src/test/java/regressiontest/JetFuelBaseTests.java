@@ -162,7 +162,13 @@ public class JetFuelBaseTests {
 
             // do a bookmark subscription
             Command commandToSend = new Command(Message.Command.Subscribe);
-            String bookmark = msgCreationTime.substring(0, msgCreationTime.indexOf(FunctionUtils.NAME_SEPARATOR));
+            String bookmark = null;
+            try {
+                 bookmark = msgCreationTime.substring(0, msgCreationTime.indexOf(FunctionUtils.NAME_SEPARATOR));
+            }catch (Exception e){
+                LOG.error("unable to parse" + msgCreationTime);
+                throw e;
+            }
             bookmark = bookmark.replace("-", "");
             bookmark = bookmark.replace(":", "");
             // go back a few minutes
@@ -242,11 +248,10 @@ public class JetFuelBaseTests {
             final String expectedState = expectedStates[(i - 1)];
             message.put("CurrentState", expectedState);
             if (expectedState.equalsIgnoreCase(FunctionState.StateError.name())) {
-                message.put("ErrorMessage", exceptionMsgExpected);
+                message.put("ExceptionMessage", exceptionMsgExpected);
                 message.put("CurrentStateMsg", messageExpected);
                 message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
             } else if (expectedState.equalsIgnoreCase(FunctionState.StateTimeout.name())) {
-//                message.put("ErrorMessage", exceptionMsgExpected);
                 message.put("CurrentStateMsg", exceptionMsgExpected);
                 message.put("MsgCreationName", instanceOwnerFromFirstMessage);
             } else {
