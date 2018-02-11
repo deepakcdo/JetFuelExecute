@@ -29,6 +29,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                                     boolean checkMessagesAfterFunctionCall) throws Exception {
         String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
         if (runningBothClientAndSerer) {
+            unPublishAndCheckFunction(jetFuelFunction);
             if (jetFuelExecute.getFunction(fullFunctionName) == null) {
                 publishAndCheckFunction(jetFuelFunction);
             }

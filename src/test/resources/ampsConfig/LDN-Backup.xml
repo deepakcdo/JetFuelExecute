@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AMPSConfig>
+    <Name>LDN-BACKUP</Name>
+    <Group>LONDON</Group>
+    <Admin>
+        <InetAddr>localhost:8198</InetAddr>
+        <SQLTransport>websocket-any</SQLTransport>
+    </Admin>
+    <SOWStatsInterval>5s</SOWStatsInterval>
+    <RequiredMinimumVersion>5.0</RequiredMinimumVersion>
+
+    <Transports>
+        <Transport>
+            <Name>json-tcp</Name>
+            <Type>tcp</Type>
+            <InetAddr>9001</InetAddr>
+            <ReuseAddr>true</ReuseAddr>
+            <MessageType>json</MessageType>
+            <Protocol>amps</Protocol>
+        </Transport>
+        <Transport>
+            <Name>nvfix-tcp</Name>
+            <Type>tcp</Type>
+            <InetAddr>9002</InetAddr>
+            <ReuseAddr>true</ReuseAddr>
+            <MessageType>nvfix</MessageType>
+            <Protocol>amps</Protocol>
+        </Transport>
+        <Transport>
+            <Name>amps-replication</Name>
+            <Type>amps-replication</Type>
+            <InetAddr>localhost:19085</InetAddr>
+            <ReuseAddr>true</ReuseAddr>
+        </Transport>
+        <Transport>
+            <Name>websocket-any</Name>
+            <Protocol>websocket</Protocol>
+            <Type>tcp</Type>
+            <InetAddr>9008</InetAddr>
+        </Transport>
+    </Transports>
+
+    <Logging>
+        <Target>
+            <Protocol>file</Protocol>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/logs/%Y%m%d-%H%M%S-%n.log</FileName>
+            <RotationThreshold>200MB</RotationThreshold>
+            <Level>info</Level>
+        </Target>
+    </Logging>
+
+    <SOW>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>JETFUEL_EXECUTE</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>600m</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>JETFUEL_EXECUTE_BUS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>25h</Expiration>
+            <Enrichment>
+                <Field>'LDN-BACKUP' as /AmpsInstanceOwner </Field>
+            </Enrichment>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>TEST_PRICE</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>HISTORIC_TRADES</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>TEST_INSTRUMENTS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>TEST_ORDERS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/ORDERS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/TRADES</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/RFQ</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/INSTRUMENT</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/STATUS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/BBG/QUOTES</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/ORDERS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/TRADES</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/RFQ</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/INSTRUMENT</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/STATUS</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>/TRADEWEB/QUOTES</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>EXCHANGE_PRICE_1</Topic>
+            <Key>/EXN_ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>EXCHANGE_PRICE_2</Topic>
+            <Key>/EXN_ID</Key>
+            <Key>/EXN_NAME</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>EXCHANGE_PRICE_3</Topic>
+            <Key>/EXN_ID</Key>
+            <Key>/EXN_NAME</Key>
+            <Key>/State</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>FAST_PRICE</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <ConflatedTopic>
+            <Topic>FAST_PRICE_CONFLATED</Topic>
+            <MessageType>json</MessageType>
+            <UnderlyingTopic>FAST_PRICE</UnderlyingTopic>
+            <Interval>5s</Interval>
+            <Filter>/region = 'A'</Filter>
+        </ConflatedTopic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>ORDERS_TOPIC</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>COMPANIES_TOPIC</Topic>
+            <Key>/ID</Key>
+            <MessageType>json</MessageType>
+            <Expiration>400d</Expiration>
+        </Topic>
+
+        <View>
+            <Name>TOTAL_COMPANY_VOLUME_VIEW</Name>
+            <UnderlyingTopic>
+                <Join>[ORDERS_TOPIC]./Tick = [COMPANIES_TOPIC]./Tick</Join>
+            </UnderlyingTopic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/view/%n-json.sow</FileName>
+            <MessageType>json</MessageType>
+            <Projection>
+                <Field>[COMPANIES_TOPIC]./CompanyId</Field>
+                <Field>[COMPANIES_TOPIC]./Tick</Field>
+                <Field>[COMPANIES_TOPIC]./Name</Field>
+                <Field>SUM([ORDERS_TOPIC]./Shares) AS /TotalVolume</Field>
+            </Projection>
+            <Grouping>
+                <Field>[ORDERS_TOPIC]./Tick</Field>
+                <Field>[COMPANIES_TOPIC]./Name</Field>
+            </Grouping>
+        </View>
+
+        <View>
+            <Name>TOTAL_COMPANY_VOLUME_NAME_VIEW</Name>
+            <UnderlyingTopic>
+                <Join>[ORDERS_TOPIC]./Tick = [COMPANIES_TOPIC]./Tick</Join>
+            </UnderlyingTopic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/view/%n-json.sow</FileName>
+            <MessageType>json</MessageType>
+            <Projection>
+                <Field>[COMPANIES_TOPIC]./CompanyId</Field>
+                <Field>[COMPANIES_TOPIC]./Tick</Field>
+                <Field>[COMPANIES_TOPIC]./Name</Field>
+                <Field>SUM([ORDERS_TOPIC]./Shares) AS /TotalVolume</Field>
+            </Projection>
+            <Grouping>
+                <Field>[ORDERS_TOPIC]./Tick</Field>
+            </Grouping>
+        </View>
+
+        <Queue>
+            <Name>COMMAND_QUEUE</Name>
+            <MessageType>json</MessageType>
+            <LeasePeriod>60s</LeasePeriod>
+            <Expiration>1d</Expiration>
+            <MaxBacklog>3</MaxBacklog>
+        </Queue>
+
+    </SOW>
+
+    <TransactionLog>
+        <JournalDirectory>${AMPS_CONFIG_DIRECTORY}/journal</JournalDirectory>
+        <PreallocatedJournalFiles>1</PreallocatedJournalFiles>
+        <MinJournalSize>10MB</MinJournalSize>
+        <Topic>
+            <Name>.*</Name>
+            <MessageType>json</MessageType>
+        </Topic>
+        <FlushInterval>100ms</FlushInterval>
+    </TransactionLog>
+
+    <Replication>
+        <Destination>
+            <Topic>
+                <MessageType>json</MessageType>
+                <Name>.*</Name>
+            </Topic>
+            <Name>LDN-PRIMARY</Name>
+            <Group>LONDON</Group>
+            <SyncType>async</SyncType>
+            <Transport>
+                <InetAddr>127.0.0.1:18085</InetAddr>
+                <Type>amps-replication</Type>
+            </Transport>
+        </Destination>
+    </Replication>
+
+    <Actions>
+        <Action>
+            <On>
+                <Module>amps-action-on-schedule</Module>
+                <Options>
+                    <Every>100m</Every>
+                    <Name>Clear up</Name>
+                </Options>
+            </On>
+            <Do>
+                <Module>amps-action-do-remove-journal</Module>
+                <Options>
+                    <Age>100m</Age>
+                </Options>
+            </Do>
+        </Action>
+        <Action>
+            <On>
+                <Module>amps-action-on-disconnect-client</Module>
+            </On>
+            <Do>
+                <Module>amps-action-do-delete-sow</Module>
+                <Options>
+                    <Topic>JETFUEL_EXECUTE</Topic>
+                    <Filter>/FunctionPublisherName = "{{AMPS_CLIENT_NAME}}"</Filter>
+                    <MessageType>json</MessageType>
+                </Options>
+            </Do>
+        </Action>
+        <Action>
+            <On>
+                <Module>amps-action-on-message-condition-timeout</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Topic>JETFUEL_EXECUTE_BUS</Topic>
+                    <Filter>/CurrentState = 'StateNew' and /AmpsInstanceOwner = 'LDN-BACKUP'</Filter>
+                    <Duration>5s</Duration>
+                </Options>
+            </On>
+            <Do>
+                <Module>amps-action-do-extract-values</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Data>{{AMPS_DATA}}</Data>
+                    <Value>ID_TO_USE=/ID</Value>
+                </Options>
+            </Do>
+            <Do>
+                <Module>amps-action-do-extract-values</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Data>{{AMPS_DATA}}</Data>
+                    <Value>CALLER_HOSTNAME=/FunctionCallerHostName</Value>
+                </Options>
+            </Do>
+            <Do>
+                <Module>amps-action-do-extract-values</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Data>{{AMPS_DATA}}</Data>
+                    <Value>CALLER=/FunctionInitiatorName</Value>
+                </Options>
+            </Do>
+            <Do>
+                <Module>amps-action-do-extract-values</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Data>{{AMPS_DATA}}</Data>
+                    <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP())</Value>
+                </Options>
+            </Do>
+            <Do>
+                <Module>amps-action-do-publish-message</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Topic>JETFUEL_EXECUTE_BUS</Topic>
+                    <Delta>True</Delta>
+                    <UpdateOnly>True</UpdateOnly>
+                    <Data>{"ID":"{{ID_TO_USE}}","FunctionCallerHostName":"{{CALLER_HOSTNAME}}","FunctionInitiatorName":"{{CALLER}}","MsgCreationName":"LDN-BACKUP","MsgCreationTime":"{{FORMATTED_DATE_TIME}}","CurrentState":"StateTimeout","CurrentStateMsg":"Function publisher that published this function is not available now."}</Data>
+                </Options>
+            </Do>
+        </Action>
+        <Action>
+            <On>
+                <Module>amps-action-on-startup</Module>
+            </On>
+            <Do>
+                <Module>amps-action-do-delete-sow</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Topic>JETFUEL_EXECUTE</Topic>
+                    <Filter>1=1</Filter>
+                </Options>
+            </Do>
+        </Action>
+    </Actions>
+
+</AMPSConfig>
