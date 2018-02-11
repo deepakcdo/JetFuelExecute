@@ -32,6 +32,7 @@ public class FunctionUtils {
 
     public static final String FUNCTION_SEPARATOR = "_";
     public static final String NAME_SEPARATOR = ".";
+    public static final String ESCAPED_NAME_SEPARATOR = "\\.";
     private static LocalDateTime date = LocalDateTime.now();
     private static String DATE_TIME = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     private static AtomicInteger counter = new AtomicInteger();

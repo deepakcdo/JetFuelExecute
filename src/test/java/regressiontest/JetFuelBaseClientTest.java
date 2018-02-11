@@ -25,7 +25,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                                     int onErrorCountExpected, boolean errorSetExpected,
                                     int onCompleteCountExpected, boolean completeSetExpected,
                                     String messageExpected, Object returnValueExpected,
-                                    String exceptionMsgExpected, boolean skipFunctionExistsTests) throws Exception {
+                                    String exceptionMsgExpected, boolean skipFunctionExistsTests, String[] expectedSates,
+                                    boolean checkMessagesAfterFunctionCall) throws Exception {
         String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
         if (runningBothClientAndSerer) {
             if (jetFuelExecute.getFunction(fullFunctionName) == null) {
@@ -47,7 +48,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callFunctionAndTest(fullFunctionName, functionParams, testWaitTime,
                 onErrorCountExpected, errorSetExpected,
                 onCompleteCountExpected, completeSetExpected,
-                messageExpected, returnValueExpected, exceptionMsgExpected, skipFunctionExistsTests);
+                messageExpected, returnValueExpected, exceptionMsgExpected, skipFunctionExistsTests, expectedSates,checkMessagesAfterFunctionCall);
         if (runningBothClientAndSerer) {
             unPublishAndCheckFunction(jetFuelFunction);
         }
@@ -60,7 +61,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, "20180225", null, false);
+                expectedMsg, "20180225", null, false,
+                new String[]{"StateDone"},true);
     }
 
     @Test
@@ -70,7 +72,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Deepak", true}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, true, null, false);
+                expectedMsg, true, null, false, new String[]{"StateDone"},true);
     }
 
     @Test
@@ -81,7 +83,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Amanda", true}, sleepValueForTest,
                 1, true,
                 0, false,
-                expectedMsg, null, expectedErrorMsg, false);
+                expectedMsg, null, expectedErrorMsg, false, new String[]{"StateError"},true);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Fred", true}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, false, null, false);
+                expectedMsg, false, null, false, new String[]{"StateDone"},true);
     }
 
     @Test
@@ -101,7 +103,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Lucy", true}, 5000 + sleepValueForTest,
                 1, true, 0, false,
-                expectedMsg, null, expectedExceptionMsg, false);
+                expectedMsg, null, expectedExceptionMsg, false, new String[]{"StateError"},
+                false);
     }
 
     // not sure what to do here @todo review behaviour
@@ -113,7 +116,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Sarah", true}, 8000 + sleepValueForTest,
                 1, true,
-                1, true,expectedMsg, true, expectedExecptionMsg, false);
+                1, true, expectedMsg, true, expectedExecptionMsg,
+                false, new String[]{"StateTimeout","StateDone"},true);
 //                0,false, expectedMsg, null, expectedExecptionMsg, false);
     }
 
@@ -124,7 +128,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction(invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", true}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, null, true);
+                false, expectedMsg, null, null, true, new String[]{},
+                false);
     }
 
     @Test
@@ -134,7 +139,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, expectedExecptionMsg, true);
+                false, expectedMsg, null, expectedExecptionMsg, true, new String[]{},false);
     }
 
     @Test
@@ -144,7 +149,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction(invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, null, true);
+                false, expectedMsg, null, null, true, new String[]{},false);
     }
 
     @Test
@@ -154,7 +159,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction(invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", new BigDecimal(45)}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, null, true);
+                false, expectedMsg, null, null, true,
+                new String[]{},false);
     }
 
     @Test
@@ -170,7 +176,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
             callJetFuelFunction("updateQuotePrice", updateBidOfferQuoteStatusFunction,
                     new Object[]{"Deepak", testInstrument, lastBid, lastOffer}, sleepValueForTest,
                     0, false, 1, true,
-                    expectedMsg, true, null, false);
+                    expectedMsg, true, null, false, new String[]{"StateDone"},true);
         }
         // check the last price is correct
         expectedMsg = "Quote found for inst " + testInstrument;
@@ -181,30 +187,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{testInstrument}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, responseJson, null, false);
-    }
-
-
-    private String getAmpsConnectionNameToUse(String functionName) {
-        if (runningBothClientAndSerer) {
-            return jetFuelExecute.getConnectionName();
-        } else {
-            // we need to get a valid functionName so remove characters from the end till you get a name
-            // I am not happy with this test as it only handles methods which have extra characters at the end.
-            String connectionName = null;
-            do {
-
-                final List<String> function = jetFuelExecute.findFunction(functionName);
-                if (function.size() > 0) {
-                    String gotFunction = function.get(0);
-                    connectionName = gotFunction.substring(0, gotFunction.indexOf(FunctionUtils.NAME_SEPARATOR));
-                }
-                functionName = functionName.substring(0, functionName.length() - 1);
-
-            } while (connectionName == null);
-
-            return connectionName;
-        }
+                expectedMsg, responseJson, null, false, new String[]{"StateDone"},true);
     }
 
 }

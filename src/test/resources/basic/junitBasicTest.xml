@@ -15,6 +15,7 @@
           init-method="initialise">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator" />
     </bean>
 
 

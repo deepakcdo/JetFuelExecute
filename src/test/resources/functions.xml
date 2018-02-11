@@ -8,6 +8,7 @@
         <constructor-arg value="#{'DE0124' +  new java.util.Random().nextInt(10000)}"/>
     </bean>
 
+    <bean id="testIDGenerator" class="regressiontest.TestIDGenerator"/>
     <bean id="handleBankStatus" class="regressiontest.functions.UpdateBankStatusExecutor"/>
     <bean id="handleTraderStatus" class="regressiontest.functions.UpdateBankTraderExecutor"/>
     <bean id="getTradingDate" class="regressiontest.functions.GetTradingDateExecutor"/>

@@ -57,13 +57,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private Consumer<String> onFunctionRemovedListener = name -> {
     };
 
-    private Function<String, String> getNextFunctionId = FunctionUtils::getNextID;
-
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
     private int noOfFunctionReplyProcessorThreads = 10;
     private String functionTopic = "JETFUEL_EXECUTE";
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
+    private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
 
     public AmpsJetFuelExecute(HAClient ampsClient, ObjectMapper jsonMapper) {
         notNull(ampsClient, "ampsClient cannot be null");
@@ -207,7 +206,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public String executeFunction(String functionName, Object[] functionParameters, FunctionResponse response) {
-        String callID = getNextFunctionId.apply(ampsConnectionName);
+        String callID = functionIDGenerator.apply(ampsConnectionName);
         try {
             if (functionsReceivedFromAmps.containsKey(functionName)) {
                 Map<String, Object> functionCall = new HashMap<>();
@@ -548,6 +547,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     public void setFunctionBusTopic(String functionsBusTopic) {
         this.functionBusTopic = functionsBusTopic;
+    }
+
+    public void setFunctionIDGenerator(Function<String, String> functionIDGenerator) {
+        this.functionIDGenerator = functionIDGenerator;
     }
 
     public String getFunctionTopic() {
