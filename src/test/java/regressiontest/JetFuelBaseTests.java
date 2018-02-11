@@ -277,7 +277,7 @@ public class JetFuelBaseTests {
             final Object returnValue = response.getReturnValue();
             if (returnValue != null && returnValue instanceof String && ((String) returnValue).trim().startsWith("{")) {
                 Map<String, Object> returnedMap = jsonMapper.readValue(returnValue.toString(), Map.class);
-                assertEquals("Return json was not correct", expectedMap, returnedMap);
+                compareCustomMap("JsonReply", expectedMap, returnedMap);
             } else {
                 assertTrue("Expected a json message back and got [" + returnValue + "] of type  " + returnValue.getClass().getCanonicalName(),
                         false);
