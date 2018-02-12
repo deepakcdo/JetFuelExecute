@@ -1,5 +1,5 @@
 # JetFuelExecute
-A flexible and Dynamic RPC Framework over a Highly Performant Journaled Message Bus.
+A Flexible and Dynamic RPC Framework over a Highly Performant Journaled Message Bus.
 
 JetFuelExecute allows a process to publish a function on AMPS which can be called by any other process connected to the AMPS. This forms the basis of a excellent request / response design pattern. This is bread and butter task for most applications. When one process has to tell another process to do something and report back.
 
@@ -19,16 +19,21 @@ Apart from the awesome flexibility of just publishing and calling remote functio
 * Removal of published functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
 * High performance and High availability provided by AMPS along with various authentication options.
 
-# JetFuelExecute demo using JetFuelExplorer (This is an independent tool)
+# JetFuelExecute demo using JetFuelExplorer 
 
 1) View available functions that are published by other servers
+
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
 
 2) Test a function - this is so useful
+
 ![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
 
 3) View the full Request/Response message - your support team will love you
+
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
+
+Note :- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
 
 # JetFuelExecute code example.
 
