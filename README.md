@@ -1,24 +1,25 @@
 # JetFuelExecute
-JetFuelExecute is a Remote Procedure Call (RPC) library over a super fast journaled and reliable messaging bus.
+A flexible and Dynamic RPC Framework over a Highly Performant Journaled Message Bus.
 
-JetFuelExecute allows a developer to publish a function on a bus and any other client connected to the bus to call it. It takes care of all message and type conversion. The bus itself is journaled so you can easily look at fields of the request and response. This should simplify the life of developers and support staff who constantly have to debug production issues.
+JetFuelExecute allows a process to publish a function on AMPS which can be called by any other process connected to the AMPS. This forms the basis of a excellent request / response design pattern. This is bread and butter task for most applications. When one process has to tell another process to do something and report back.
 
-This library forms the basis of a very good command / response paradigm. This is bread and butter for most applications. When one process has to tell another process to do something and report back.
+JetFuelExecute takes care of all message and type conversion. JetFuelExecute uses AMPS as the message bus so you can easily look at fields of the original request and its response. This should simplify the life of developers and support staff who constantly have to debug production issues.
 
-
+# Why use JetFuelExecute?
 Apart from the awesome flexibility of just publishing and calling remote function with full audit JetFuelExecute also provides these extra features :-
-1) Automatic timeout response if the publishing server goes down so you client is not waiting for ever.
-2) Removal of published functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
-3) Type safety of parameters. So when you send a integer its received as a integer
-4) Coming soon - The Ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean up action. Here a clean up action could pull all the quotes from the market for the disconnected user.
-5) Coming soon - Ability to make a function call which is executed by several publishers. e.g. if you have BankOff function published by 5 different gateways, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
-6) Coming soon - Subscriptions requests. This will allow you to create a function which can stream you continuous updates till you unsubscribe. Very useful if you want to get a stream of custom price calculations.
+* Simple and easy to use API
+* No code dependency between function publisher and caller
+* Clear error code from function calls where ever it was generated
+* Developers create live documentation when they publish a function.
+* Simple migration to new version of published functions. Just publish a new function so both are available then migrate clients to new function.
+* FunctionExecutor that process the function call is cleanly encapsulated so can be tested independently.
+* View available functions along with their documentation and test them easily
+* Extremely flexible as a component can be publisher of function and at the same time call other functions.
+* Automatic timeout response generated if the server publishing a function goes down,  so your client is not waiting for ever.
+* Removal of published functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
+* High performance and High availability provided by AMPS along with various authentication options.
 
-Currently the only bus that is supported is http://www.crankuptheamps.com/ In future other buses will be supported.
-
-This project currently has the java implementation, in the near future we will javascript and C implementation. This means JetFuelExecute functions can be published and called from multiple languages.
-
-JetFuelExplorer is another tool set you can use with JetFuelExecute. With JetFuelExplorer you can do 3 important things
+# JetFuelExecute demo using JetFuelExplorer (This is an independent tool)
 
 1) View available functions that are published by other servers
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
@@ -29,12 +30,14 @@ JetFuelExplorer is another tool set you can use with JetFuelExecute. With JetFue
 3) View the full Request/Response message - your support team will love you
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
 
+# JetFuelExecute code example.
 
-Let quickly look how you can use JetFuelExecute in two easy steps :-
-1) Publish a function
-2) Call the function
+Using JetFuelExecute do the following :-
 
-Let look at step 1 first. Publishing a function on the bus is easy.
+    1) Publish a function
+    2) Call the function
+
+Lets look at step 1 first - Publishing a function.
 ```java
             // Create amps connection
             final HAClient haClient = new HaClientFactory().createHaClient("SampleJetFuelSever",
@@ -92,7 +95,7 @@ When you publish a function on the bus you also need to tell it how to process t
     }
 ```
 
-Now lets look at step 2. Calling a function. This is even easier than publishing the function. You simply call the excuteFunction with the function name, parameters and FunctionResponse listener
+Now lets look at step 2 - Calling a function. This is even easier than publishing the function. You simply call the executeFunction with the function name, parameters and FunctionResponse listener
 
 ```java
             // Create amps connection
@@ -128,4 +131,10 @@ And here is the code for ClientFunctionResponse.
     }
 ```
 
-This request/response is now fully journaled so any audit or support staff can investigate this.
+This request/response is now fully journaled so any audit or support staff can investigate this any time.
+
+# Features coming very soon.
+* The Ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
+* Ability to make a function call which is executed by several publishers. E.g. if you have BankOff function published by 5 different function publishers, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
+* Subscriptions requests. This will allow you to create a function which can stream you continuous updates till you unsubscribe. Very useful if you want to get a stream of custom price calculations.
+* Api’s in different languages e.g. Javascript and C. This means JetFuelExecute functions can be published and called from multiple languages.
