@@ -16,21 +16,18 @@ Apart from the awesome flexibility of just publishing and calling remote functio
 * View available functions along with their documentation and test them easily
 * Extremely flexible as a component can be publisher of function and at the same time call other functions.
 * Automatic timeout response generated if the server publishing a function goes down,  so your client is not waiting for ever.
-* Removal of published functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
+* Removal of functions if the publisher that published it disconnects. So client always knows what functions are really available before making the call
 * High performance and High availability provided by AMPS along with various authentication options.
 
 # JetFuelExecute demo using JetFuelExplorer 
 
 1) View available functions that are published by other servers
-
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
 
 2) Test a function - this is so useful
-
 ![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
 
 3) View the full Request/Response message - your support team will love you
-
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
 
 Note :- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
