@@ -1,5 +1,10 @@
 package headfront.jetfuel.execute.functions;
 
+import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
+import headfront.jetfuel.execute.utils.FunctionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 import static org.springframework.util.Assert.notNull;
@@ -8,6 +13,9 @@ import static org.springframework.util.Assert.notNull;
  * Created by Deepak on 28/05/2017.
  */
 public abstract class AbstractFunctionExecutor implements FunctionProcessor {
+
+    private static Logger LOG = LoggerFactory.getLogger(AbstractFunctionExecutor.class);
+
     private List<FunctionParameter> functionParameters;
 
     public void setFunctionParameters(List<FunctionParameter> functionParameters) {
@@ -16,14 +24,15 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     }
 
     public void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponse result) {
-        if (functionParameters == null) {
-            throw new RuntimeException("The setFunctionParameters(List<FunctionParameter>) has not been called so we cant validate this. Please set it.");
-        }
-        String validate = validate(parameters);
+        String validate = FunctionUtils.validateParameters(parameters, functionParameters);
         if (validate == null) {
             try {
-                executeFunction(id, parameters, result);
-            } catch (Exception e) {
+                if (result instanceof SubscriptionFunctionResponse) {
+                    executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponse) result);
+                } else {
+                    executeFunction(id, parameters, result);
+                }
+            } catch (Throwable e) {
                 result.onError(id, "Unable to process Function call", e.getMessage() + " " + e.toString());
             }
         } else {
@@ -31,22 +40,22 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
         }
     }
 
-    protected abstract void executeFunction(String id, List<Object> parameters, FunctionResponse result);
-
-
-    private String validate(List<Object> parameters) {
-        String gotAndExpectedMsg = "Got " + parameters + " expected " + functionParameters;
-        if (parameters.size() != functionParameters.size()) {
-            return "Got " + parameters.size() + " parameters but expected " + functionParameters.size() + " parameters. " + gotAndExpectedMsg;
-        }
-        for (int i = 0; i < parameters.size(); i++) {
-            Object parameter = parameters.get(i);
-            Class<?> parameterClass = parameter.getClass();
-            Class parameterType = functionParameters.get(i).getParameterType();
-            if (!parameterClass.equals(parameterType)) {
-                return "Parameter at index " + (i + 1) + " was " + parameter + " with type " + parameterClass + " we expected " + parameterType;
-            }
-        }
-        return null;
+    /**
+     * Override this method
+     */
+    protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+        String mesage = "AbstractFunctionExecutor.executeFunction() has not been extended";
+        LOG.error(mesage);
+        throw new AbstractMethodError(mesage);
     }
+
+    /**
+     * Override this method
+     */
+    protected void executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+        String mesage = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
+        LOG.error(mesage);
+        throw new AbstractMethodError(mesage);
+    }
+
 }

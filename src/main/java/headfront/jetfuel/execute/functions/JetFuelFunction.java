@@ -39,9 +39,9 @@ public class JetFuelFunction {
                            Class returnType, String returnTypeDescription, FunctionProcessor executor,
                            FunctionAccessType functionAccessType,
                            FunctionExecutionType executionType) {
-        this.executionType = executionType;
         notNull(functionName, "functionName cannot be null");
         notNull(functionDescription, "functionDescription cannot be null");
+        this.executionType = executionType;
         this.returnTypeDescription = returnTypeDescription;
         this.functionDescription = functionDescription;
         this.executor = executor;
@@ -52,10 +52,6 @@ public class JetFuelFunction {
         parametersNames = functionParameters.stream().map(FunctionParameter::getParameterName).collect(Collectors.toList());
         parametersTypes = functionParameters.stream().map(FunctionParameter::getParameterType).collect(Collectors.toList());
         parametersDesc = functionParameters.stream().map(FunctionParameter::getDescription).collect(Collectors.toList());
-        if (executionType != FunctionExecutionType.RequestResponse) {
-            throw new UnsupportedOperationException("Only FunctionExecutionType of RequestResponse is supported in this " +
-                    "version and we received " + executionType);
-        }
     }
 
     // This is set at Publish time

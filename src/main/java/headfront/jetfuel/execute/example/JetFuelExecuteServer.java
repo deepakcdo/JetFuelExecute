@@ -59,7 +59,7 @@ public class JetFuelExecuteServer {
             // publish JetFuel Function on the bus
             jetFuelExecute.publishFunction(ableToVoteFunction);
 
-            System.out.println("Now waiting for client calls");
+            System.out.println("Published Function " + ableToVoteFunction.getFullFunctionName() + " Now waiting for client calls");
             //now wait for Clients to call
             while (true) {
                 Thread.sleep(10000);

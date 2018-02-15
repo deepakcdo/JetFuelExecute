@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertTrue;
@@ -20,7 +21,7 @@ import static junit.framework.TestCase.assertTrue;
 @ContextConfiguration(locations = {"/client/junitClientTest.xml"})
 public class JetFuelBaseClientTest extends JetFuelBaseTests {
 
-    public void callJetFuelFunction(String functionName, JetFuelFunction jetFuelFunction,
+    public String callJetFuelFunction(String functionName, JetFuelFunction jetFuelFunction,
                                     Object[] functionParams, long testWaitTime,
                                     int onErrorCountExpected, boolean errorSetExpected,
                                     int onCompleteCountExpected, boolean completeSetExpected,
@@ -29,7 +30,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                                     boolean checkMessagesAfterFunctionCall) throws Exception {
         String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
         if (runningBothClientAndSerer) {
-            unPublishAndCheckFunction(jetFuelFunction);
+//            unPublishAndCheckFunction(jetFuelFunction);
             if (jetFuelExecute.getFunction(fullFunctionName) == null) {
                 publishAndCheckFunction(jetFuelFunction);
             }
@@ -46,13 +47,14 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 fullFunctionName = connectionName + FunctionUtils.NAME_SEPARATOR + functionName;
             }
         }
-        callFunctionAndTest(fullFunctionName, functionParams, testWaitTime,
+        final String callID = callFunctionAndTest(fullFunctionName, functionParams, testWaitTime,
                 onErrorCountExpected, errorSetExpected,
                 onCompleteCountExpected, completeSetExpected,
-                messageExpected, returnValueExpected, exceptionMsgExpected, skipFunctionExistsTests, expectedSates,checkMessagesAfterFunctionCall);
+                messageExpected, returnValueExpected, exceptionMsgExpected, skipFunctionExistsTests, expectedSates, checkMessagesAfterFunctionCall);
         if (runningBothClientAndSerer) {
             unPublishAndCheckFunction(jetFuelFunction);
         }
+        return callID;
     }
 
     @Test
@@ -63,7 +65,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 0, false,
                 1, true,
                 expectedMsg, "20180225", null, false,
-                new String[]{"StateDone"},true);
+                new String[]{"StateDone"}, true);
     }
 
     @Test
@@ -73,7 +75,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Deepak", true}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, true, null, false, new String[]{"StateDone"},true);
+                expectedMsg, true, null, false, new String[]{"StateDone"}, true);
     }
 
     @Test
@@ -84,7 +86,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Amanda", true}, sleepValueForTest,
                 1, true,
                 0, false,
-                expectedMsg, null, expectedErrorMsg, false, new String[]{"StateError"},true);
+                expectedMsg, null, expectedErrorMsg, false, new String[]{"StateError"}, true);
     }
 
     @Test
@@ -94,7 +96,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Fred", true}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, false, null, false, new String[]{"StateDone"},true);
+                expectedMsg, false, null, false, new String[]{"StateDone"}, true);
     }
 
     @Test
@@ -118,7 +120,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"Sarah", true}, 8000 + sleepValueForTest,
                 1, true,
                 1, true, expectedMsg, true, expectedExecptionMsg,
-                false, new String[]{"StateTimeout","StateDone"},true);
+                false, new String[]{"StateTimeout", "StateDone"}, true);
 //                0,false, expectedMsg, null, expectedExecptionMsg, false);
     }
 
@@ -140,7 +142,32 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, expectedExecptionMsg, true, new String[]{},false);
+                false, expectedMsg, null, expectedExecptionMsg, true, new String[]{}, false);
+    }
+
+    @Test
+    public void callFunctionExecuteOnAFunctionThatIsOfTypeSubscriptionShouldFail() throws Exception {
+        JetFuelFunction jetFuelFunction = getNextThreePriceTicksInvalid;
+        String functionName = getNextThreePriceTicks.getFunctionName();
+        String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
+        if (runningBothClientAndSerer) {
+//            unPublishAndCheckFunction(jetFuelFunction);
+            if (jetFuelExecute.getFunction(fullFunctionName) == null) {
+                publishAndCheckFunction(jetFuelFunction);
+            }
+        } else {
+                final List<String> functions = jetFuelExecute.findFunction(functionName);
+                // Here we might be running several servers so pick a server functions
+                final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
+                assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
+                        serverFunctions.size() >= 1);
+                fullFunctionName = serverFunctions.get(0);
+        }
+        final String callID = jetFuelExecute.executeFunction(fullFunctionName, new Object[]{"James"}, new TestFunctionResponse(new CountDownLatch(0)));
+        assertTrue("This should return null", callID == null);
+        if (runningBothClientAndSerer) {
+            unPublishAndCheckFunction(jetFuelFunction);
+        }
     }
 
     @Test
@@ -150,7 +177,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         callJetFuelFunction(invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
-                false, expectedMsg, null, null, true, new String[]{},false);
+                false, expectedMsg, null, null, true, new String[]{}, false);
     }
 
     @Test
@@ -161,34 +188,35 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new Object[]{"James", new BigDecimal(45)}, sleepValueForTest,
                 1, true, 0,
                 false, expectedMsg, null, null, true,
-                new String[]{},false);
+                new String[]{}, false);
     }
 
     @Test
-    public void callUpateQuoteFunctions10Times() throws Exception {
+    public void callUpdateQuoteFunctions10Times() throws Exception {
         String expectedMsg = "Quote update was successful";
         // publish 10 prices
         double lastBid = 0;
         double lastOffer = 0;
         double offset = 56;
+        String lastCallId = null;
         for (int i = 0; i < 10; i++) {
             lastBid = offset + i;
             lastOffer = offset + 1 + i;
-            callJetFuelFunction("updateQuotePrice", updateBidOfferQuoteStatusFunction,
+            lastCallId = callJetFuelFunction("updateQuotePrice", updateBidOfferQuoteStatusFunction,
                     new Object[]{"Deepak", testInstrument, lastBid, lastOffer}, sleepValueForTest,
                     0, false, 1, true,
-                    expectedMsg, true, null, false, new String[]{"StateDone"},true);
+                    expectedMsg, true, null, false, new String[]{"StateDone"}, true);
         }
         // check the last price is correct
         expectedMsg = "Quote found for inst " + testInstrument;
         String functionName = "getLastQuote";
-        String responseJson = "{\"FunctionID\":\"" + jetFuelExecute.getConnectionName() + "\",\"BidPrice\":"
+        String responseJson = "{\"FunctionID\":\"" + lastCallId + "\",\"BidPrice\":"
                 + lastBid + ",\"Trader\":\"Deepak\",\"ID\":\"" + testInstrument + "\",\"OfferPrice\":" + lastOffer + "}";
         callJetFuelFunction(functionName, getLastQuoteFunction,
                 new Object[]{testInstrument}, sleepValueForTest,
                 0, false,
                 1, true,
-                expectedMsg, responseJson, null, false, new String[]{"StateDone"},true);
+                expectedMsg, responseJson, null, false, new String[]{"StateDone"}, true);
     }
 
 }

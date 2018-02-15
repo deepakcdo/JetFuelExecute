@@ -25,6 +25,7 @@ public interface JetFuelExecuteConstants {
     String RETURN_VALUE = "ReturnValue";
     String FUNCTION_ACCESS_TYPE = "FunctionAccessType";
     String FUNCTION_EXECUTION_TYPE = "FunctionExecutionType";
+    String FUNCTION_UPATE_MESSAGE = "FunctionUpdateMsg";
 
 
     String FUNCTION_CALL_ID = "ID";

@@ -1,6 +1,7 @@
 package headfront.jetfuel.execute;
 
 import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 
 import java.util.List;
@@ -83,13 +84,22 @@ public interface JetFuelExecute {
     boolean unPublishFunction(JetFuelFunction function);
 
     /**
-     * Execute a function in JetFuel Execute
+     * Execute a function in JetFuel Execute. Call this for Functions that have a FunctionExecutionType of RequestResponse
      * @param functionName full name of the function you want to call
-     * @param params parameters for the function
+     * @param functionParameters parameters for the function
      * @param response callback listener for the function call
      * @return The uniqueId for this function call
      */
-    String executeFunction(String functionName, Object[] params, FunctionResponse response);
+    String executeFunction(String functionName, Object[] functionParameters, FunctionResponse response);
+
+    /**
+     * Execute a Subscription function in JetFuel Execute.  Call this for Functions that have a FunctionExecutionType of Subscription
+     * @param functionName full name of the function you want to call
+     * @param functionParameters parameters for the function
+     * @param response callback listener for the function call
+     * @return The uniqueId for this function call
+     */
+    String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponse response);
 
     /**
      * If JetFuelFunction of type FunctionExecutionType#Subscription was executed then you can cancel this subscription
@@ -98,6 +108,6 @@ public interface JetFuelExecute {
      * @param callId to be cancelled.
      * @return true if successful else false.
      */
-    boolean cancelExecuteFunctionSubscription(String callId);
+    boolean cancelSubscriptionFunctionRequest(String callId);
 
 }

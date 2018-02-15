@@ -6,6 +6,9 @@ package headfront.jetfuel.execute;
 public enum FunctionState {
 
     StateNew("StateNew"),
+    StateSubActive("StateSubActive"),
+    StateSubUpdate("StateSubUpdate"),
+    StateSubCancelled("StateSubCancelled"),
     StateDone("StateDone"),
     StateError("StateError"),
     StateTimeout("StateTimeout");

@@ -61,6 +61,13 @@ task BuildApp {
 
 }
 
+
+task runJetFuelExecuteSubServerT(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'headfront.jetfuel.execute.example.JetFuelExecuteSubServer'
+    jvmArgs '-Dlog4j.configurationFile=/Users/Deepak/Documents/MySpace/Dev/JetFuelExecute/src/test/resources/log4j2.xml'
+}
+
 task runNewBbgGateway(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'headfront.jetfuel.execute.Gateway'

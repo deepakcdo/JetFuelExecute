@@ -56,6 +56,11 @@ public class JetFuelBaseTests {
     @Autowired
     JetFuelFunction getTradingDateFunction;
     @Autowired
+    JetFuelFunction getNextThreePriceTicks;
+    @Autowired
+    JetFuelFunction getNextThreePriceTicksInvalid;
+
+    @Autowired
     ObjectMapper jsonMapper;
 
     protected boolean runningBothClientAndSerer = true;
@@ -100,7 +105,7 @@ public class JetFuelBaseTests {
                 latch.countDown();
             }
         });
-        assertTrue("Should be able to unpublish Function " + fullFunctionName,
+        assertTrue("Should be able to unPublish Function " + fullFunctionName,
                 jetFuelExecute.unPublishFunction(function));
         latch.await(sleepValueForTest, TimeUnit.MILLISECONDS);
         Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
@@ -109,7 +114,7 @@ public class JetFuelBaseTests {
                 !availableFunctions.contains(fullFunctionName));
     }
 
-    protected void callFunctionAndTest(String fullFunctionName, Object[] functionParams, long testWaitTime,
+    protected String callFunctionAndTest(String fullFunctionName, Object[] functionParams, long testWaitTime,
                                        int onErrorCountExpected, boolean errorSetExpected,
                                        int onCompleteCountExpected, boolean completeSetExpected,
                                        String messageExpected, Object returnValueExpected, String exceptionMsgExpected,
@@ -228,6 +233,7 @@ public class JetFuelBaseTests {
             }
             haClient.unsubscribe(bookmarkSub);
         }
+        return callID;
     }
 
     private Map<String, Object> createExpectedMessage(int i, String[] expectedStates, String fullFunctionName,

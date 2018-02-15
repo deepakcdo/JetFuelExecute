@@ -216,4 +216,23 @@ public class FunctionUtils {
         String dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         return dateTimeStr;
     }
+
+    public static String validateParameters(List<Object> parameters, List<FunctionParameter> configuredParameters) {
+        if (configuredParameters == null) {
+            throw new RuntimeException("The setFunctionParameters(List<FunctionParameter>) has not been called so we cant validateParameters this. Please set it.");
+        }
+        String gotAndExpectedMsg = "Got " + parameters + " expected " + configuredParameters;
+        if (parameters.size() != configuredParameters.size()) {
+            return "Got " + parameters.size() + " parameters but expected " + configuredParameters.size() + " parameters. " + gotAndExpectedMsg;
+        }
+        for (int i = 0; i < parameters.size(); i++) {
+            Object parameter = parameters.get(i);
+            Class<?> parameterClass = parameter.getClass();
+            Class parameterType = configuredParameters.get(i).getParameterType();
+            if (!parameterClass.equals(parameterType)) {
+                return "Parameter at index " + (i + 1) + " was " + parameter + " with type " + parameterClass + " we expected " + parameterType;
+            }
+        }
+        return null;
+    }
 }
