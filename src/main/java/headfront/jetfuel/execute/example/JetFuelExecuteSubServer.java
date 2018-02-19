@@ -6,7 +6,10 @@ import headfront.jetfuel.execute.FunctionAccessType;
 import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
-import headfront.jetfuel.execute.functions.*;
+import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
+import headfront.jetfuel.execute.functions.FunctionParameter;
+import headfront.jetfuel.execute.functions.JetFuelFunction;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
@@ -48,7 +51,7 @@ public class JetFuelExecuteSubServer {
                     "This function will give you the next 5 price ticks for the given Instrument. The update type will be a string of json",
                     functionParameters,
                     Double.class, "Return The current price of the instrument",
-                    new PriceCreatorVoteExecutor(), FunctionAccessType.Read, FunctionExecutionType.Subscription);
+                    new PriceCreatorVoteExecutor(jetFuelExecute), FunctionAccessType.Read, FunctionExecutionType.Subscription);
 
             System.out.println("Publishing Function");
             // publish JetFuel Function on the bus
@@ -56,9 +59,7 @@ public class JetFuelExecuteSubServer {
 
             System.out.println("Published Function " + get5PricesTicks.getFullFunctionName() + " Now waiting for client calls");
             //now wait for Clients to call
-            while (true) {
-                Thread.sleep(10000);
-            }
+
         } catch (Exception e) {
             System.out.println("Unable to create JetFuelServer");
             e.printStackTrace();
@@ -67,23 +68,19 @@ public class JetFuelExecuteSubServer {
 
     static class PriceCreatorVoteExecutor extends AbstractFunctionExecutor {
 
+        private JetFuelExecute jetFuelExecute;
+
+        public PriceCreatorVoteExecutor(JetFuelExecute jetFuelExecute) {
+            this.jetFuelExecute = jetFuelExecute;
+        }
+
         @Override
         protected void executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
             String inst = parameters.get(0).toString();
-
+            PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
+            new Thread(subExecutor).start();
+            jetFuelExecute.registerSubscriptionExecutor(id, subExecutor);
             result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.StateSubActive);
-            try {
-                Thread.sleep(1000);
-                result.onSubscriptionUpdate(id, "First Update ", "100.256");
-                Thread.sleep(1000);
-                result.onSubscriptionUpdate(id, "Second Update ", "200.256");
-                Thread.sleep(1000);
-                result.onSubscriptionUpdate(id, "Third Update ", "300.256");
-                Thread.sleep(1000);
-                result.onSubscriptionStateChanged(id, "Sent All 3 prices", FunctionState.StateDone );
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

@@ -3,11 +3,13 @@ package headfront.jetfuel.execute.utils;
 import com.crankuptheamps.client.ConnectionInfo;
 import com.crankuptheamps.client.DefaultServerChooser;
 import com.crankuptheamps.client.HAClient;
-import com.crankuptheamps.client.exception.ConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Deepak on 09/04/2017.

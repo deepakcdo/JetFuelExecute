@@ -7,9 +7,6 @@ import headfront.jetfuel.execute.functions.FunctionResponse;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by Deepak on 01/02/2018.
  */

@@ -1,8 +1,9 @@
 package headfront.jetfuel.execute;
 
 import headfront.jetfuel.execute.functions.FunctionResponse;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
+import headfront.jetfuel.execute.functions.SubscriptionExecutor;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 
 import java.util.List;
 import java.util.Set;
@@ -103,11 +104,17 @@ public interface JetFuelExecute {
 
     /**
      * If JetFuelFunction of type FunctionExecutionType#Subscription was executed then you can cancel this subscription
-     * when its no longer require updates.
+     * when its no longer require updates. This is an async call
      * Note this is not implemented yet
      * @param callId to be cancelled.
-     * @return true if successful else false.
      */
-    boolean cancelSubscriptionFunctionRequest(String callId);
+    void cancelSubscriptionFunctionRequest(String callId);
 
+    /**
+     * This is used internally. This will be removed soon. Its meant to internally register SubscriptionExecutor so it can be cancelled later
+     *
+     * @param id Fuctionid to be registered
+     * @param subExecutor the SubscriptionExecutor to be registered with the id
+     */
+    void registerSubscriptionExecutor(String id, SubscriptionExecutor subExecutor);
 }

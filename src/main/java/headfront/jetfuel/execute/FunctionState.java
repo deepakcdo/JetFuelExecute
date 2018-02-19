@@ -9,6 +9,7 @@ public enum FunctionState {
     StateSubActive("StateSubActive"),
     StateSubUpdate("StateSubUpdate"),
     StateSubCancelled("StateSubCancelled"),
+    StateSubCancelRequest("StateSubCancelRequest"),
     StateDone("StateDone"),
     StateError("StateError"),
     StateTimeout("StateTimeout");

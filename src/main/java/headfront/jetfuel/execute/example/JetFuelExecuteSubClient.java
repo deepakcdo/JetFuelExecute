@@ -36,6 +36,9 @@ public class JetFuelExecuteSubClient {
                     new Object[]{"DE0022456"}, new ClientFunctionResponse());
             System.out.println("Called " + functionName + " with id  " + id1);
 
+            Thread.sleep(5000);
+            jetFuelExecute.cancelSubscriptionFunctionRequest(id1);
+
         } catch (Exception e) {
             System.out.println("Unable to create JetFuelExecute Client");
             e.printStackTrace();

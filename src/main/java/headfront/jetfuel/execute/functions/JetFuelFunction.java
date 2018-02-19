@@ -5,7 +5,6 @@ import headfront.jetfuel.execute.FunctionAccessType;
 import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

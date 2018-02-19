@@ -61,9 +61,7 @@ public class JetFuelExecuteServer {
 
             System.out.println("Published Function " + ableToVoteFunction.getFullFunctionName() + " Now waiting for client calls");
             //now wait for Clients to call
-            while (true) {
-                Thread.sleep(10000);
-            }
+
         } catch (Exception e) {
             System.out.println("Unable to create JetFuelServer");
             e.printStackTrace();

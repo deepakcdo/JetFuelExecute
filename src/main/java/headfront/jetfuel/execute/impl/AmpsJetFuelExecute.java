@@ -10,10 +10,8 @@ import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.JetFuelExecuteConstants;
-import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
-import headfront.jetfuel.execute.functions.FunctionResponse;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
-import headfront.jetfuel.execute.functions.JetFuelFunction;
+import headfront.jetfuel.execute.example.PriceSubscriptionExecutor;
+import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import headfront.jetfuel.execute.utils.NamedThreadFactory;
 import org.slf4j.Logger;
@@ -47,15 +45,15 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
     private final Map<String, FunctionResponse> callBackBackLog = new ConcurrentHashMap<>();
     private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
+    private final Map<String, SubscriptionExecutor> activeSubscriptionRequests = new ConcurrentHashMap<>();
     private final Set<CommandId> jetFuelActiveSubscriptions = new HashSet<>();
     private ExecutorService functionRequestProcessorExecutorService = null;
     private ExecutorService functionReplyProcessorExecutorService = null;
-    private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
-    private Consumer<String> onFunctionAddedListener = name -> {
-    };
+    private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
+    private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
+    private Consumer<String> onFunctionAddedListener = name -> { };
 
-    private Consumer<String> onFunctionRemovedListener = name -> {
-    };
+    private Consumer<String> onFunctionRemovedListener = name -> { };
 
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
@@ -215,8 +213,17 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     @Override
-    public boolean cancelSubscriptionFunctionRequest(String callId) {
-        throw new UnsupportedOperationException("Not supported in this version");
+    public void cancelSubscriptionFunctionRequest(String callId) {
+        String message = "Cancel request";
+        final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, message, hostName, callId);
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubCancelRequest.name());
+        sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, message);
+    }
+
+    @Override
+    public void registerSubscriptionExecutor(String id, SubscriptionExecutor subExecutor) {
+        activeSubscriptionRequests.put(id, subExecutor);
+        //"todo increment function counter
     }
 
     private void processReplyMessage(String functionResponse) {
@@ -346,7 +353,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private void subscribeToFunctionCallbacks() throws Exception {
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME + "= '" + hostName + "' and /" +
                 JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME + "= '" + ampsConnectionName + "' and /" +
-                JetFuelExecuteConstants.CURRENT_STATE + "!='" + FunctionState.StateNew + "'";
+                JetFuelExecuteConstants.CURRENT_STATE + " NOT IN ('" + FunctionState.StateNew +
+                "', '" + FunctionState.StateSubCancelRequest + "')";
 
         final CommandId subscribe = ampsClient.subscribe(m -> {
                     final String functionResponse = m.getData().trim();
@@ -391,7 +399,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         LOG.error("Unable to process published function update  " + data, e);
                     }
                 }, getFunctionTopic(), "",
-                100, AMPS_OPTIONS, 5000);
+                100, AMPS_OPTIONS_WITH_OOF, 5000);
         jetFuelActiveSubscriptions.add(commandId);
         LOG.info("Placed a sowAndSubscribe to topic " + getFunctionTopic() + " with filter '' so we know when new functions are published or removed");
         LOG.info("Waiting to download published Functions");
@@ -417,7 +425,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private boolean subscribeForCallBacks(final JetFuelFunction jetFuelFunction) {
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + "='" + jetFuelFunction.getFullFunctionName() +
-                "' and /" + JetFuelExecuteConstants.CURRENT_STATE + "='" + FunctionState.StateNew + "'";
+                "' and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.StateNew
+                + "', '" + FunctionState.StateSubCancelRequest + "')";
         try {
             final CommandId subscription = ampsClient.subscribe(m -> {
                 String request = m.getData().trim();
@@ -440,7 +449,9 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             Map map = jsonMapper.readValue(request, Map.class);
             final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
             String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
-            log("Received JetFuelExecuteFunction execution request with id " + id + " from " + caller, " request was " + request);
+            final String currentState = map.get(JetFuelExecuteConstants.CURRENT_STATE).toString();
+            log("Received JetFuelExecuteFunction execution request of type '" + currentState
+                    + "' with id " + id + " from " + caller, " request was " + request);
             String callerHostName = map.get(JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME).toString();
             if (checkFunctionOwner) {
                 if (!caller.equals(ampsFunctionCaller)) {
@@ -449,46 +460,59 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     return;
                 }
             }
-            AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
-            newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
-            List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
-            LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFunctionName() + " with parameter " + parameters + " from caller " + caller);
-            if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
-                newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponse() {
-                    @Override
-                    public void onCompleted(String id, Object message, Object returnValue) {
-                        createAndSendComplete(caller, message, returnValue, callerHostName, id);
-                    }
 
-                    @Override
-                    public void onError(String id, Object message, Object exception) {
-                        createAndSendError(message, exception, id, caller, hostName);
-                    }
-                });
-            } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
-                newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponse() {
-                    @Override
-                    public void onSubscriptionUpdate(String id, Object message, String update) {
-                        createAndSendSubscritionUpdate(caller, id, update, message, callerHostName);
-                    }
+            if (currentState.equalsIgnoreCase(FunctionState.StateNew.name())) {
+                AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
+                newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
+                List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
+                LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFunctionName() + " with parameter " + parameters + " from caller " + caller);
+                if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
+                    newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponse() {
+                        @Override
+                        public void onCompleted(String id, Object message, Object returnValue) {
+                            createAndSendComplete(caller, message, returnValue, callerHostName, id);
+                        }
 
-                    @Override
-                    public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
-                        createAndSendSubscritionStateChanged(caller, id, state, message, callerHostName);
-                    }
+                        @Override
+                        public void onError(String id, Object message, Object exception) {
+                            createAndSendError(message, exception, id, caller, hostName);
+                        }
+                    });
+                } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
+                    newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponse() {
+                        @Override
+                        public void onSubscriptionUpdate(String id, Object message, String update) {
+                            createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
+                        }
 
-                    @Override
-                    public void onCompleted(String id, Object message, Object returnValue) {
-                        createAndSendComplete(caller, message, returnValue, callerHostName, id);
-                    }
+                        @Override
+                        public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
+                            createAndSendSubscriptionStateChanged(caller, id, state, message, callerHostName);
+                        }
 
-                    @Override
-                    public void onError(String id, Object message, Object exception) {
-                        createAndSendError(message, exception, id, caller, hostName);
-                    }
-                });
+                        @Override
+                        public void onCompleted(String id, Object message, Object returnValue) {
+                            createAndSendComplete(caller, message, returnValue, callerHostName, id);
+                        }
+
+                        @Override
+                        public void onError(String id, Object message, Object exception) {
+                            createAndSendError(message, exception, id, caller, hostName);
+                        }
+                    });
+                } else {
+                    LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
+                }
+            } else if (currentState.equalsIgnoreCase(FunctionState.StateSubCancelRequest.name())) {
+                final SubscriptionExecutor subscriptionExecutor = activeSubscriptionRequests.remove(id);
+                if (subscriptionExecutor != null) {
+                    subscriptionExecutor.stopSubscriptions();
+
+                } else {
+                    LOG.error("Received a cancel request for SubscriptionFunction with id '" + id + "' but we dont have an active SubscriptionExecutor for it.");
+                }
             } else {
-                LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
+                LOG.error("Unexpected state received for function Id '" + id + "' state was '" + currentState + "' . Full message " + request);
             }
             //Handle onClientDisconnect in the future
         } catch (Exception e) {
@@ -521,17 +545,17 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         }
     }
 
-    private void createAndSendSubscritionStateChanged(String caller, String id, FunctionState state, Object message, String callerHostName) {
+    private void createAndSendSubscriptionStateChanged(String caller, String id, FunctionState state, Object message, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
         reply.put(JetFuelExecuteConstants.CURRENT_STATE, state.name());
-        sendMessageToAmps("onSubscriptionChanged", reply, message);
+        sendMessageToAmps("onSubscriptionChanged to '" + state + "'", reply, message);
     }
 
-    private void createAndSendSubscritionUpdate(String caller, String id, String update, Object message, String callerHostName) {
+    private void createAndSendSubscriptionUpdate(String caller, String id, String update, Object message, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
         reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubUpdate);
         reply.put(JetFuelExecuteConstants.FUNCTION_UPATE_MESSAGE, update);
-        sendMessageToAmps("onSubscriptionChanged", reply, message);
+        sendMessageToAmps("onSubscriptionUpdate", reply, message);
     }
 
     private void createAndSendComplete(String caller, Object message, Object returnValue, String callerHostName, String id) {

@@ -1,6 +1,5 @@
 package headfront.jetfuel.execute.functions;
 
-import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

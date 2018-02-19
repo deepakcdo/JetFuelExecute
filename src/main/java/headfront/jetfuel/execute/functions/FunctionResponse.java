@@ -1,7 +1,5 @@
 package headfront.jetfuel.execute.functions;
 
-import headfront.jetfuel.execute.FunctionState;
-
 /**
  * Created by Deepak on 10/05/2017.
  */
