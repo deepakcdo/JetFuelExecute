@@ -252,7 +252,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             break;
                         case StateSubUpdate:
                             subscriptionFunctionResponse.onSubscriptionUpdate(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
-                                    (String) map.get(JetFuelExecuteConstants.FUNCTION_UPATE_MESSAGE));
+                                    (String) map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE));
                             break;
                         case StateSubActive:
                             subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.StateSubActive);
@@ -548,7 +548,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private void createAndSendSubscriptionUpdate(String caller, String id, String update, Object message, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
         reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubUpdate);
-        reply.put(JetFuelExecuteConstants.FUNCTION_UPATE_MESSAGE, update);
+        reply.put(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE, update);
         sendMessageToAmps("onSubscriptionUpdate", reply, message);
     }
 

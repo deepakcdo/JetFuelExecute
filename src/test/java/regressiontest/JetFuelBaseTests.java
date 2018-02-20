@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecuteConstants;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static headfront.jetfuel.execute.JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE;
 import static junit.framework.TestCase.*;
 
 /**
@@ -34,6 +36,7 @@ public class JetFuelBaseTests {
     private static Logger LOG = LoggerFactory.getLogger(JetFuelBaseTests.class);
 
     public long sleepValueForTest = 3000;
+    public long sleepValueForSubTest = 10000;
 
     @Autowired
     String testInstrument;
@@ -115,13 +118,16 @@ public class JetFuelBaseTests {
     }
 
     protected String callFunctionAndTest(String fullFunctionName, Object[] functionParams, long testWaitTime,
-                                       int onErrorCountExpected, boolean errorSetExpected,
-                                       int onCompleteCountExpected, boolean completeSetExpected,
-                                       String messageExpected, Object returnValueExpected, String exceptionMsgExpected,
-                                       boolean skipFunctionExistsTests, String[] expectedStates,
-                                       boolean checkMessagesAfterFunctionCall) throws Exception {
-        CountDownLatch waitLatch = new CountDownLatch(onErrorCountExpected + onCompleteCountExpected);
-        TestFunctionResponse response = new TestFunctionResponse(waitLatch);
+                                         int onErrorCountExpected, boolean errorSetExpected,
+                                         int onCompleteCountExpected, boolean completeSetExpected,
+                                         int onUdateCountExpected, int onStateChangeExpected,
+                                         List<String> updateMessagesExpected, List<String> updateValuesExpected,
+                                         String messageExpected, Object returnValueExpected, String exceptionMsgExpected,
+                                         boolean skipFunctionExistsTests, String[] expectedStates,
+                                         boolean checkMessagesAfterFunctionCall, boolean isSubFunction) throws Exception {
+        int expectedMessagesForFunction = onErrorCountExpected + onCompleteCountExpected +
+                onUdateCountExpected + onStateChangeExpected + 1;
+        CountDownLatch waitLatch = new CountDownLatch(expectedMessagesForFunction);
         if (!skipFunctionExistsTests) {
             final Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
             assertTrue("Function with name " + fullFunctionName + " not found we had " + availableFunctions,
@@ -131,7 +137,6 @@ public class JetFuelBaseTests {
         }
 
         // set up subscription to bus to get all updates for this function
-        int expectedMessagesForFunction = onErrorCountExpected + onCompleteCountExpected + 1;
         CountDownLatch waitForSubMessages = new CountDownLatch(expectedMessagesForFunction);
         final String id = getNextFunctionId.apply(jetFuelExecute.getConnectionName());
         final String nextId = predictNextId(id);
@@ -148,7 +153,16 @@ public class JetFuelBaseTests {
                     },
                     jetFuelExecute.getFunctionBusTopic(), "/ID='" + nextId + "'", 10000);
         }
-        final String callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
+        String callID;
+        TestFunctionResponse response;
+        if (isSubFunction) {
+            response = new TestSubscriptionFunctionResponse(waitLatch);
+            callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponse) response);
+        } else {
+            response = new TestFunctionResponse(waitLatch);
+            callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
+        }
+
         final boolean await = waitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
         if (!await) {
             if (LOG.isDebugEnabled()) {
@@ -156,7 +170,9 @@ public class JetFuelBaseTests {
             }
         }
 
-        checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected, onCompleteCountExpected, completeSetExpected,
+        checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected,
+                onCompleteCountExpected, completeSetExpected,
+                onUdateCountExpected, onStateChangeExpected, updateMessagesExpected, updateValuesExpected,
                 messageExpected, returnValueExpected, exceptionMsgExpected);
         if (checkMessagesAfterFunctionCall) {
             waitForSubMessages.await(testWaitTime, TimeUnit.MILLISECONDS);
@@ -169,16 +185,18 @@ public class JetFuelBaseTests {
             Command commandToSend = new Command(Message.Command.Subscribe);
             String bookmark = null;
             try {
-                 bookmark = msgCreationTime.substring(0, msgCreationTime.indexOf(FunctionUtils.NAME_SEPARATOR));
-            }catch (Exception e){
-                LOG.error("unable to parse" + msgCreationTime);
+                if (msgCreationTime.contains(FunctionUtils.NAME_SEPARATOR)) {
+                    bookmark = msgCreationTime.substring(0, msgCreationTime.indexOf(FunctionUtils.NAME_SEPARATOR));
+                }
+            } catch (Exception e) {
+                LOG.error("unable to parse " + msgCreationTime);
                 throw e;
             }
             bookmark = bookmark.replace("-", "");
             bookmark = bookmark.replace(":", "");
             // go back a few minutes
             bookmark = bookmark.substring(0, bookmark.length() - 4);
-            bookmark = bookmark+ "0000";
+            bookmark = bookmark + "0000";
             commandToSend.setBookmark(bookmark);
             commandToSend.addAckType(Message.AckType.Completed);
             commandToSend.setTopic(jetFuelExecute.getFunctionBusTopic());
@@ -198,7 +216,7 @@ public class JetFuelBaseTests {
             bookmarkLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
             assertEquals("Should have received " + expectedMessagesForFunction + "  messages a bookmark subscription ",
                     expectedMessagesForFunction, bookmarkMessages.size());
-            if (LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Subscription messages " + messages);
                 LOG.debug("Bookmark messages " + bookmarkMessages);
             }
@@ -245,7 +263,7 @@ public class JetFuelBaseTests {
         message.put("FunctionCallerHostName", InetAddress.getLocalHost().getHostName());
         message.put("FunctionToCall", fullFunctionName);
         message.put("ID", nextId);
-        message.put("FunctionInitiatorName",jetFuelExecute.getConnectionName());
+        message.put("FunctionInitiatorName", jetFuelExecute.getConnectionName());
         message.put("FunctionParameters", Arrays.asList(functionParams));
         if (i == 0) {
             message.put("CurrentState", "StateNew");
@@ -260,18 +278,25 @@ public class JetFuelBaseTests {
             } else if (expectedState.equalsIgnoreCase(FunctionState.StateTimeout.name())) {
                 message.put("CurrentStateMsg", exceptionMsgExpected);
                 message.put("MsgCreationName", instanceOwnerFromFirstMessage);
-            } else {
+            } else if (expectedState.equalsIgnoreCase(FunctionState.StateDone.name())) {
                 message.put("CurrentStateMsg", messageExpected);
                 message.put("ReturnValue", returnValueExpected);
                 message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.StateSubUpdate.name())) {
+                message.put(FUNCTION_UPDATE_MESSAGE, messageExpected);
+                message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
             }
+
             message.put("AmpsInstanceOwner", instanceOwnerFromFirstMessage);
         }
         return message;
     }
 
-    private void checkFunctionResponse(TestFunctionResponse response, String id, int onErrorCountExpected, boolean errorSetExpected,
+    private void checkFunctionResponse(TestFunctionResponse response, String id,
+                                       int onErrorCountExpected, boolean errorSetExpected,
                                        int onCompleteCountExpected, boolean completeSetExpected,
+                                       int onUpdateCountExpected, int onStateChangeExpected,
+                                       List<String> updateMessagesExpected, List<String> updateValuesExpected,
                                        String messageExpected, Object returnValueExpected, String exceptionMsgExpected) throws Exception {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checking response for " + id);
@@ -297,6 +322,13 @@ public class JetFuelBaseTests {
             assertEquals("Return was not correct", returnValueExpected, response.getReturnValue());
         }
         assertEquals("Exception Message was not correct", exceptionMsgExpected, response.getException());
+        if (response instanceof TestSubscriptionFunctionResponse) {
+            TestSubscriptionFunctionResponse subscriptionFunctionResponse = (TestSubscriptionFunctionResponse) response;
+            assertEquals("onUpdateCount should have been called " + onUpdateCountExpected + " time/s", onUpdateCountExpected, ((TestSubscriptionFunctionResponse) response).getOnSubUpdateCount());
+            assertEquals("onStateChange should have been called " + onStateChangeExpected + " time/s", onStateChangeExpected, ((TestSubscriptionFunctionResponse) response).getOnSubStateChangeCount());
+            assertEquals("Update messages should be equal", updateMessagesExpected, subscriptionFunctionResponse.getAllMessages());
+            assertEquals("Update values should be equal", updateValuesExpected, subscriptionFunctionResponse.getSubscriptionUpdates());
+        }
     }
 
     public void setRunningBothClientAndSerer(boolean runningBothClientAndSerer) {

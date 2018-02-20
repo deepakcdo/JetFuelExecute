@@ -12,15 +12,15 @@ import java.util.concurrent.CountDownLatch;
 public class TestFunctionResponse implements FunctionResponse {
 
     private static Logger LOG = LoggerFactory.getLogger(TestFunctionResponse.class);
-    private volatile boolean onCompletedCalled = false;
-    private volatile boolean onErrorCalled = false;
-    private volatile Object message = null;
-    private volatile Object returnValue = null;
-    private volatile Object exception = null;
-    private volatile String id = null;
-    private CountDownLatch latch;
-    private volatile int onCompletedCount = 0;
-    private volatile int onErrorCount = 0;
+    protected volatile boolean onCompletedCalled = false;
+    protected volatile boolean onErrorCalled = false;
+    protected volatile Object message = null;
+    protected volatile Object returnValue = null;
+    protected volatile Object exception = null;
+    protected volatile String id = null;
+    protected CountDownLatch latch;
+    protected volatile int onCompletedCount = 0;
+    protected volatile int onErrorCount = 0;
 
     public TestFunctionResponse(CountDownLatch latch) {
         this.latch = latch;
