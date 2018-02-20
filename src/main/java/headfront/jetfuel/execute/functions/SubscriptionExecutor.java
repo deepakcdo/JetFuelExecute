@@ -3,7 +3,7 @@ package headfront.jetfuel.execute.functions;
 /**
  * Created by Deepak on 19/02/2018.
  */
-public interface SubscriptionExecutor extends Runnable {
+public abstract class SubscriptionExecutor extends Thread {
 
-    void stopSubscriptions();
+    public abstract void stopSubscriptions();
 }

@@ -1,4 +1,4 @@
-package headfront.jetfuel.execute.example;
+package headfront.jetfuel.execute.example.subscription;
 
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.functions.SubscriptionExecutor;
@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Deepak on 19/02/2018.
  */
-public class PriceSubscriptionExecutor implements SubscriptionExecutor {
+public class PriceSubscriptionExecutor extends SubscriptionExecutor {
 
     private AtomicBoolean keepRunning = new AtomicBoolean(true);
     private String callId;
@@ -30,7 +30,7 @@ public class PriceSubscriptionExecutor implements SubscriptionExecutor {
                 result.onSubscriptionUpdate(callId, "Sending price " + count, "" + (100.25 * count));
                 count++;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user" , FunctionState.StateSubCancelled);
             }
         }
 
@@ -40,6 +40,6 @@ public class PriceSubscriptionExecutor implements SubscriptionExecutor {
     public void stopSubscriptions() {
         System.out.println("stopping " + callId);
         keepRunning.set(false);
-        result.onSubscriptionStateChanged(callId, "Subscription cancelled by user" , FunctionState.StateSubCancelled);
+        interrupt();
     }
 }

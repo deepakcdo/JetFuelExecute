@@ -10,7 +10,6 @@ import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.JetFuelExecuteConstants;
-import headfront.jetfuel.execute.example.PriceSubscriptionExecutor;
 import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import headfront.jetfuel.execute.utils.NamedThreadFactory;
@@ -45,15 +44,16 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
     private final Map<String, FunctionResponse> callBackBackLog = new ConcurrentHashMap<>();
     private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
-    private final Map<String, SubscriptionExecutor> activeSubscriptionRequests = new ConcurrentHashMap<>();
     private final Set<CommandId> jetFuelActiveSubscriptions = new HashSet<>();
     private ExecutorService functionRequestProcessorExecutorService = null;
     private ExecutorService functionReplyProcessorExecutorService = null;
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
     private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
-    private Consumer<String> onFunctionAddedListener = name -> { };
+    private Consumer<String> onFunctionAddedListener = name -> {
+    };
 
-    private Consumer<String> onFunctionRemovedListener = name -> { };
+    private Consumer<String> onFunctionRemovedListener = name -> {
+    };
 
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
@@ -218,12 +218,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, message, hostName, callId);
         reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubCancelRequest.name());
         sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, message);
-    }
-
-    @Override
-    public void registerSubscriptionExecutor(String id, SubscriptionExecutor subExecutor) {
-        activeSubscriptionRequests.put(id, subExecutor);
-        //"todo increment function counter
     }
 
     private void processReplyMessage(String functionResponse) {
@@ -504,10 +498,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
                 }
             } else if (currentState.equalsIgnoreCase(FunctionState.StateSubCancelRequest.name())) {
-                final SubscriptionExecutor subscriptionExecutor = activeSubscriptionRequests.remove(id);
+                final SubscriptionExecutor subscriptionExecutor = ActiveSubscriptionRegistry.getActiveSubscription(id);
                 if (subscriptionExecutor != null) {
                     subscriptionExecutor.stopSubscriptions();
-
+                    subscriptionExecutor.interrupt();
                 } else {
                     LOG.error("Received a cancel request for SubscriptionFunction with id '" + id + "' but we dont have an active SubscriptionExecutor for it.");
                 }

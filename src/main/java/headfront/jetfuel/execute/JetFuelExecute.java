@@ -110,11 +110,4 @@ public interface JetFuelExecute {
      */
     void cancelSubscriptionFunctionRequest(String callId);
 
-    /**
-     * This is used internally. This will be removed soon. Its meant to internally register SubscriptionExecutor so it can be cancelled later
-     *
-     * @param id Fuctionid to be registered
-     * @param subExecutor the SubscriptionExecutor to be registered with the id
-     */
-    void registerSubscriptionExecutor(String id, SubscriptionExecutor subExecutor);
 }

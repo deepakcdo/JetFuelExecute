@@ -1,4 +1,4 @@
-package headfront.jetfuel.execute.example;
+package headfront.jetfuel.execute.example.subscription;
 
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,10 +6,7 @@ import headfront.jetfuel.execute.FunctionAccessType;
 import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
-import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
-import headfront.jetfuel.execute.functions.FunctionParameter;
-import headfront.jetfuel.execute.functions.JetFuelFunction;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
@@ -51,7 +48,7 @@ public class JetFuelExecuteSubServer {
                     "This function will give you the next 5 price ticks for the given Instrument. The update type will be a string of json",
                     functionParameters,
                     Double.class, "Return The current price of the instrument",
-                    new PriceCreatorVoteExecutor(jetFuelExecute), FunctionAccessType.Read, FunctionExecutionType.Subscription);
+                    new PriceCreatorVoteExecutor(), FunctionAccessType.Read, FunctionExecutionType.Subscription);
 
             System.out.println("Publishing Function");
             // publish JetFuel Function on the bus
@@ -68,19 +65,13 @@ public class JetFuelExecuteSubServer {
 
     static class PriceCreatorVoteExecutor extends AbstractFunctionExecutor {
 
-        private JetFuelExecute jetFuelExecute;
-
-        public PriceCreatorVoteExecutor(JetFuelExecute jetFuelExecute) {
-            this.jetFuelExecute = jetFuelExecute;
-        }
-
         @Override
-        protected void executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+        protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
             String inst = parameters.get(0).toString();
             PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
-            new Thread(subExecutor).start();
-            jetFuelExecute.registerSubscriptionExecutor(id, subExecutor);
+            subExecutor.start();
             result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.StateSubActive);
+            return subExecutor;
         }
     }
 }

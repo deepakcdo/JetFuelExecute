@@ -1,4 +1,4 @@
-package headfront.jetfuel.execute.example;
+package headfront.jetfuel.execute.example.subscription;
 
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;

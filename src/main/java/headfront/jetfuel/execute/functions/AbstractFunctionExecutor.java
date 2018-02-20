@@ -1,5 +1,6 @@
 package headfront.jetfuel.execute.functions;
 
+import headfront.jetfuel.execute.impl.ActiveSubscriptionRegistry;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,11 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
         if (validate == null) {
             try {
                 if (result instanceof SubscriptionFunctionResponse) {
-                    executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponse) result);
+                    final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponse) result);
+                    final String reason = ActiveSubscriptionRegistry.registerActiveSubscription(id, subscriptionExecutor);
+                    if (reason != null){
+                        LOG.error("Unable to register SubscriptionExecutor for id " + id + " due to " + reason);
+                    }
                 } else {
                     executeFunction(id, parameters, result);
                 }
@@ -51,7 +56,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     /**
      * Override this method
      */
-    protected void executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
         String mesage = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
         LOG.error(mesage);
         throw new AbstractMethodError(mesage);
