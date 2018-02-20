@@ -147,27 +147,36 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
 
     @Test
     public void callFunctionExecuteOnAFunctionThatIsOfTypeSubscriptionShouldFail() throws Exception {
-        JetFuelFunction jetFuelFunction = getNextThreePriceTicksInvalid;
-        String functionName = getNextThreePriceTicks.getFunctionName();
-        String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
-        if (runningBothClientAndSerer) {
+        callJetFuelFunction("getNextThreePriceTicksInvalid", getNextThreePriceTicksInvalid,
+                new Object[]{"DE00012312"}, sleepValueForTest,
+                0, false, 0,
+                false, null, null, null,
+                false, new String[]{}, false);
+
+
+//
+//
+//        JetFuelFunction jetFuelFunction = getNextThreePriceTicksInvalid;
+//        String functionName = getNextThreePriceTicks.getFunctionName();
+//        String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
+//        if (runningBothClientAndSerer) {
+////            unPublishAndCheckFunction(jetFuelFunction);
+//            if (jetFuelExecute.getFunction(fullFunctionName) == null) {
+//                publishAndCheckFunction(jetFuelFunction);
+//            }
+//        } else {
+//                final List<String> functions = jetFuelExecute.findFunction(functionName);
+//                // Here we might be running several servers so pick a server functions
+//                final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
+//                assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
+//                        serverFunctions.size() >= 1);
+//                fullFunctionName = serverFunctions.get(0);
+//        }
+//        final String callID = jetFuelExecute.executeFunction(fullFunctionName, new Object[]{"James"}, new TestFunctionResponse(new CountDownLatch(0)));
+//        assertTrue("This should return null", callID == null);
+//        if (runningBothClientAndSerer) {
 //            unPublishAndCheckFunction(jetFuelFunction);
-            if (jetFuelExecute.getFunction(fullFunctionName) == null) {
-                publishAndCheckFunction(jetFuelFunction);
-            }
-        } else {
-                final List<String> functions = jetFuelExecute.findFunction(functionName);
-                // Here we might be running several servers so pick a server functions
-                final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
-                assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
-                        serverFunctions.size() >= 1);
-                fullFunctionName = serverFunctions.get(0);
-        }
-        final String callID = jetFuelExecute.executeFunction(fullFunctionName, new Object[]{"James"}, new TestFunctionResponse(new CountDownLatch(0)));
-        assertTrue("This should return null", callID == null);
-        if (runningBothClientAndSerer) {
-            unPublishAndCheckFunction(jetFuelFunction);
-        }
+//        }
     }
 
     @Test

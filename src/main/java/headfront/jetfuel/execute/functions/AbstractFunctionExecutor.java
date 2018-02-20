@@ -48,18 +48,20 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
      * Override this method
      */
     protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
-        String mesage = "AbstractFunctionExecutor.executeFunction() has not been extended";
-        LOG.error(mesage);
-        throw new AbstractMethodError(mesage);
+        String message = "AbstractFunctionExecutor.executeFunction() has not been extended";
+        LOG.error(message);
+        result.onError(id, "Function has not been setup correctly by the publisher", null);
+        throw new AbstractMethodError(message);
     }
 
     /**
      * Override this method
      */
     protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
-        String mesage = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
-        LOG.error(mesage);
-        throw new AbstractMethodError(mesage);
+        String message = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
+        LOG.error(message);
+        result.onError(id, "Function has not been setup correctly by the publisher", null);
+        throw new AbstractMethodError(message);
     }
 
 }

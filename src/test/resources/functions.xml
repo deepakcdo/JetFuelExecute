@@ -170,7 +170,7 @@
     </bean>
 
     <bean id="getNextThreePriceTicksInvalid" class="headfront.jetfuel.execute.functions.JetFuelFunction">
-        <constructor-arg index="0" value="getNextThreePriceTicks"/>
+        <constructor-arg index="0" value="getNextThreePriceTicksInvalid"/>
         <constructor-arg index="1" value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
         <constructor-arg index="2">
             <list>
