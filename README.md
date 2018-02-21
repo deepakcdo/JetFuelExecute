@@ -33,6 +33,14 @@ In addition to JetFuelExecute having the awesome flexibility of just publishing 
 
 Note:- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
 
+
+# JetFuelExecute State Diagram.
+JetFuelExecute supports two Execution modes.
+* Request/Response - Use this when you want to send a command and get a reply
+* Subscription - Use this when you need a stream of data for a given command. This can be cancelled later.
+![screenshot](http://headfront.co.uk/JetFuelExecuteStateDiagram.png)
+
+
 # JetFuelExecute code example.
 
 Using JetFuelExecute do the following :-
