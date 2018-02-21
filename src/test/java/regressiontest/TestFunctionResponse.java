@@ -30,6 +30,7 @@ public class TestFunctionResponse implements FunctionResponse {
     public void onCompleted(String id, Object message, Object returnValue) {
         this.id = id;
         this.message = message;
+        addMessage(message);
         this.returnValue = returnValue;
         onCompletedCalled = true;
         onCompletedCount++;
@@ -43,6 +44,7 @@ public class TestFunctionResponse implements FunctionResponse {
     public void onError(String id, Object message, Object exception) {
         this.id = id;
         this.message = message;
+        addMessage(message);
         this.exception = exception;
         onErrorCalled = true;
         onErrorCount++;
@@ -50,6 +52,10 @@ public class TestFunctionResponse implements FunctionResponse {
         if (LOG.isDebugEnabled()) {
             LOG.debug("onError called on " + id + " message " + message + " exception " + exception);
         }
+    }
+
+    protected void addMessage(Object message) {
+
     }
 
     public boolean isOnCompletedCalled() {

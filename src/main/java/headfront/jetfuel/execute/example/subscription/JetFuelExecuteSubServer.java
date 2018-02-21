@@ -70,7 +70,7 @@ public class JetFuelExecuteSubServer {
             String inst = parameters.get(0).toString();
             PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
             subExecutor.start();
-            result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.StateSubActive);
+            result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.SubActive);
             return subExecutor;
         }
     }

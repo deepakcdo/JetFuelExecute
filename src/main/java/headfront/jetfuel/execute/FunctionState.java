@@ -5,14 +5,14 @@ package headfront.jetfuel.execute;
  */
 public enum FunctionState {
 
-    StateNew("StateNew"),
-    StateSubActive("StateSubActive"),
-    StateSubUpdate("StateSubUpdate"),
-    StateSubCancelled("StateSubCancelled"),
-    StateSubCancelRequest("StateSubCancelRequest"),
-    StateDone("StateDone"),
-    StateError("StateError"),
-    StateTimeout("StateTimeout");
+    RequestNew("RequestNew"),
+    SubActive("SubActive"),
+    SubUpdate("SubUpdate"),
+    SubCancelled("SubCancelled"),
+    RequestCancelSub("RequestCancelSub"),
+    Completed("Completed"),
+    Error("Error"),
+    Timeout("Timeout");
 
     private String text;
 

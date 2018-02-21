@@ -364,7 +364,7 @@
                 <Options>
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE_BUS</Topic>
-                    <Filter>/CurrentState = 'StateNew' and /AmpsInstanceOwner = 'LDN-BACKUP'</Filter>
+                    <Filter>/CurrentState = 'RequestNew' and /AmpsInstanceOwner = 'LDN-BACKUP'</Filter>
                     <Duration>5s</Duration>
                 </Options>
             </On>
@@ -407,7 +407,7 @@
                     <Topic>JETFUEL_EXECUTE_BUS</Topic>
                     <Delta>True</Delta>
                     <UpdateOnly>True</UpdateOnly>
-                    <Data>{"ID":"{{ID_TO_USE}}","FunctionCallerHostName":"{{CALLER_HOSTNAME}}","FunctionInitiatorName":"{{CALLER}}","MsgCreationName":"LDN-BACKUP","MsgCreationTime":"{{FORMATTED_DATE_TIME}}","CurrentState":"StateTimeout","CurrentStateMsg":"Function publisher that published this function is not available now."}</Data>
+                    <Data>{"ID":"{{ID_TO_USE}}","FunctionCallerHostName":"{{CALLER_HOSTNAME}}","FunctionInitiatorName":"{{CALLER}}","MsgCreationName":"LDN-BACKUP","MsgCreationTime":"{{FORMATTED_DATE_TIME}}","CurrentState":"Timeout","CurrentStateMsg":"Function publisher that published this function is not available now."}</Data>
                 </Options>
             </Do>
         </Action>

@@ -31,8 +31,8 @@ public class TestSubscriptionFunctionResponse extends TestFunctionResponse imple
     public void onSubscriptionUpdate(String id, Object message, String update) {
         this.id = id;
         this.message = message;
-        allMessages.add((String)message);
-        updateMessages.add((String)message);
+        allMessages.add((String) message);
+        updateMessages.add((String) message);
         onSubUpdateCount++;
         subscriptionUpdates.add(update);
         latch.countDown();
@@ -45,8 +45,8 @@ public class TestSubscriptionFunctionResponse extends TestFunctionResponse imple
     public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
         this.id = id;
         this.message = message;
-        allMessages.add((String)message);
-        stateChnagedMessages.add((String)message);
+        allMessages.add((String) message);
+        stateChnagedMessages.add((String) message);
         onSubStateChangeCount++;
         subscriptionStateChange.add(state.name());
         latch.countDown();
@@ -81,5 +81,9 @@ public class TestSubscriptionFunctionResponse extends TestFunctionResponse imple
 
     public List<String> getStateChnagedMessages() {
         return stateChnagedMessages;
+    }
+
+    protected void addMessage(Object message) {
+        allMessages.add((String) message);
     }
 }

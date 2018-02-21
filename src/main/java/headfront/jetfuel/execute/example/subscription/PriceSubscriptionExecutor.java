@@ -30,7 +30,7 @@ public class PriceSubscriptionExecutor extends SubscriptionExecutor {
                 result.onSubscriptionUpdate(callId, "Sending price " + count, "" + (100.25 * count));
                 count++;
             } catch (InterruptedException e) {
-                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user" , FunctionState.StateSubCancelled);
+                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user" , FunctionState.SubCancelled);
             }
         }
 

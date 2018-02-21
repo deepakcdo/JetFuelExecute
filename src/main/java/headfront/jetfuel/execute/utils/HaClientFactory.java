@@ -28,7 +28,7 @@ public class HaClientFactory {
         }
         if (addSuffixToConnName) {
             Random random = new Random(System.currentTimeMillis());
-            int rand = random.nextInt(10000);
+            int rand = random.nextInt(100000);
             connectionName = connectionName + "_" + rand;
         }
 

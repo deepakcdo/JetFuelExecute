@@ -21,6 +21,6 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
 
     @Test
     public void forceTest() throws Exception {
-        callFunctionExecuteOnAFunctionThatIsOfTypeSubscriptionShouldFail();
+        callMarketPriceThenCancel();
     }
 }

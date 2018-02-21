@@ -1,9 +1,7 @@
 package regressiontest;
 
-import headfront.jetfuel.execute.functions.JetFuelFunction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -61,14 +59,14 @@ public class BasicJetFuelExecuteTest extends JetFuelBaseClientTest {
 
     @Test
     public void creatingGetNextThreePriceTicksThenUnpublish() throws Exception {
-        publishAndCheckFunction(getNextThreePriceTicks);
-        unPublishAndCheckFunction(getNextThreePriceTicks);
+        publishAndCheckFunction(getNextThreePriceTicksFunction);
+        unPublishAndCheckFunction(getNextThreePriceTicksFunction);
     }
 
     @Test
     public void creatingGetNextThreePriceTicksInvalidThenUnpublish() throws Exception {
-        publishAndCheckFunction(getNextThreePriceTicksInvalid);
-        unPublishAndCheckFunction(getNextThreePriceTicksInvalid);
+        publishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
+        unPublishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
     }
 
 }

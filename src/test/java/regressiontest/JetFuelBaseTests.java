@@ -6,7 +6,6 @@ import com.crankuptheamps.client.HAClient;
 import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
-import headfront.jetfuel.execute.JetFuelExecuteConstants;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
@@ -18,14 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static headfront.jetfuel.execute.JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE;
+import static headfront.jetfuel.execute.JetFuelExecuteConstants.*;
 import static junit.framework.TestCase.*;
 
 /**
@@ -35,7 +33,7 @@ public class JetFuelBaseTests {
 
     private static Logger LOG = LoggerFactory.getLogger(JetFuelBaseTests.class);
 
-    public long sleepValueForTest = 3000;
+    public long sleepValueForTest = 5000;
     public long sleepValueForSubTest = 10000;
 
     @Autowired
@@ -59,9 +57,11 @@ public class JetFuelBaseTests {
     @Autowired
     JetFuelFunction getTradingDateFunction;
     @Autowired
-    JetFuelFunction getNextThreePriceTicks;
+    JetFuelFunction getNextThreePriceTicksFunction;
     @Autowired
-    JetFuelFunction getNextThreePriceTicksInvalid;
+    JetFuelFunction getNextThreePriceTicksInvalidFunction;
+    @Autowired
+    JetFuelFunction getMarketPriceFunction;
 
     @Autowired
     ObjectMapper jsonMapper;
@@ -124,9 +124,13 @@ public class JetFuelBaseTests {
                                          List<String> updateMessagesExpected, List<String> updateValuesExpected,
                                          String messageExpected, Object returnValueExpected, String exceptionMsgExpected,
                                          boolean skipFunctionExistsTests, String[] expectedStates,
-                                         boolean checkMessagesAfterFunctionCall, boolean isSubFunction) throws Exception {
+                                         boolean checkMessagesAfterFunctionCall, boolean isSubFunction, int cancelAfter) throws Exception {
         int expectedMessagesForFunction = onErrorCountExpected + onCompleteCountExpected +
-                onUdateCountExpected + onStateChangeExpected + 1;
+                onUdateCountExpected + onStateChangeExpected;
+        expectedMessagesForFunction++; // This is for the original Function Request
+        if (cancelAfter > 0){
+            expectedMessagesForFunction++; // This is for the cancel request
+        }
         CountDownLatch waitLatch = new CountDownLatch(expectedMessagesForFunction);
         if (!skipFunctionExistsTests) {
             final Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
@@ -158,6 +162,10 @@ public class JetFuelBaseTests {
         if (isSubFunction) {
             response = new TestSubscriptionFunctionResponse(waitLatch);
             callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponse) response);
+            if (cancelAfter > 0){
+                Thread.sleep(cancelAfter);
+                jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
+            }
         } else {
             response = new TestFunctionResponse(waitLatch);
             callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
@@ -224,7 +232,8 @@ public class JetFuelBaseTests {
             String instanceOwnerFromFirstMessage = null;
             for (int i = 0; i < expectedMessagesForFunction; i++) {
                 final Map<String, Object> expectedMessage = createExpectedMessage(i, expectedStates, fullFunctionName,
-                        msgCreationTime, nextId, functionParams, returnValueExpected, messageExpected, exceptionMsgExpected, instanceOwnerFromFirstMessage);
+                        msgCreationTime, nextId, functionParams, returnValueExpected, messageExpected, exceptionMsgExpected,
+                        instanceOwnerFromFirstMessage, updateMessagesExpected, updateValuesExpected, isSubFunction);
                 final String messageFromSubscription = messages.get(i);
                 final String messageFromBookmarkSubscription = bookmarkMessages.get(i);
                 Map<String, Object> messageFromSubscriptionMap = jsonMapper.readValue(messageFromSubscription, Map.class);
@@ -256,38 +265,55 @@ public class JetFuelBaseTests {
 
     private Map<String, Object> createExpectedMessage(int i, String[] expectedStates, String fullFunctionName,
                                                       String msgCreationTime, String nextId, Object[] functionParams,
-                                                      Object returnValueExpected, String messageExpected, String exceptionMsgExpected,
-                                                      String instanceOwnerFromFirstMessage) throws Exception {
+                                                      Object returnValueExpected, String messageExpected,
+                                                      String exceptionMsgExpected,
+                                                      String instanceOwnerFromFirstMessage,
+                                                      List<String> updateMessagesExpected,
+                                                      List<String> updateValuesExpected, boolean isSubFunction) throws Exception {
         Map<String, Object> message = new HashMap<>();
-        message.put("MsgCreationTime", msgCreationTime);
-        message.put("FunctionCallerHostName", InetAddress.getLocalHost().getHostName());
-        message.put("FunctionToCall", fullFunctionName);
-        message.put("ID", nextId);
-        message.put("FunctionInitiatorName", jetFuelExecute.getConnectionName());
-        message.put("FunctionParameters", Arrays.asList(functionParams));
+        message.put(MSG_CREATION_TIME, msgCreationTime);
+        message.put(FUNCTION_CALLER_HOSTNAME, InetAddress.getLocalHost().getHostName());
+        message.put(FUNCTION_TO_CALL, fullFunctionName);
+        message.put(PUBLISH_FUNCTION_ID, nextId);
+        message.put(FUNCTION_INITIATOR_NAME, jetFuelExecute.getConnectionName());
+        message.put(PARAMETERS, Arrays.asList(functionParams));
         if (i == 0) {
-            message.put("CurrentState", "StateNew");
-            message.put("MsgCreationName", jetFuelExecute.getConnectionName());
+            message.put(CURRENT_STATE, FunctionState.RequestNew.name());
+            message.put(MSG_CREATION_NAME, jetFuelExecute.getConnectionName());
         } else {
             final String expectedState = expectedStates[(i - 1)];
-            message.put("CurrentState", expectedState);
-            if (expectedState.equalsIgnoreCase(FunctionState.StateError.name())) {
-                message.put("ExceptionMessage", exceptionMsgExpected);
-                message.put("CurrentStateMsg", messageExpected);
-                message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
-            } else if (expectedState.equalsIgnoreCase(FunctionState.StateTimeout.name())) {
-                message.put("CurrentStateMsg", exceptionMsgExpected);
-                message.put("MsgCreationName", instanceOwnerFromFirstMessage);
-            } else if (expectedState.equalsIgnoreCase(FunctionState.StateDone.name())) {
-                message.put("CurrentStateMsg", messageExpected);
-                message.put("ReturnValue", returnValueExpected);
-                message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
-            } else if (expectedState.equalsIgnoreCase(FunctionState.StateSubUpdate.name())) {
-                message.put(FUNCTION_UPDATE_MESSAGE, messageExpected);
-                message.put("MsgCreationName", fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            message.put(CURRENT_STATE, expectedState);
+            if (expectedState.equalsIgnoreCase(FunctionState.Error.name())) {
+                message.put(EXCEPTION_MESSAGE, exceptionMsgExpected);
+                message.put(CURRENT_STATE_MSG, messageExpected);
+                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.Timeout.name())) {
+                message.put(CURRENT_STATE_MSG, exceptionMsgExpected);
+                message.put(MSG_CREATION_NAME, instanceOwnerFromFirstMessage);
+            } else if (expectedState.equalsIgnoreCase(FunctionState.Completed.name())) {
+                message.put(CURRENT_STATE_MSG, messageExpected);
+                message.put(RETURN_VALUE, returnValueExpected);
+                if (isSubFunction) {
+                    message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
+                }
+                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.SubUpdate.name())) {
+                message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(i - 2));
+                message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(i - 1));
+                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.SubActive.name())) {
+                message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(i - 1));
+                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
+                message.put(CURRENT_STATE_MSG, CANCEL_REQ_MESSAGE);
+                message.put(MSG_CREATION_NAME, jetFuelExecute.getConnectionName());
+                message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
+            } else if (expectedState.equalsIgnoreCase(FunctionState.SubCancelled.name())) {
+                message.put(CURRENT_STATE_MSG,  updateMessagesExpected.get(updateMessagesExpected.size() - 1));
+                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
             }
-
-            message.put("AmpsInstanceOwner", instanceOwnerFromFirstMessage);
+            message.put(FUNCTION_AMPS_INSTANCE_OWNER, instanceOwnerFromFirstMessage);
         }
         return message;
     }
@@ -398,8 +424,18 @@ public class JetFuelBaseTests {
                 return "Fourth";
             case 5:
                 return "Fifth";
+            case 6:
+                return "Sixth";
+            case 7:
+                return "Seventh";
+            case 8:
+                return "Eight";
+            case 9:
+                return "Ninth";
+            case 10:
+                return "Tenth";
             default:
-                return "Unknown";
+                return "OverTenth";
         }
     }
 }

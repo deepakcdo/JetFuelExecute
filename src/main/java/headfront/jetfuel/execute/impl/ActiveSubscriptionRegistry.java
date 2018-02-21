@@ -25,5 +25,11 @@ public class ActiveSubscriptionRegistry {
         return activeSubscriptionRequests.remove(id);
     }
 
+    public static void closeAllActiveSubscription() {
+        activeSubscriptionRequests.values().forEach(sub -> {
+            sub.stopSubscriptions();
+            sub.interrupt();
+        });
+    }
 }
 

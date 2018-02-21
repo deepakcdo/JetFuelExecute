@@ -12,11 +12,8 @@
     <bean id="handleBankStatus" class="regressiontest.functions.UpdateBankStatusExecutor"/>
     <bean id="handleTraderStatus" class="regressiontest.functions.UpdateBankTraderExecutor"/>
     <bean id="getTradingDate" class="regressiontest.functions.GetTradingDateExecutor"/>
-    <bean id="get3PricesFromMarket" class="regressiontest.functions.GetThreePricesFromMarketExecutor">
-        <constructor-arg index="0" ref="haClient"/>
-        <constructor-arg index="1" ref="jsonMapper"/>
-        <constructor-arg index="2" value="${quoteTopic}"/>
-    </bean>
+    <bean id="get3PricesFromMarket" class="regressiontest.functions.GetThreePricesFromMarketExecutor"/>
+    <bean id="getMarketPricesExecutor" class="regressiontest.functions.GetPricesFromMarketExecutor"/>
     <bean id="updateBidOfferQuoteStatus" class="regressiontest.functions.UpdateBidOfferQuoteExecutor">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
@@ -169,7 +166,7 @@
         <constructor-arg index="7" value="RequestResponse"/>
     </bean>
 
-    <bean id="getNextThreePriceTicksInvalid" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+    <bean id="getNextThreePriceTicksInvalidFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="getNextThreePriceTicksInvalid"/>
         <constructor-arg index="1" value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
         <constructor-arg index="2">
@@ -188,7 +185,7 @@
         <constructor-arg index="7" value="Subscription"/>
     </bean>
 
-    <bean id="getNextThreePriceTicks" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+    <bean id="getNextThreePriceTicksFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="getNextThreePriceTicks"/>
         <constructor-arg index="1" value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
         <constructor-arg index="2">
@@ -203,6 +200,25 @@
         <constructor-arg index="3" value="java.lang.String"/>
         <constructor-arg index="4" value="Return current price of instrument"/>
         <constructor-arg index="5" ref="get3PricesFromMarket"/>
+        <constructor-arg index="6" value="Read"/>
+        <constructor-arg index="7" value="Subscription"/>
+    </bean>
+
+    <bean id="getMarketPriceFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="getMarketPrice"/>
+        <constructor-arg index="1" value="Send the market price of the instrument. The subscription message will be of a string with a price in it"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="instrument"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Instrument id for which you need market prices for"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return current price of instrument"/>
+        <constructor-arg index="5" ref="getMarketPricesExecutor"/>
         <constructor-arg index="6" value="Read"/>
         <constructor-arg index="7" value="Subscription"/>
     </bean>

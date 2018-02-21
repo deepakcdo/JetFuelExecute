@@ -26,6 +26,7 @@ public interface JetFuelExecuteConstants {
     String FUNCTION_ACCESS_TYPE = "FunctionAccessType";
     String FUNCTION_EXECUTION_TYPE = "FunctionExecutionType";
     String FUNCTION_UPDATE_MESSAGE = "FunctionUpdateMsg";
+    String FUNCTION_AMPS_INSTANCE_OWNER = "AmpsInstanceOwner";
 
 
     String FUNCTION_CALL_ID = "ID";
@@ -38,4 +39,6 @@ public interface JetFuelExecuteConstants {
     String CURRENT_STATE = "CurrentState";
     String CURRENT_STATE_MSG = "CurrentStateMsg";
     String EXCEPTION_MESSAGE = "ExceptionMessage";
+
+    String CANCEL_REQ_MESSAGE = "Cancel request from client";
 }

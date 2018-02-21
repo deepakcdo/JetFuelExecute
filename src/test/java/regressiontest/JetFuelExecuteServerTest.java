@@ -27,8 +27,9 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         publishAndCheckFunction(updateQuoteStatusFunction);
         publishAndCheckFunction(getLastQuoteFunction);
         publishAndCheckFunction(getTradingDateFunction);
-        publishAndCheckFunction(getNextThreePriceTicks);
-        publishAndCheckFunction(getNextThreePriceTicksInvalid);
+        publishAndCheckFunction(getNextThreePriceTicksFunction);
+        publishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
+        publishAndCheckFunction(getMarketPriceFunction);
 
         LOG.info("Waiting for 5 minutes");
         // run for 5 min
@@ -49,8 +50,9 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         unPublishAndCheckFunction(updateQuoteStatusFunction);
         unPublishAndCheckFunction(getLastQuoteFunction);
         unPublishAndCheckFunction(getTradingDateFunction);
-        unPublishAndCheckFunction(getNextThreePriceTicks);
-        unPublishAndCheckFunction(getNextThreePriceTicksInvalid);
+        unPublishAndCheckFunction(getNextThreePriceTicksFunction);
+        unPublishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
+        unPublishAndCheckFunction(getMarketPriceFunction);
         jetFuelExecute.shutDown();
         LOG.info("All Tests completed");
     }

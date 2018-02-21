@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static headfront.jetfuel.execute.JetFuelExecuteConstants.CANCEL_REQ_MESSAGE;
 import static headfront.jetfuel.execute.JetFuelExecuteConstants.CLIENT_STATUS_TOPIC;
 import static org.springframework.util.Assert.notNull;
 
@@ -57,7 +58,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
-    private int noOfFunctionReplyProcessorThreads = 10;
+    private int noOfFunctionReplyProcessorThreads = 1;
     private String functionTopic = "JETFUEL_EXECUTE";
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
     private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
@@ -214,10 +215,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public void cancelSubscriptionFunctionRequest(String callId) {
-        String message = "Cancel request";
-        final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, message, hostName, callId);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubCancelRequest.name());
-        sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, message);
+
+        final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, CANCEL_REQ_MESSAGE, hostName, callId);
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub.name());
+        sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, CANCEL_REQ_MESSAGE);
     }
 
     private void processReplyMessage(String functionResponse) {
@@ -237,28 +238,28 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     }
                     FunctionState currentState = FunctionState.valueOf(state.toString());
                     switch (currentState) {
-                        case StateDone:
+                        case Completed:
                             result.onCompleted(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     map.get(JetFuelExecuteConstants.RETURN_VALUE));
                             callBackBackLog.remove(id);
                             break;
-                        case StateError:
+                        case Error:
                             result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE));
                             callBackBackLog.remove(id);
                             break;
-                        case StateTimeout:
+                        case Timeout:
                             result.onError(id, "Function Timeout", map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG));
 //                            callBackBackLog.remove(id); // allow time out not to be a final state
                             break;
-                        case StateSubUpdate:
+                        case SubUpdate:
                             subscriptionFunctionResponse.onSubscriptionUpdate(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     (String) map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE));
                             break;
-                        case StateSubActive:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.StateSubActive);
+                        case SubActive:
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
                             break;
-                        case StateSubCancelled:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.StateSubCancelled);
+                        case SubCancelled:
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubCancelled);
                             callBackBackLog.remove(id); // allow time out not to be a final state
                             break;
                         default:
@@ -292,7 +293,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     functionCall.put(JetFuelExecuteConstants.PARAMETERS, functionParameters);
                     functionCall.put(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME, ampsConnectionName);
                     functionCall.put(JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME, hostName);
-                    functionCall.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateNew);
+                    functionCall.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestNew);
                     functionCall.put(JetFuelExecuteConstants.MSG_CREATION_TIME, FunctionUtils.getIsoDateTime());
                     functionCall.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);
                     String jsonMsg = jsonMapper.writeValueAsString(functionCall);
@@ -347,8 +348,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private void subscribeToFunctionCallbacks() throws Exception {
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME + "= '" + hostName + "' and /" +
                 JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME + "= '" + ampsConnectionName + "' and /" +
-                JetFuelExecuteConstants.CURRENT_STATE + " NOT IN ('" + FunctionState.StateNew +
-                "', '" + FunctionState.StateSubCancelRequest + "')";
+                JetFuelExecuteConstants.CURRENT_STATE + " NOT IN ('" + FunctionState.RequestNew +
+                "', '" + FunctionState.RequestCancelSub + "')";
 
         final CommandId subscribe = ampsClient.subscribe(m -> {
                     final String functionResponse = m.getData().trim();
@@ -419,8 +420,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private boolean subscribeForCallBacks(final JetFuelFunction jetFuelFunction) {
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + "='" + jetFuelFunction.getFullFunctionName() +
-                "' and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.StateNew
-                + "', '" + FunctionState.StateSubCancelRequest + "')";
+                "' and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.RequestNew
+                + "', '" + FunctionState.RequestCancelSub + "')";
         try {
             final CommandId subscription = ampsClient.subscribe(m -> {
                 String request = m.getData().trim();
@@ -455,7 +456,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 }
             }
 
-            if (currentState.equalsIgnoreCase(FunctionState.StateNew.name())) {
+            if (currentState.equalsIgnoreCase(FunctionState.RequestNew.name())) {
                 AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
                 newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
                 List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
@@ -497,7 +498,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 } else {
                     LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
                 }
-            } else if (currentState.equalsIgnoreCase(FunctionState.StateSubCancelRequest.name())) {
+            } else if (currentState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
                 final SubscriptionExecutor subscriptionExecutor = ActiveSubscriptionRegistry.getActiveSubscription(id);
                 if (subscriptionExecutor != null) {
                     subscriptionExecutor.stopSubscriptions();
@@ -547,7 +548,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private void createAndSendSubscriptionUpdate(String caller, String id, String update, Object message, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateSubUpdate);
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.SubUpdate);
         reply.put(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE, update);
         sendMessageToAmps("onSubscriptionUpdate", reply, message);
     }
@@ -555,14 +556,14 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private void createAndSendComplete(String caller, Object message, Object returnValue, String callerHostName, String id) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
         reply.put(JetFuelExecuteConstants.RETURN_VALUE, returnValue);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateDone);
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.Completed);
         sendMessageToAmps("onComplete", reply, returnValue);
     }
 
     private void createAndSendError(Object message, Object exception, String id, String caller, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
         reply.put(JetFuelExecuteConstants.EXCEPTION_MESSAGE, exception);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.StateError);
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.Error);
         sendMessageToAmps("onError", reply, exception);
     }
 
