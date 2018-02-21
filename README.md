@@ -38,7 +38,7 @@ Note:- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an indep
 JetFuelExecute supports two Execution modes.
 * Request/Response - Use this when you want to send a command and get a reply
 * Subscription - Use this when you need a stream of data for a given command. This can be cancelled later.
-![screenshot](http://headfront.co.uk/JetFuelExecuteStateDiagram.png)
+![screenshot](http://headfront.co.uk/JetFuelExecuteStateDiagram.jpg)
 
 
 # JetFuelExecute code example.
