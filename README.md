@@ -5,6 +5,8 @@ JetFuelExecute allows a process to publish a function on AMPS which can be calle
 
 JetFuelExecute takes care of all message and type conversions. JetFuelExecute uses AMPS as the message bus so you can easily look at the fields of the original request and its response. This simplifies the life of developers and support staff who constantly have to debug production issues.
 
+JetFuelExecute now suppports Subscriptions requests. This allows you to create a function which can stream you continuous updates till you unsubscribe. Very useful if you want to get a stream of custom price calculations.
+
 # Why use JetFuelExecute?
 In addition to JetFuelExecute having the awesome flexibility of just publishing and calling remote function with full audit it also has these extra features :-
 * Simple and easy to use API, with clear Error reasons for any failure.
@@ -137,5 +139,4 @@ This request/response is now fully journaled so any audit or support staff can i
 # Features coming very soon.
 * The ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
 * Ability to make a function call which is executed by several publishers. E.g. if you have BankOff function published by 5 different function publishers, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
-* Subscriptions requests. This will allow you to create a function which can stream you continuous updates till you unsubscribe. Very useful if you want to get a stream of custom price calculations.
 * API’s in different languages e.g. Javascript and C. This means JetFuelExecute functions can be published and called from multiple languages.
