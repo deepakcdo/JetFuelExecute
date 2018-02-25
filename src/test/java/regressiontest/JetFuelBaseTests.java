@@ -128,7 +128,7 @@ public class JetFuelBaseTests {
         int expectedMessagesForFunction = onErrorCountExpected + onCompleteCountExpected +
                 onUdateCountExpected + onStateChangeExpected;
         expectedMessagesForFunction++; // This is for the original Function Request
-        if (cancelAfter > 0){
+        if (cancelAfter > 0) {
             expectedMessagesForFunction++; // This is for the cancel request
         }
         CountDownLatch waitLatch = new CountDownLatch(expectedMessagesForFunction);
@@ -162,7 +162,7 @@ public class JetFuelBaseTests {
         if (isSubFunction) {
             response = new TestSubscriptionFunctionResponse(waitLatch);
             callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponse) response);
-            if (cancelAfter > 0){
+            if (cancelAfter > 0) {
                 Thread.sleep(cancelAfter);
                 jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
             }
@@ -173,9 +173,7 @@ public class JetFuelBaseTests {
 
         final boolean await = waitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
         if (!await) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Wait time elapsed for " + callID);
-            }
+            LOG.error("Wait time elapsed for " + callID + " we should have for the right number of callacks");
         }
 
         checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected,
@@ -307,9 +305,9 @@ public class JetFuelBaseTests {
             } else if (expectedState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
                 message.put(CURRENT_STATE_MSG, CANCEL_REQ_MESSAGE);
                 message.put(MSG_CREATION_NAME, jetFuelExecute.getConnectionName());
-                message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
+                message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(1));
             } else if (expectedState.equalsIgnoreCase(FunctionState.SubCancelled.name())) {
-                message.put(CURRENT_STATE_MSG,  updateMessagesExpected.get(updateMessagesExpected.size() - 1));
+                message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(updateMessagesExpected.size() - 1));
                 message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
                 message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
             }

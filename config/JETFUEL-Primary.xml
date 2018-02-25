@@ -52,7 +52,7 @@
             <MessageType>json</MessageType>
             <Expiration>25h</Expiration>
             <Enrichment>
-                <Field>'JETFUEL-PRIMARY' as /AmpsInstanceOwner </Field>
+                <Field>IF(/AmpsInstanceOwner OF PREVIOUS IS NULL, IF(/CurrentState OF CURRENT == 'RequestNew', 'LDN-PRIMARY', /AmpsInstanceOwner OF CURRENT), /AmpsInstanceOwner OF PREVIOUS) as /AmpsInstanceOwner</Field>
             </Enrichment>
         </Topic>
 
