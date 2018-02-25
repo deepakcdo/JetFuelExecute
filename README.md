@@ -91,7 +91,7 @@ When you publish a function on the bus you also need to tell it how to process t
     static class AbleToVoteExecutor extends AbstractFunctionExecutor {
 
         @Override
-        protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+        protected void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
             Boolean citizen = Boolean.parseBoolean(parameters.get(0).toString());
             Integer age = Integer.parseInt(parameters.get(1).toString());
             if (!citizen) {
@@ -106,7 +106,7 @@ When you publish a function on the bus you also need to tell it how to process t
     }
 ```
 
-Now lets look at step 2 - Calling a function. This is even easier than publishing the function. You simply call the executeFunction with the function name, parameters and FunctionResponse listener
+Now lets look at step 2 - Calling a function. This is even easier than publishing the function. You simply call the executeFunction with the function name, parameters and FunctionResponseListener
 
 ```java
             // Create amps connection
@@ -122,12 +122,12 @@ Now lets look at step 2 - Calling a function. This is even easier than publishin
             // calling function
 
             final String id1 = jetFuelExecute.executeFunction("SampleJetFuelSever.CheckAbilityToVote",
-                    new Object[]{true, 22}, new ClientFunctionResponse());
+                    new Object[]{true, 22}, new ClientFunctionResponseListener());
 ```
-And here is the code for ClientFunctionResponse.
+And here is the code for ClientFunctionResponseListener.
 
 ```java
-    class ClientFunctionResponse implements FunctionResponse {
+    class ClientFunctionResponseListener implements FunctionResponseListener {
         @Override
         public void onCompleted(String id, Object message, Object returnValue) {
             System.out.println("Got onCompleted for id '" + id + "' with message '" + message + 
