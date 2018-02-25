@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.springframework.util.Assert.notNull;
+import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
 
 /**
  * Created by Deepak on 28/05/2017.

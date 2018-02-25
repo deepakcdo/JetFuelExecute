@@ -14,8 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.springframework.util.Assert.hasLength;
-import static org.springframework.util.Assert.notNull;
+import static headfront.jetfuel.execute.utils.AssertChecks.hasLength;
+import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
+
 
 /**
  * Created by Deepak on 09/04/2017.

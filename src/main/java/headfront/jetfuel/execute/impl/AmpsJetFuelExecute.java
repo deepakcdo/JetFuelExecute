@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static headfront.jetfuel.execute.JetFuelExecuteConstants.CANCEL_REQ_MESSAGE;
 import static headfront.jetfuel.execute.JetFuelExecuteConstants.CLIENT_STATUS_TOPIC;
-import static org.springframework.util.Assert.notNull;
+import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
 
 /**
  * Created by Deepak on 10/01/2018.

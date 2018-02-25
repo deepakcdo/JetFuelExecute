@@ -9,7 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.util.Assert.notNull;
+import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
+
 
 /**
  * Created by Deepak on 09/04/2017.
