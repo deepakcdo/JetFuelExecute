@@ -15,7 +15,7 @@ In addition to JetFuelExecute having the awesome flexibility of just publishing 
 * Simple migration to new version of published functions. Just publish a new function so both are available then migrate clients to new function.
 * The FunctionExecutor that processes the function call is cleanly encapsulated, so it can be tested independently.
 * You can view available functions along with their documentation and test them easily.
-* Extremely flexible - Can be a publisher of function, at the same time callother functions.
+* Extremely flexible - Can be a publisher of function, at the same time call other functions.
 * Automatic timeout response generated if the server publishing a function goes down,  so your client is not waiting forever.
 * Removal of unavailable functions - A client will never call a function if the publisher of that function disconnects. 
 * High performance and high availability provided by AMPS along with various authentication options.
