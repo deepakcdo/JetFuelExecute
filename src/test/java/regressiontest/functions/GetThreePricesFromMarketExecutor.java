@@ -3,7 +3,7 @@ package regressiontest.functions;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
 import headfront.jetfuel.execute.functions.SubscriptionExecutor;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class GetThreePricesFromMarketExecutor extends AbstractFunctionExecutor {
 
     @Override
-    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {
         String inst = parameters.get(0).toString();
         PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result, 3);
         subExecutor.start();

@@ -1,6 +1,6 @@
 package regressiontest;
 
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,9 +9,9 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Created by Deepak on 22/01/2018.
  */
-public class TestFunctionResponse implements FunctionResponse {
+public class TestFunctionResponseListener implements FunctionResponseListener {
 
-    private static Logger LOG = LoggerFactory.getLogger(TestFunctionResponse.class);
+    private static Logger LOG = LoggerFactory.getLogger(TestFunctionResponseListener.class);
     protected volatile boolean onCompletedCalled = false;
     protected volatile boolean onErrorCalled = false;
     protected volatile Object message = null;
@@ -22,7 +22,7 @@ public class TestFunctionResponse implements FunctionResponse {
     protected volatile int onCompletedCount = 0;
     protected volatile int onErrorCount = 0;
 
-    public TestFunctionResponse(CountDownLatch latch) {
+    public TestFunctionResponseListener(CountDownLatch latch) {
         this.latch = latch;
     }
 

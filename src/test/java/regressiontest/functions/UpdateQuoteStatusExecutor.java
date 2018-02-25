@@ -3,7 +3,7 @@ package regressiontest.functions;
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,7 @@ public class UpdateQuoteStatusExecutor extends AbstractFunctionExecutor {
     }
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
         try {
             String trader = parameters.get(0).toString();
             String instrument = parameters.get(1).toString();

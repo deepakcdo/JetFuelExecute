@@ -7,6 +7,6 @@ import java.util.List;
  */
 public interface FunctionProcessor {
 
-    void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponse result);
+    void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponseListener result);
 
 }

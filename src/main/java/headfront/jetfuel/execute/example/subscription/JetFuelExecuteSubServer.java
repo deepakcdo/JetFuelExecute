@@ -66,7 +66,7 @@ public class JetFuelExecuteSubServer {
     static class PriceCreatorVoteExecutor extends AbstractFunctionExecutor {
 
         @Override
-        protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+        protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {
             String inst = parameters.get(0).toString();
             PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
             subExecutor.start();

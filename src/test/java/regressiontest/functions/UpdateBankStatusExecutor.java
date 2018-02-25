@@ -1,7 +1,7 @@
 package regressiontest.functions;
 
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
         String name = parameters.get(0).toString();
         if (name.equalsIgnoreCase("Sarah")) {
             // Sarah is a late bloomer she replies after timeout happens

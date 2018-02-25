@@ -23,12 +23,12 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
         this.functionParameters = functionParameters;
     }
 
-    public void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponse result) {
+    public void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponseListener result) {
         String validate = FunctionUtils.validateParameters(parameters, functionParameters);
         if (validate == null) {
             try {
-                if (result instanceof SubscriptionFunctionResponse) {
-                    final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponse) result);
+                if (result instanceof SubscriptionFunctionResponseListener) {
+                    final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponseListener) result);
                     final String reason = ActiveSubscriptionRegistry.registerActiveSubscription(id, subscriptionExecutor);
                     if (reason != null){
                         LOG.error("Unable to register SubscriptionExecutor for id " + id + " due to " + reason);
@@ -47,7 +47,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     /**
      * Override this method
      */
-    protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+    protected void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeFunction() has not been extended";
         LOG.error(message);
         result.onError(id, "Function has not been setup correctly by the publisher", null);
@@ -57,7 +57,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     /**
      * Override this method
      */
-    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponse result) {
+    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
         LOG.error(message);
         result.onError(id, "Function has not been setup correctly by the publisher", null);

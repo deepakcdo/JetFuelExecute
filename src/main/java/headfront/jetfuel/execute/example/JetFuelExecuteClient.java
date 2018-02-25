@@ -3,7 +3,7 @@ package headfront.jetfuel.execute.example;
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.JetFuelExecute;
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
@@ -32,7 +32,7 @@ public class JetFuelExecuteClient {
             // calling function
 
             final String id1 = jetFuelExecute.executeFunction("SampleJetFuelSever.CheckAbilityToVote",
-                    new Object[]{true, 22}, new ClientFunctionResponse());
+                    new Object[]{true, 22}, new ClientFunctionResponseListener());
             System.out.println("Called function with id  " + id1);
 
 
@@ -43,7 +43,7 @@ public class JetFuelExecuteClient {
 
     }
 
-   static class ClientFunctionResponse implements FunctionResponse {
+   static class ClientFunctionResponseListener implements FunctionResponseListener {
         @Override
         public void onCompleted(String id, Object message, Object returnValue) {
             System.out.println("Got onCompleted for id '" + id + "' with message '" + message + "' and returnValue '" + returnValue + "'");

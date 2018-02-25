@@ -4,7 +4,7 @@ import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
@@ -33,7 +33,7 @@ public class JetFuelExecuteSubClient {
             // calling function
             String functionName = "SampleJetFuelSubSever.Get5PricesTicks";
             final String id1 = jetFuelExecute.executeSubscriptionFunction(functionName,
-                    new Object[]{"DE0022456"}, new ClientFunctionResponse());
+                    new Object[]{"DE0022456"}, new ClientFunctionResponseListener());
             System.out.println("Called " + functionName + " with id  " + id1);
 
             Thread.sleep(5000);
@@ -46,7 +46,7 @@ public class JetFuelExecuteSubClient {
 
     }
 
-    static class ClientFunctionResponse implements SubscriptionFunctionResponse {
+    static class ClientFunctionResponseListener implements SubscriptionFunctionResponseListener {
         @Override
         public void onCompleted(String id, Object message, Object returnValue) {
             System.out.println("Got onCompleted for id '" + id + "' with message '" + message + "' and returnValue '" + returnValue + "'");

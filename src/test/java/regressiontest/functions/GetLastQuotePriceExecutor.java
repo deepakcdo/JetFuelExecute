@@ -4,7 +4,7 @@ import com.crankuptheamps.client.HAClient;
 import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
     }
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
         try {
             String instrument = parameters.get(0).toString();
             CountDownLatch wait = new CountDownLatch(1);

@@ -5,7 +5,7 @@ import headfront.jetfuel.execute.FunctionState;
 /**
  * Created by Deepak on 10/05/2017.
  */
-public interface SubscriptionFunctionResponse extends FunctionResponse {
+public interface SubscriptionFunctionResponseListener extends FunctionResponseListener {
 
     void onSubscriptionUpdate(String id, Object message, String update);
 

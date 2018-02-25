@@ -43,7 +43,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private boolean checkFunctionOwner = false;
     private final Map<String, JetFuelFunction> functionsReceivedFromAmps = new ConcurrentHashMap<>();
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
-    private final Map<String, FunctionResponse> callBackBackLog = new ConcurrentHashMap<>();
+    private final Map<String, FunctionResponseListener> callBackBackLog = new ConcurrentHashMap<>();
     private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
     private final Set<CommandId> jetFuelActiveSubscriptions = new HashSet<>();
     private ExecutorService functionRequestProcessorExecutorService = null;
@@ -204,12 +204,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     @Override
-    public String executeFunction(String functionName, Object[] functionParameters, FunctionResponse response) {
+    public String executeFunction(String functionName, Object[] functionParameters, FunctionResponseListener response) {
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.RequestResponse);
     }
 
     @Override
-    public String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponse response) {
+    public String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponseListener response) {
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.Subscription);
     }
 
@@ -223,7 +223,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private void processReplyMessage(String functionResponse) {
         String id = null;
-        FunctionResponse result = null;
+        FunctionResponseListener result = null;
         try {
             Map<String, Object> map = jsonMapper.readValue(functionResponse, Map.class);
             Object state = map.get(JetFuelExecuteConstants.CURRENT_STATE);
@@ -232,9 +232,9 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             result = callBackBackLog.get(id);
             if (result != null) {
                 if (state != null) {
-                    SubscriptionFunctionResponse subscriptionFunctionResponse = null;
-                    if (result instanceof SubscriptionFunctionResponse) {
-                        subscriptionFunctionResponse = (SubscriptionFunctionResponse) result;
+                    SubscriptionFunctionResponseListener subscriptionFunctionResponse = null;
+                    if (result instanceof SubscriptionFunctionResponseListener) {
+                        subscriptionFunctionResponse = (SubscriptionFunctionResponseListener) result;
                     }
                     FunctionState currentState = FunctionState.valueOf(state.toString());
                     switch (currentState) {
@@ -279,7 +279,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         }
     }
 
-    private String checkAndExecuteFunction(String functionName, Object[] functionParameters, FunctionResponse response,
+    private String checkAndExecuteFunction(String functionName, Object[] functionParameters, FunctionResponseListener response,
                                            FunctionExecutionType functionExecutionType) {
         String callID = functionIDGenerator.apply(ampsConnectionName);
         try {
@@ -462,7 +462,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
                 LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFunctionName() + " with parameter " + parameters + " from caller " + caller);
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
-                    newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponse() {
+                    newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponseListener() {
                         @Override
                         public void onCompleted(String id, Object message, Object returnValue) {
                             createAndSendComplete(caller, message, returnValue, callerHostName, id);
@@ -474,7 +474,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         }
                     });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
-                    newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponse() {
+                    newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponseListener() {
                         @Override
                         public void onSubscriptionUpdate(String id, Object message, String update) {
                             createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);

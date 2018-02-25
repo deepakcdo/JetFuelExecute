@@ -7,7 +7,7 @@ import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
 import headfront.jetfuel.execute.functions.FunctionParameter;
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
@@ -71,7 +71,7 @@ public class JetFuelExecuteServer {
     static class AbleToVoteExecutor extends AbstractFunctionExecutor {
 
         @Override
-        protected void executeFunction(String id, List<Object> parameters, FunctionResponse result) {
+        protected void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
             Boolean citizen = Boolean.parseBoolean(parameters.get(0).toString());
             Integer age = Integer.parseInt(parameters.get(1).toString());
             if (!citizen) {

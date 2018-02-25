@@ -7,7 +7,7 @@ import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.slf4j.Logger;
@@ -158,16 +158,16 @@ public class JetFuelBaseTests {
                     jetFuelExecute.getFunctionBusTopic(), "/ID='" + nextId + "'", 10000);
         }
         String callID;
-        TestFunctionResponse response;
+        TestFunctionResponseListener response;
         if (isSubFunction) {
-            response = new TestSubscriptionFunctionResponse(waitLatch);
-            callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponse) response);
+            response = new TestSubscriptionFunctionResponseListener(waitLatch);
+            callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponseListener) response);
             if (cancelAfter > 0) {
                 Thread.sleep(cancelAfter);
                 jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
             }
         } else {
-            response = new TestFunctionResponse(waitLatch);
+            response = new TestFunctionResponseListener(waitLatch);
             callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
         }
 
@@ -316,7 +316,7 @@ public class JetFuelBaseTests {
         return message;
     }
 
-    private void checkFunctionResponse(TestFunctionResponse response, String id,
+    private void checkFunctionResponse(TestFunctionResponseListener response, String id,
                                        int onErrorCountExpected, boolean errorSetExpected,
                                        int onCompleteCountExpected, boolean completeSetExpected,
                                        int onUpdateCountExpected, int onStateChangeExpected,
@@ -346,10 +346,10 @@ public class JetFuelBaseTests {
             assertEquals("Return was not correct", returnValueExpected, response.getReturnValue());
         }
         assertEquals("Exception Message was not correct", exceptionMsgExpected, response.getException());
-        if (response instanceof TestSubscriptionFunctionResponse) {
-            TestSubscriptionFunctionResponse subscriptionFunctionResponse = (TestSubscriptionFunctionResponse) response;
-            assertEquals("onUpdateCount should have been called " + onUpdateCountExpected + " time/s", onUpdateCountExpected, ((TestSubscriptionFunctionResponse) response).getOnSubUpdateCount());
-            assertEquals("onStateChange should have been called " + onStateChangeExpected + " time/s", onStateChangeExpected, ((TestSubscriptionFunctionResponse) response).getOnSubStateChangeCount());
+        if (response instanceof TestSubscriptionFunctionResponseListener) {
+            TestSubscriptionFunctionResponseListener subscriptionFunctionResponse = (TestSubscriptionFunctionResponseListener) response;
+            assertEquals("onUpdateCount should have been called " + onUpdateCountExpected + " time/s", onUpdateCountExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubUpdateCount());
+            assertEquals("onStateChange should have been called " + onStateChangeExpected + " time/s", onStateChangeExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubStateChangeCount());
             assertEquals("Update messages should be equal", updateMessagesExpected, subscriptionFunctionResponse.getAllMessages());
             assertEquals("Update values should be equal", updateValuesExpected, subscriptionFunctionResponse.getSubscriptionUpdates());
         }

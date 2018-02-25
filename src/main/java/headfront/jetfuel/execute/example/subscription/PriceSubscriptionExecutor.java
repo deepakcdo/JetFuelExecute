@@ -2,7 +2,7 @@ package headfront.jetfuel.execute.example.subscription;
 
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.functions.SubscriptionExecutor;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,10 +13,10 @@ public class PriceSubscriptionExecutor extends SubscriptionExecutor {
 
     private AtomicBoolean keepRunning = new AtomicBoolean(true);
     private String callId;
-    private SubscriptionFunctionResponse result;
+    private SubscriptionFunctionResponseListener result;
     private int count = 1;
 
-    public PriceSubscriptionExecutor(String callId, SubscriptionFunctionResponse result) {
+    public PriceSubscriptionExecutor(String callId, SubscriptionFunctionResponseListener result) {
         this.callId = callId;
         this.result = result;
     }

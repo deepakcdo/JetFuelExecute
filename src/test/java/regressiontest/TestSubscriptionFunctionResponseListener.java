@@ -1,7 +1,7 @@
 package regressiontest;
 
 import headfront.jetfuel.execute.FunctionState;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +12,9 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Created by Deepak on 22/01/2018.
  */
-public class TestSubscriptionFunctionResponse extends TestFunctionResponse implements SubscriptionFunctionResponse {
+public class TestSubscriptionFunctionResponseListener extends TestFunctionResponseListener implements SubscriptionFunctionResponseListener {
 
-    private static Logger LOG = LoggerFactory.getLogger(TestSubscriptionFunctionResponse.class);
+    private static Logger LOG = LoggerFactory.getLogger(TestSubscriptionFunctionResponseListener.class);
     protected volatile int onSubUpdateCount = 0;
     protected volatile int onSubStateChangeCount = 0;
     protected volatile List<String> subscriptionUpdates = new ArrayList<>();
@@ -23,7 +23,7 @@ public class TestSubscriptionFunctionResponse extends TestFunctionResponse imple
     protected volatile List<String> updateMessages = new ArrayList<>();
     protected volatile List<String> stateChnagedMessages = new ArrayList<>();
 
-    public TestSubscriptionFunctionResponse(CountDownLatch latch) {
+    public TestSubscriptionFunctionResponseListener(CountDownLatch latch) {
         super(latch);
     }
 

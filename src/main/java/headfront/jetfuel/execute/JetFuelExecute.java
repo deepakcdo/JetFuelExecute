@@ -1,9 +1,8 @@
 package headfront.jetfuel.execute;
 
-import headfront.jetfuel.execute.functions.FunctionResponse;
+import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
-import headfront.jetfuel.execute.functions.SubscriptionExecutor;
-import headfront.jetfuel.execute.functions.SubscriptionFunctionResponse;
+import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 
 import java.util.List;
 import java.util.Set;
@@ -91,7 +90,7 @@ public interface JetFuelExecute {
      * @param response callback listener for the function call
      * @return The uniqueId for this function call
      */
-    String executeFunction(String functionName, Object[] functionParameters, FunctionResponse response);
+    String executeFunction(String functionName, Object[] functionParameters, FunctionResponseListener response);
 
     /**
      * Execute a Subscription function in JetFuel Execute.  Call this for Functions that have a FunctionExecutionType of Subscription
@@ -100,7 +99,7 @@ public interface JetFuelExecute {
      * @param response callback listener for the function call
      * @return The uniqueId for this function call
      */
-    String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponse response);
+    String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponseListener response);
 
     /**
      * If JetFuelFunction of type FunctionExecutionType#Subscription was executed then you can cancel this subscription
