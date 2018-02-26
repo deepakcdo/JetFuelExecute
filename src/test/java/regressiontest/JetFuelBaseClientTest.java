@@ -266,6 +266,6 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 0, false, 0, false,
                 2, 2, Arrays.asList(messages), Arrays.asList(updates),
                 expectedMsg, null, null, false,
-                states, true, true, 2200);
+                states, true, true, 2900);
     }
 }

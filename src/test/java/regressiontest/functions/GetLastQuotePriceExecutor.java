@@ -5,6 +5,9 @@ import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import regressiontest.JetFuelExecuteServerTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
 
+    private static Logger LOG = LoggerFactory.getLogger(JetFuelExecuteServerTest.class);
 
     private HAClient ampsClient;
     private ObjectMapper jsonMapper;
@@ -53,6 +57,7 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
                 result.onError(id, "More than one Quote found for inst " + instrument, true);
             }
         } catch (Exception e) {
+            LOG.error("Unable to get quote ", e);
             result.onError(id, "Unable to get quote " + e.getMessage(), e);
         }
     }
