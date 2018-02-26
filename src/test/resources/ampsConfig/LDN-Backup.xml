@@ -72,6 +72,41 @@
 
         <Topic>
             <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
+            <Topic>JETFUEL_EXECUTE_STATS</Topic>
+            <MessageType>json</MessageType>
+            <Expiration>365d</Expiration>
+            <Preprocessing>
+                <Field>REGEXP_REPLACE(/MsgCreationTime,"T.*","") as /Date</Field>
+            </Preprocessing>
+            <Enrichment>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'RequestNew',IF(/RequestNewCount OF PREVIOUS IS NULL, 1, (/RequestNewCount OF PREVIOUS) + 1), /RequestNewCount OF PREVIOUS), /RequestNewCount OF PREVIOUS) as /RequestNewCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'Completed',IF(/CompletedCount OF PREVIOUS IS NULL, 1, (/CompletedCount OF PREVIOUS) + 1), /CompletedCount OF PREVIOUS), /CompletedCount OF PREVIOUS) as /CompletedCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'Error', IF(/ErrorCount OF PREVIOUS IS NULL, 1, (/ErrorCount OF PREVIOUS) + 1), /ErrorCount OF PREVIOUS), /ErrorCount OF PREVIOUS) as /ErrorCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'Timeout', IF(/TimeoutCount OF PREVIOUS IS NULL, 1, (/TimeoutCount OF PREVIOUS) + 1), /TimeoutCount OF PREVIOUS), /TimeoutCount OF PREVIOUS) as /TimeoutCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'RequestCancelSub', IF(/RequestCancelSubCount OF PREVIOUS IS NULL, 1, (/RequestCancelSubCount OF PREVIOUS) + 1), /RequestCancelSubCount OF PREVIOUS), /RequestCancelSubCount OF PREVIOUS) as /RequestCancelSubCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'SubCancelled', IF(/SubCancelledCount OF PREVIOUS IS NULL, 1, (/SubCancelledCount OF PREVIOUS) + 1), /SubCancelledCount OF PREVIOUS), /SubCancelledCount OF PREVIOUS) as /SubCancelledCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'SubUpdate', IF(/SubUpdateCount OF PREVIOUS IS NULL, 1, (/SubUpdateCount OF PREVIOUS) + 1), /SubUpdateCount OF PREVIOUS), /SubUpdateCount OF PREVIOUS) as /SubUpdateCount</Field>
+                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-BACKUP', IF(/CurrentState OF CURRENT == 'SubActive', IF(/SubActiveCount OF PREVIOUS IS NULL, 1, (/SubActiveCount OF PREVIOUS) + 1), /SubActiveCount OF PREVIOUS), /SubActiveCount OF PREVIOUS) as /SubActiveCount</Field>
+                <Field>IF(/MsgCreationTime == 1, NULL, NULL) AS /MsgCreationTime HINT OPTIONAL</Field>
+                <Field>IF(/MsgCreationName == 1, NULL, NULL) AS /MsgCreationName HINT OPTIONAL</Field>
+                <Field>IF(/FunctionCallerHostName == 1, NULL, NULL) AS /FunctionCallerHostName HINT OPTIONAL</Field>
+                <Field>IF(/CurrentState == 1, NULL, NULL) AS /CurrentState HINT OPTIONAL</Field>
+                <Field>IF(/ID == 1, NULL, NULL) AS /ID HINT OPTIONAL</Field>
+                <Field>IF(/FunctionInitiatorName == 1, NULL, NULL) AS /FunctionInitiatorName HINT OPTIONAL</Field>
+                <Field>IF(/FunctionParameters == 1, NULL, NULL) AS /FunctionParameters HINT OPTIONAL</Field>
+                <Field>IF(/AmpsInstanceOwner == 1, NULL, NULL) AS /AmpsInstanceOwner HINT OPTIONAL</Field>
+                <Field>IF(/CurrentStateMsg == 1, NULL, NULL) AS /CurrentStateMsg HINT OPTIONAL</Field>
+                <Field>IF(/ReturnValue == 1, NULL, NULL) AS /ReturnValue HINT OPTIONAL</Field>
+                <Field>IF(/FunctionUpdateMsg == 1, NULL, NULL) AS /FunctionUpdateMsg HINT OPTIONAL</Field>
+                <Field>IF(/ExceptionMessage == 1, NULL, NULL) AS /ExceptionMessage HINT OPTIONAL</Field>
+                <Field>IF(/FunctionParameters == 1, NULL, NULL) AS /ExceptionMessage HINT OPTIONAL</Field>
+            </Enrichment>
+            <Key>/Date</Key>
+            <Key>/FunctionToCall</Key>
+        </Topic>
+
+        <Topic>
+            <FileName>${AMPS_CONFIG_DIRECTORY}/sow/%n-json.sow</FileName>
             <Topic>TEST_PRICE</Topic>
             <Key>/ID</Key>
             <MessageType>json</MessageType>
@@ -421,6 +456,24 @@
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE</Topic>
                     <Filter>1=1</Filter>
+                </Options>
+            </Do>
+        </Action>
+        <Action>
+            <On>
+                <Module>amps-action-on-publish-message</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <MessageSource>local</MessageSource>
+                    <Topic>JETFUEL_EXECUTE_BUS</Topic>
+                </Options>
+            </On>
+            <Do>
+                <Module>amps-action-do-publish-message</Module>
+                <Options>
+                    <MessageType>json</MessageType>
+                    <Topic>JETFUEL_EXECUTE_STATS</Topic>
+                    <Data>{{AMPS_DATA}}</Data>
                 </Options>
             </Do>
         </Action>

@@ -29,7 +29,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
             try {
                 if (result instanceof SubscriptionFunctionResponseListener) {
                     final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponseListener) result);
-                    final String reason = ActiveSubscriptionRegistry.registerActiveSubscription(id, subscriptionExecutor);
+                    final String reason = ActiveSubscriptionRegistry.registerActiveServerSubscription(id, subscriptionExecutor);
                     if (reason != null){
                         LOG.error("Unable to register SubscriptionExecutor for id " + id + " due to " + reason);
                     }

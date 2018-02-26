@@ -215,11 +215,15 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public void cancelSubscriptionFunctionRequest(String callId) {
-
-        final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, CANCEL_REQ_MESSAGE, hostName, callId);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub.name());
-        sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, CANCEL_REQ_MESSAGE);
+        if (ActiveSubscriptionRegistry.isActiveClientSubscription(callId)) {
+            final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, CANCEL_REQ_MESSAGE, hostName, callId);
+            reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub.name());
+            sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, CANCEL_REQ_MESSAGE);
+        } else {
+            LOG.error("Got a request to cancel subscription request for id " + callId + " but there was no active subscription.");
+        }
     }
+
 
     private void processReplyMessage(String functionResponse) {
         String id = null;
@@ -241,30 +245,37 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         case Completed:
                             result.onCompleted(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     map.get(JetFuelExecuteConstants.RETURN_VALUE));
-                            callBackBackLog.remove(id);
                             break;
                         case Error:
-                            result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE));
-                            callBackBackLog.remove(id);
+                            result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
+                                    map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE));
                             break;
                         case Timeout:
-                            result.onError(id, "Function Timeout", map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG));
-//                            callBackBackLog.remove(id); // allow time out not to be a final state
+                            result.onError(id, "Function Timeout",
+                                    map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG));
                             break;
                         case SubUpdate:
-                            subscriptionFunctionResponse.onSubscriptionUpdate(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
+                            subscriptionFunctionResponse.onSubscriptionUpdate(id,
+                                    map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     (String) map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE));
                             break;
                         case SubActive:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id,
+                                    map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
+                            ActiveSubscriptionRegistry.addActiveClientSubscription(id);
                             break;
                         case SubCancelled:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubCancelled);
-                            callBackBackLog.remove(id); // allow time out not to be a final state
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id,
+                                    map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubCancelled);
                             break;
                         default:
-                            result.onError(id, "Unknown state " + currentState + " and message  " + map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), null);
+                            result.onError(id, "Unknown state " + currentState + " and message  "
+                                    + map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), null);
                             break;
+                    }
+                    if (currentState.isFinalState()) {
+                        ActiveSubscriptionRegistry.removeActiveServerSubscription(id);
+                        callBackBackLog.remove(id);
                     }
                 }
             } else {
@@ -499,7 +510,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
                 }
             } else if (currentState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
-                final SubscriptionExecutor subscriptionExecutor = ActiveSubscriptionRegistry.getActiveSubscription(id);
+                final SubscriptionExecutor subscriptionExecutor = ActiveSubscriptionRegistry.getAndRemoveActiveServerSubscription(id);
                 if (subscriptionExecutor != null) {
                     subscriptionExecutor.stopSubscriptions();
                     subscriptionExecutor.interrupt();

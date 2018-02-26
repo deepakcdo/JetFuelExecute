@@ -5,23 +5,28 @@ package headfront.jetfuel.execute;
  */
 public enum FunctionState {
 
-    RequestNew("RequestNew"),
-    SubActive("SubActive"),
-    SubUpdate("SubUpdate"),
-    SubCancelled("SubCancelled"),
-    RequestCancelSub("RequestCancelSub"),
-    Completed("Completed"),
-    Error("Error"),
-    Timeout("Timeout");
+    RequestNew("RequestNew", false),
+    SubActive("SubActive", false),
+    SubUpdate("SubUpdate", false),
+    SubCancelled("SubCancelled", true),
+    RequestCancelSub("RequestCancelSub", false),
+    Completed("Completed", true),
+    Error("Error", true),
+    Timeout("Timeout", false); // For now Timeout is not a End state.
 
     private String text;
+    private boolean isFinalState;
 
-    FunctionState(String text) {
+    FunctionState(String text, boolean isFinalState) {
         this.text = text;
+        this.isFinalState = isFinalState;
     }
 
     public String getText() {
         return text;
     }
 
+    public boolean isFinalState() {
+        return isFinalState;
+    }
 }
