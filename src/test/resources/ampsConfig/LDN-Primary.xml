@@ -36,7 +36,7 @@
             <Name>websocket-any</Name>
             <Protocol>websocket</Protocol>
             <Type>tcp</Type>
-            <InetAddr>9008</InetAddr>
+            <InetAddr>8008</InetAddr>
         </Transport>
     </Transports>
 
@@ -79,14 +79,14 @@
                 <Field>REGEXP_REPLACE(/MsgCreationTime,"T.*","") as /Date</Field>
             </Preprocessing>
             <Enrichment>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'RequestNew',IF(/RequestNewCount OF PREVIOUS IS NULL, 1, (/RequestNewCount OF PREVIOUS) + 1), /RequestNewCount OF PREVIOUS), /RequestNewCount OF PREVIOUS) as /RequestNewCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'Completed',IF(/CompletedCount OF PREVIOUS IS NULL, 1, (/CompletedCount OF PREVIOUS) + 1), /CompletedCount OF PREVIOUS), /CompletedCount OF PREVIOUS) as /CompletedCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'Error', IF(/ErrorCount OF PREVIOUS IS NULL, 1, (/ErrorCount OF PREVIOUS) + 1), /ErrorCount OF PREVIOUS), /ErrorCount OF PREVIOUS) as /ErrorCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'Timeout', IF(/TimeoutCount OF PREVIOUS IS NULL, 1, (/TimeoutCount OF PREVIOUS) + 1), /TimeoutCount OF PREVIOUS), /TimeoutCount OF PREVIOUS) as /TimeoutCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'RequestCancelSub', IF(/RequestCancelSubCount OF PREVIOUS IS NULL, 1, (/RequestCancelSubCount OF PREVIOUS) + 1), /RequestCancelSubCount OF PREVIOUS), /RequestCancelSubCount OF PREVIOUS) as /RequestCancelSubCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'SubCancelled', IF(/SubCancelledCount OF PREVIOUS IS NULL, 1, (/SubCancelledCount OF PREVIOUS) + 1), /SubCancelledCount OF PREVIOUS), /SubCancelledCount OF PREVIOUS) as /SubCancelledCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'SubUpdate', IF(/SubUpdateCount OF PREVIOUS IS NULL, 1, (/SubUpdateCount OF PREVIOUS) + 1), /SubUpdateCount OF PREVIOUS), /SubUpdateCount OF PREVIOUS) as /SubUpdateCount</Field>
-                <Field>IF(/AmpsInstanceOwner OF CURRENT  == 'LDN-PRIMARY', IF(/CurrentState OF CURRENT == 'SubActive', IF(/SubActiveCount OF PREVIOUS IS NULL, 1, (/SubActiveCount OF PREVIOUS) + 1), /SubActiveCount OF PREVIOUS), /SubActiveCount OF PREVIOUS) as /SubActiveCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'RequestNew',IF(/RequestNewCount OF PREVIOUS IS NULL, 1, (/RequestNewCount OF PREVIOUS) + 1), /RequestNewCount OF PREVIOUS) as /RequestNewCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Completed',IF(/CompletedCount OF PREVIOUS IS NULL, 1, (/CompletedCount OF PREVIOUS) + 1), /CompletedCount OF PREVIOUS) as /CompletedCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Error', IF(/ErrorCount OF PREVIOUS IS NULL, 1, (/ErrorCount OF PREVIOUS) + 1), /ErrorCount OF PREVIOUS) as /ErrorCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Timeout', IF(/TimeoutCount OF PREVIOUS IS NULL, 1, (/TimeoutCount OF PREVIOUS) + 1), /TimeoutCount OF PREVIOUS) as /TimeoutCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'RequestCancelSub', IF(/RequestCancelSubCount OF PREVIOUS IS NULL, 1, (/RequestCancelSubCount OF PREVIOUS) + 1), /RequestCancelSubCount OF PREVIOUS) as /RequestCancelSubCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubCancelled', IF(/SubCancelledCount OF PREVIOUS IS NULL, 1, (/SubCancelledCount OF PREVIOUS) + 1), /SubCancelledCount OF PREVIOUS) as /SubCancelledCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubUpdate', IF(/SubUpdateCount OF PREVIOUS IS NULL, 1, (/SubUpdateCount OF PREVIOUS) + 1), /SubUpdateCount OF PREVIOUS) as /SubUpdateCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubActive', IF(/SubActiveCount OF PREVIOUS IS NULL, 1, (/SubActiveCount OF PREVIOUS) + 1), /SubActiveCount OF PREVIOUS) as /SubActiveCount</Field>
                 <Field>IF(/MsgCreationTime == 1, NULL, NULL) AS /MsgCreationTime HINT OPTIONAL</Field>
                 <Field>IF(/MsgCreationName == 1, NULL, NULL) AS /MsgCreationName HINT OPTIONAL</Field>
                 <Field>IF(/FunctionCallerHostName == 1, NULL, NULL) AS /FunctionCallerHostName HINT OPTIONAL</Field>
@@ -99,7 +99,6 @@
                 <Field>IF(/ReturnValue == 1, NULL, NULL) AS /ReturnValue HINT OPTIONAL</Field>
                 <Field>IF(/FunctionUpdateMsg == 1, NULL, NULL) AS /FunctionUpdateMsg HINT OPTIONAL</Field>
                 <Field>IF(/ExceptionMessage == 1, NULL, NULL) AS /ExceptionMessage HINT OPTIONAL</Field>
-                <Field>IF(/FunctionParameters == 1, NULL, NULL) AS /ExceptionMessage HINT OPTIONAL</Field>
             </Enrichment>
             <Key>/Date</Key>
             <Key>/FunctionToCall</Key>
