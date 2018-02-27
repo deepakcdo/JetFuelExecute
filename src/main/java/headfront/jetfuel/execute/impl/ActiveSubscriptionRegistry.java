@@ -48,7 +48,7 @@ public class ActiveSubscriptionRegistry {
         return activeClientRequests.remove(id);
     }
 
-    public static boolean addActiveClientSubscription(String id) {
+    public static boolean registerActiveClientSubscription(String id) {
         return activeClientRequests.add(id);
     }
 

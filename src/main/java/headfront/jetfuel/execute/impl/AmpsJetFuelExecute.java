@@ -262,7 +262,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         case SubActive:
                             subscriptionFunctionResponse.onSubscriptionStateChanged(id,
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
-                            ActiveSubscriptionRegistry.addActiveClientSubscription(id);
+                            ActiveSubscriptionRegistry.registerActiveClientSubscription(id);
                             break;
                         case SubCancelled:
                             subscriptionFunctionResponse.onSubscriptionStateChanged(id,
