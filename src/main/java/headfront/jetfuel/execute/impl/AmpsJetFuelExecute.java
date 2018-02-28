@@ -274,7 +274,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             break;
                     }
                     if (currentState.isFinalState()) {
-                        ActiveSubscriptionRegistry.removeActiveServerSubscription(id);
+                        ActiveSubscriptionRegistry.removeActiveClientSubscription(id);
                         callBackBackLog.remove(id);
                     }
                 }
