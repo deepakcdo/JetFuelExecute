@@ -14,21 +14,22 @@ import java.util.function.Consumer;
 public interface JetFuelExecute {
 
     /**
-     * Initialise JetFuelExecute. This will set up internal subscription to amps to get available functions. It will
-     * also start listening to messages we are interested..
-     * Note JetFuelExecute does not manage the amps connection as this is meant to be manged outside JetFuelExecute.
-     * AmpsConnections is passed into the constructor
+     * Initialise JetFuelExecute. This will set up internal subscription to the configured middleware to get available
+     * functions. It will also start listening to messages we are interested..
+     * Note JetFuelExecute does not manage the connection ato the middleware s this is meant to be manged outside
+     * JetFuelExecute.
+     * Usually the connection to the middleware is passed into the constructor of the the class implementing this interface
      */
     void initialise();
 
     /**
      * Shut down cleanly. This will include unpublishing any functions and close any active subscriptions
-     * Note we dont close the amps connections as this is meant to be manged outside JetFuelExecute
+     * Note we dont close the middlware connections as this is meant to be manged outside JetFuelExecute
      */
     void shutDown();
 
     /**
-     * @return the Amps Connection name
+     * @return the Connection name
      */
     String getConnectionName();
 
@@ -50,14 +51,14 @@ public interface JetFuelExecute {
     List<String> findFunction(String name);
 
     /**
-     * @return The Function meta data topic in amps. This topic will list all the JetFuel function and its details like
-     * descriptions, parameter's, return type etc
+     * @return The Function meta data topic in the configured  middleware. This topic will list all the JetFuel
+     * function and its details like descriptions, parameter's, return type etc
      */
     String getFunctionTopic();
 
     /**
-     * @return The Function bus topic in amps. This topic is where all the request and response messages are
-     * published to or subscribed from.
+     * @return The Function bus topic in the configured middleware. This topic is where all the request and response
+     * messages are published to or subscribed from.
      */
     String getFunctionBusTopic();
 

@@ -6,10 +6,7 @@ import com.crankuptheamps.client.HAClient;
 import com.crankuptheamps.client.Message;
 import com.crankuptheamps.client.exception.DisconnectedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import headfront.jetfuel.execute.FunctionExecutionType;
-import headfront.jetfuel.execute.FunctionState;
-import headfront.jetfuel.execute.JetFuelExecute;
-import headfront.jetfuel.execute.JetFuelExecuteConstants;
+import headfront.jetfuel.execute.*;
 import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import headfront.jetfuel.execute.utils.NamedThreadFactory;
@@ -50,12 +47,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private ExecutorService functionReplyProcessorExecutorService = null;
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
     private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
+    private final ActiveSubscriptionRegistry subscriptionRegistry = new AmpsActiveSubscriptionRegistry();
+
     private Consumer<String> onFunctionAddedListener = name -> {
     };
 
     private Consumer<String> onFunctionRemovedListener = name -> {
     };
-
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
     private int noOfFunctionRequestProcessorsThreads = 10;
     private int noOfFunctionReplyProcessorThreads = 1;
@@ -215,7 +213,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public void cancelSubscriptionFunctionRequest(String callId) {
-        if (ActiveSubscriptionRegistry.isActiveClientSubscription(callId)) {
+        if (subscriptionRegistry.isActiveClientSubscription(callId)) {
             final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, CANCEL_REQ_MESSAGE, hostName, callId);
             reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub.name());
             sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, CANCEL_REQ_MESSAGE);
@@ -262,7 +260,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         case SubActive:
                             subscriptionFunctionResponse.onSubscriptionStateChanged(id,
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
-                            ActiveSubscriptionRegistry.registerActiveClientSubscription(id);
+                            subscriptionRegistry.registerActiveClientSubscription(id);
                             break;
                         case SubCancelled:
                             subscriptionFunctionResponse.onSubscriptionStateChanged(id,
@@ -274,7 +272,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             break;
                     }
                     if (currentState.isFinalState()) {
-                        ActiveSubscriptionRegistry.removeActiveClientSubscription(id);
+                        subscriptionRegistry.removeActiveClientSubscription(id);
                         callBackBackLog.remove(id);
                     }
                 }
@@ -485,6 +483,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         }
                     });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
+                    newExecutor.setActiveSubscriptionFactory(subscriptionRegistry);
                     newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponseListener() {
                         @Override
                         public void onSubscriptionUpdate(String id, Object message, String update) {
@@ -510,7 +509,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
                 }
             } else if (currentState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
-                final SubscriptionExecutor subscriptionExecutor = ActiveSubscriptionRegistry.getAndRemoveActiveServerSubscription(id);
+                final SubscriptionExecutor subscriptionExecutor = subscriptionRegistry.getAndRemoveActiveServerSubscription(id);
                 if (subscriptionExecutor != null) {
                     subscriptionExecutor.stopSubscriptions();
                     subscriptionExecutor.interrupt();
