@@ -368,7 +368,9 @@ public class JetFuelBaseTests {
             String connectionName = null;
             do {
 
-                final List<String> function = jetFuelExecute.findFunction(functionName);
+                final List<String> allFunction = jetFuelExecute.findFunction(functionName);
+                final List<String> function = allFunction.stream()
+                        .filter(name -> name.toLowerCase().contains("server")).collect(Collectors.toList());
                 if (function.size() > 0) {
                     String gotFunction = function.get(0);
                     connectionName = gotFunction.substring(0, gotFunction.indexOf(FunctionUtils.NAME_SEPARATOR));
