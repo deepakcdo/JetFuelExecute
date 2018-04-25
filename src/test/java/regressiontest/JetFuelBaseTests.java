@@ -173,7 +173,7 @@ public class JetFuelBaseTests {
 
         final boolean await = waitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
         if (!await) {
-            LOG.error("Wait time elapsed for " + callID + " we should have for the right number of callacks");
+            LOG.error("Wait time elapsed for " + callID + " we should have for the right number of callbacks");
         }
 
         checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected,

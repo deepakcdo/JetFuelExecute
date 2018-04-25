@@ -38,6 +38,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final String ampsConnectionName;
     private String hostName;
     private boolean checkFunctionOwner = false;
+    private AtomicBoolean initalised = new AtomicBoolean(false);
     private final Map<String, JetFuelFunction> functionsReceivedFromAmps = new ConcurrentHashMap<>();
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
     private final Map<String, FunctionResponseListener> callBackBackLog = new ConcurrentHashMap<>();
@@ -78,6 +79,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public boolean unPublishFunction(JetFuelFunction jetFuelFunction) {
+        checkInitalised();
         try {
             String deleteKey = "/ID='" + jetFuelFunction.getFullFunctionName() + "'";
             ampsClient.sowDelete(getFunctionTopic(), deleteKey, 1000);
@@ -98,30 +100,36 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public void initialise() {
-        try {
+        if (!initalised.get()) {
+            try {
 
-            // Initialise executors
-            functionRequestProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionRequestProcessorsThreads,
-                    new NamedThreadFactory("FunctionProcessor"));
-            functionReplyProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionReplyProcessorThreads
-                    , new NamedThreadFactory("FunctionReplyThread"));
+                // Initialise executors
+                functionRequestProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionRequestProcessorsThreads,
+                        new NamedThreadFactory("FunctionProcessor"));
+                functionReplyProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionReplyProcessorThreads
+                        , new NamedThreadFactory("FunctionReplyThread"));
 
-            // Disable this for now as this info is only available per instance.
-            // Listen for disconnection so functions that need to know about dsconnections can act on it
-            // And use it keep a copy of available functions. e.g when publisher disconnects we can remove the functions it published
-            // subscribeToDisconnections();
+                // Disable this for now as this info is only available per instance.
+                // Listen for disconnection so functions that need to know about dsconnections can act on it
+                // And use it keep a copy of available functions. e.g when publisher disconnects we can remove the functions it published
+                // subscribeToDisconnections();
 
-            // Add disconnection and reconnection for our selves
-            ampsClient.addConnectionStateListener(new AmpsConnectionListener());
+                // Add disconnection and reconnection for our selves
+                ampsClient.addConnectionStateListener(new AmpsConnectionListener());
 
-            // Listen for all active Functions
-            subscribeToPublishedFunctions();
+                // Listen for all active Functions
+                subscribeToPublishedFunctions();
 
-            // Listen for function callbacks
-            subscribeToFunctionCallbacks();
+                // Listen for function callbacks
+                subscribeToFunctionCallbacks();
 
-        } catch (Exception e) {
-            LOG.error("Unable to initialise FunctionPublisher", e);
+                initalised.set(true);
+
+            } catch (Exception e) {
+                LOG.error("Unable to initialise FunctionPublisher", e);
+            }
+        } else {
+            LOG.error("AmpsJetFuelExecute is already initalised");
         }
     }
 
@@ -181,6 +189,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public boolean publishFunction(JetFuelFunction jetFuelFunction) {
+        checkInitalised();
         jetFuelFunction.setTransientFunctionDetatils(ampsConnectionName, hostName, FunctionUtils.getIsoDateTime());
         final String validToPublish = jetFuelFunction.isValidToPublish();
         if (validToPublish != null) {
@@ -203,11 +212,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public String executeFunction(String functionName, Object[] functionParameters, FunctionResponseListener response) {
+        checkInitalised();
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.RequestResponse);
     }
 
     @Override
     public String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponseListener response) {
+        checkInitalised();
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.Subscription);
     }
 
@@ -662,5 +673,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     public String getFunctionBusTopic() {
         return functionBusTopic;
+    }
+
+    private void checkInitalised(){
+        if (!initalised.get()){
+            LOG.warn("AmpsJetFuelExecute was not initialised. Initializing it now.");
+            initialise();
+        }
     }
 }
