@@ -125,13 +125,14 @@ public class JetFuelBaseTests {
                                          String messageExpected, Object returnValueExpected, String exceptionMsgExpected,
                                          boolean skipFunctionExistsTests, String[] expectedStates,
                                          boolean checkMessagesAfterFunctionCall, boolean isSubFunction, int cancelAfter) throws Exception {
-        int expectedMessagesForFunction = onErrorCountExpected + onCompleteCountExpected +
+        int totalResponses = onErrorCountExpected + onCompleteCountExpected +
                 onUdateCountExpected + onStateChangeExpected;
+        int expectedMessagesForFunction = totalResponses + 1;
         expectedMessagesForFunction++; // This is for the original Function Request
         if (cancelAfter > 0) {
             expectedMessagesForFunction++; // This is for the cancel request
         }
-        CountDownLatch waitLatch = new CountDownLatch(expectedMessagesForFunction);
+        CountDownLatch responseWaitLatch = new CountDownLatch(totalResponses);
         if (!skipFunctionExistsTests) {
             final Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
             assertTrue("Function with name " + fullFunctionName + " not found we had " + availableFunctions,
@@ -160,20 +161,22 @@ public class JetFuelBaseTests {
         String callID;
         TestFunctionResponseListener response;
         if (isSubFunction) {
-            response = new TestSubscriptionFunctionResponseListener(waitLatch);
+            response = new TestSubscriptionFunctionResponseListener(responseWaitLatch);
             callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponseListener) response);
             if (cancelAfter > 0) {
                 Thread.sleep(cancelAfter);
                 jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
             }
         } else {
-            response = new TestFunctionResponseListener(waitLatch);
+            response = new TestFunctionResponseListener(responseWaitLatch);
             callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
         }
 
-        final boolean await = waitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
-        if (!await) {
-            LOG.error("Wait time elapsed for " + callID + " we should have for the right number of callbacks");
+        final boolean responseWait = responseWaitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
+        if (!responseWait) {
+            LOG.error("Wait time elapsed for " + callID +
+                    " we should have for the right number of callbacks for normal messages. We expected " +
+                    totalResponses + " but got " + responseWaitLatch.getCount() + " messages");
         }
 
         checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected,
@@ -181,7 +184,12 @@ public class JetFuelBaseTests {
                 onUdateCountExpected, onStateChangeExpected, updateMessagesExpected, updateValuesExpected,
                 messageExpected, returnValueExpected, exceptionMsgExpected);
         if (checkMessagesAfterFunctionCall) {
-            waitForSubMessages.await(testWaitTime, TimeUnit.MILLISECONDS);
+            boolean subscribeWait = waitForSubMessages.await(testWaitTime, TimeUnit.MILLISECONDS);
+            if (!subscribeWait) {
+                LOG.error("Wait time elapsed for " + callID +
+                        " we should have for the right number of callbacks for subscription  messages. We expected " +
+                        expectedMessagesForFunction + " but got " + waitForSubMessages.getCount() + " messages");
+            }
 
             //check received messages from subscription
             assertEquals("Should have received " + expectedMessagesForFunction + " messages from normal subscription ",
@@ -260,6 +268,7 @@ public class JetFuelBaseTests {
         }
         return callID;
     }
+
 
     private Map<String, Object> createExpectedMessage(int i, String[] expectedStates, String fullFunctionName,
                                                       String msgCreationTime, String nextId, Object[] functionParams,

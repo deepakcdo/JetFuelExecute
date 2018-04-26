@@ -13,23 +13,23 @@ import java.util.List;
  */
 public class FunctionPublisherHelper {
 
-    private JetFuelExecute execute;
+    private JetFuelExecute jetFuelExecute;
     private List<JetFuelFunction> functions;
 
     private static Logger LOG = LoggerFactory.getLogger(AmpsJetFuelExecute.class);
 
 
-    public void setExecute(JetFuelExecute execute) {
-        this.execute = execute;
+    public void setJetFuelExecute(JetFuelExecute execute) {
+        this.jetFuelExecute = jetFuelExecute;
     }
 
-    public void setFunctions(List<JetFuelFunction> functions) {
+    public void setFunctionsToPublish(List<JetFuelFunction> functions) {
         this.functions = functions;
     }
 
     public void init(){
-        AssertChecks.notNull(execute);
-        LOG.info("FunctionPublisherHelper will initalise " + functions.size() + " functions");
-        functions.forEach(execute::publishFunction);
+        AssertChecks.notNull(jetFuelExecute);
+        LOG.info("FunctionPublisherHelper will initialise " + functions.size() + " functions");
+        functions.forEach(jetFuelExecute::publishFunction);
     }
 }
