@@ -241,7 +241,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             Map<String, Object> map = jsonMapper.readValue(functionResponse, Map.class);
             Object state = map.get(JetFuelExecuteConstants.CURRENT_STATE);
             id = map.get(JetFuelExecuteConstants.PUBLISH_FUNCTION_ID).toString();
-            log("Received JetFuelExecuteFunction execution response for ID " + id, " response was " + functionResponse);
+            final Object  message = map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG);
+            final Object returnVal = map.get(JetFuelExecuteConstants.RETURN_VALUE);
+            log("Received JetFuelExecuteFunction execution response for ID " + id + " with state '" + state +
+                    "' , message '" + message  + "' and return value '" + returnVal + "'", " response was " + functionResponse);
             result = callBackBackLog.get(id);
             if (result != null) {
                 if (state != null) {
@@ -252,8 +255,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     FunctionState currentState = FunctionState.valueOf(state.toString());
                     switch (currentState) {
                         case Completed:
-                            result.onCompleted(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
-                                    map.get(JetFuelExecuteConstants.RETURN_VALUE));
+                            result.onCompleted(id, message,returnVal);
                             break;
                         case Error:
                             result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
@@ -318,7 +320,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     functionCall.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);
                     String jsonMsg = jsonMapper.writeValueAsString(functionCall);
                     log("Sending JetFuelExecuteFunction execution request with id " +
-                            callID + " to topic " + getFunctionBusTopic(), " request " + jsonMsg);
+                            callID + " to topic " + getFunctionBusTopic() + " function "  + jetFuelFunction.getFullFunctionName() +
+                            " with parameters " + Arrays.toString(functionParameters) , " request " + jsonMsg);
                     ampsClient.publish(getFunctionBusTopic(), jsonMsg);
                     callBackBackLog.put(callID, response);
                     return callID;
@@ -463,10 +466,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         try {
             Map map = jsonMapper.readValue(request, Map.class);
             final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
-            String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
+            final String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
             final String currentState = map.get(JetFuelExecuteConstants.CURRENT_STATE).toString();
+            final List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
             log("Received JetFuelExecuteFunction execution request of type '" + currentState
-                    + "' with id " + id + " from " + caller, " request was " + request);
+                    + "' with id " + id + " from " + caller + " function " + jetFuelFunction.getFullFunctionName() +
+                    " with parameters " + parameters, " request was " + request);
             String callerHostName = map.get(JetFuelExecuteConstants.FUNCTION_CALLER_HOSTNAME).toString();
             if (checkFunctionOwner) {
                 if (!caller.equals(ampsFunctionCaller)) {
@@ -479,8 +484,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             if (currentState.equalsIgnoreCase(FunctionState.RequestNew.name())) {
                 AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
                 newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
-                List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
-                LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFunctionName() + " with parameter " + parameters + " from caller " + caller);
+                LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFullFunctionName() + " with parameter " + parameters + " from caller " + caller);
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
                     newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponseListener() {
                         @Override
@@ -551,7 +555,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         try {
             String json = jsonMapper.writeValueAsString(reply);
             ampsClient.deltaPublish(getFunctionBusTopic(), json);
-            log("Sending JetFuelExecuteFunction execution " + methodName +
+            log("Sending JetFuelExecuteFunction execution response" + methodName +
                     " with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
                     "',  Message was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
                     "' return value '" + value + "' ", "and  json " + json);
@@ -675,8 +679,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         return functionBusTopic;
     }
 
-    private void checkInitalised(){
-        if (!initalised.get()){
+    private void checkInitalised() {
+        if (!initalised.get()) {
             LOG.warn("AmpsJetFuelExecute was not initialised. Initializing it now.");
             initialise();
         }

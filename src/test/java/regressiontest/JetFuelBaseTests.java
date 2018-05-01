@@ -176,7 +176,7 @@ public class JetFuelBaseTests {
         if (!responseWait) {
             LOG.error("Wait time elapsed for " + callID +
                     " we should have for the right number of callbacks for normal messages. We expected " +
-                    totalResponses + " but got " + responseWaitLatch.getCount() + " messages");
+                    totalResponses + " countdowns but got " + responseWaitLatch.getCount());
         }
 
         checkFunctionResponse(response, callID, onErrorCountExpected, errorSetExpected,
@@ -188,7 +188,7 @@ public class JetFuelBaseTests {
             if (!subscribeWait) {
                 LOG.error("Wait time elapsed for " + callID +
                         " we should have for the right number of callbacks for subscription  messages. We expected " +
-                        expectedMessagesForFunction + " but got " + waitForSubMessages.getCount() + " messages");
+                        expectedMessagesForFunction + " countdowns but got " + waitForSubMessages.getCount());
             }
 
             //check received messages from subscription
