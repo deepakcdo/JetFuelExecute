@@ -17,8 +17,8 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="headfront.jetfuel" level="debug"/>
-        <Logger name="regressiontest" level="debug"/>
+        <Logger name="headfront.jetfuel" level="info"/>
+        <Logger name="regressiontest" level="info"/>
         <Root level="info">
             <!--<AppenderRef ref="fileAppender"/>-->
             <AppenderRef ref="consoleAppender"/>

@@ -20,7 +20,7 @@ public class FunctionPublisherHelper {
 
 
     public void setJetFuelExecute(JetFuelExecute execute) {
-        this.jetFuelExecute = jetFuelExecute;
+        this.jetFuelExecute = execute;
     }
 
     public void setFunctionsToPublish(List<JetFuelFunction> functions) {

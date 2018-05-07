@@ -227,11 +227,18 @@ public class FunctionUtils {
             return "Got " + parameters.size() + " parameters but expected " + configuredParameters.size() + " parameters. " + gotAndExpectedMsg;
         }
         for (int i = 0; i < parameters.size(); i++) {
+            final FunctionParameter configuredParam = configuredParameters.get(i);
             Object parameter = parameters.get(i);
+            if (parameter == null){
+                return "Got a null value for " + configuredParam.getParameterName() + " this is not allowed";
+            }
             Class<?> parameterClass = parameter.getClass();
-            Class parameterType = configuredParameters.get(i).getParameterType();
-            if (!parameterClass.equals(parameterType)) {
-                return "Parameter at index " + (i + 1) + " was " + parameter + " with type " + parameterClass + " we expected " + parameterType;
+            Class configuredParameterType = configuredParam.getParameterType();
+            if (parameter.getClass() == Integer.class && configuredParameterType == Long.class){
+                return null; //allow this as long are bigger than ints
+            }
+            if (!parameterClass.equals(configuredParameterType)) {
+                return "Parameter at index " + (i + 1) + " was " + parameter + " with type " + parameterClass + " we expected " + configuredParameterType;
             }
         }
         return null;

@@ -195,6 +195,19 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     }
 
     @Test
+    public void callFunctionWithWithANullParameter() throws Exception {
+        String functionName = "updateBankStatus";
+        callJetFuelFunction(functionName, updateBankStatusFunction,
+                new Object[]{null, 55}, sleepValueForTest,
+                1, true, 0,
+                false,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                "Validation failed.", null,
+                "Got a null value for traderName this is not allowed",
+                true, new String[]{}, false, false, 0);
+    }
+
+    @Test
     public void callFunctionWithUnSupportedParameter() throws Exception {
         String invalidFunction = "updateBankStatusXXX";
         String expectedMsg = "Function " + getAmpsConnectionNameToUse(invalidFunction) + ".updateBankStatusXXX(String, BigDecimal) is not available";

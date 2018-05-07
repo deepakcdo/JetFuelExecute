@@ -243,8 +243,11 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             id = map.get(JetFuelExecuteConstants.PUBLISH_FUNCTION_ID).toString();
             final Object  message = map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG);
             final Object returnVal = map.get(JetFuelExecuteConstants.RETURN_VALUE);
+            final Object exception = map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE);
             log("Received JetFuelExecuteFunction execution response for ID " + id + " with state '" + state +
-                    "' , message '" + message  + "' and return value '" + returnVal + "'", " response was " + functionResponse);
+                    "' , message '" + message  + "' and return value '" + returnVal + "'" +
+                    " , exception '" + exception  + "'"
+                    , " response was " + functionResponse);
             result = callBackBackLog.get(id);
             if (result != null) {
                 if (state != null) {
@@ -555,10 +558,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         try {
             String json = jsonMapper.writeValueAsString(reply);
             ampsClient.deltaPublish(getFunctionBusTopic(), json);
-            log("Sending JetFuelExecuteFunction execution response" + methodName +
-                    " with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
+            log("Sending JetFuelExecuteFunction execution response '" + methodName +
+                    "' with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
                     "',  Message was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
-                    "' return value '" + value + "' ", "and  json " + json);
+                    "' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE)  +
+                    "'  exception '" + reply.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE)  + "' "
+                    , "and  json " + json);
         } catch (Exception e) {
             LOG.error("Unable to process JetFuelExecuteFunction execution request with id " +
                     reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID), e);

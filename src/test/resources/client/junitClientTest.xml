@@ -6,7 +6,7 @@
        					   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"
        default-autowire="byName">
 
-    <context:property-placeholder location="classpath*:client/junitClientTest.properties"/>
+    <context:property-placeholder location="classpath*:shared.properties,client/junitClientTest.properties"/>
 
     <import resource="classpath:amps.xml"/>
     <import resource="classpath:functions.xml"/>
@@ -16,6 +16,8 @@
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
         <property name="functionIDGenerator" ref="testIDGenerator" />
+        <property name="functionTopic" value="${functionTopic}" />
+        <property name="functionBusTopic" value="${functionBusTopic}" />
     </bean>
 
 </beans>
