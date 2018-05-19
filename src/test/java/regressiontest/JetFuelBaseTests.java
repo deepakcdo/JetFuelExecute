@@ -127,8 +127,7 @@ public class JetFuelBaseTests {
                                          boolean checkMessagesAfterFunctionCall, boolean isSubFunction, int cancelAfter) throws Exception {
         int totalResponses = onErrorCountExpected + onCompleteCountExpected +
                 onUdateCountExpected + onStateChangeExpected;
-        int expectedMessagesForFunction = totalResponses + 1;
-        expectedMessagesForFunction++; // This is for the original Function Request
+        int expectedMessagesForFunction = totalResponses + 1; // This is for the original Function Request
         if (cancelAfter > 0) {
             expectedMessagesForFunction++; // This is for the cancel request
         }
@@ -197,20 +196,17 @@ public class JetFuelBaseTests {
 
             // do a bookmark subscription
             Command commandToSend = new Command(Message.Command.Subscribe);
-            String bookmark = null;
+            String bookmark = FunctionUtils.getIsoDateTime(-3); // adjust if the box is running on a different timezone
             try {
-                if (msgCreationTime.contains(FunctionUtils.NAME_SEPARATOR)) {
-                    bookmark = msgCreationTime.substring(0, msgCreationTime.indexOf(FunctionUtils.NAME_SEPARATOR));
+                if (bookmark.contains(FunctionUtils.NAME_SEPARATOR)) {
+                    bookmark = bookmark.substring(0, bookmark.indexOf(FunctionUtils.NAME_SEPARATOR));
                 }
             } catch (Exception e) {
-                LOG.error("unable to parse " + msgCreationTime);
+                LOG.error("unable to parse " + bookmark);
                 throw e;
             }
             bookmark = bookmark.replace("-", "");
             bookmark = bookmark.replace(":", "");
-            // go back a few minutes
-            bookmark = bookmark.substring(0, bookmark.length() - 4);
-            bookmark = bookmark + "0000";
             commandToSend.setBookmark(bookmark);
             commandToSend.addAckType(Message.AckType.Completed);
             commandToSend.setTopic(jetFuelExecute.getFunctionBusTopic());

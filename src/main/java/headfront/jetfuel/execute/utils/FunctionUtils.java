@@ -218,6 +218,13 @@ public class FunctionUtils {
         return dateTimeStr;
     }
 
+    public static String getIsoDateTime(int adjustHours) {
+        LocalDateTime date = LocalDateTime.now();
+        date = date.plusHours(adjustHours);
+        String dateTimeStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return dateTimeStr;
+    }
+
     public static String validateParameters(List<Object> parameters, List<FunctionParameter> configuredParameters) {
         if (configuredParameters == null) {
             throw new RuntimeException("The setFunctionParameters(List<FunctionParameter>) has not been called so we cant validateParameters this. Please set it.");
@@ -229,12 +236,12 @@ public class FunctionUtils {
         for (int i = 0; i < parameters.size(); i++) {
             final FunctionParameter configuredParam = configuredParameters.get(i);
             Object parameter = parameters.get(i);
-            if (parameter == null){
+            if (parameter == null) {
                 return "Got a null value for " + configuredParam.getParameterName() + " this is not allowed";
             }
             Class<?> parameterClass = parameter.getClass();
             Class configuredParameterType = configuredParam.getParameterType();
-            if (parameter.getClass() == Integer.class && configuredParameterType == Long.class){
+            if (parameter.getClass() == Integer.class && configuredParameterType == Long.class) {
                 return null; //allow this as long are bigger than ints
             }
             if (!parameterClass.equals(configuredParameterType)) {
