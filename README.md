@@ -144,6 +144,9 @@ And here is the code for ClientFunctionResponseListener.
 
 This request/response is now fully journaled so any audit or support staff can investigate this any time.
 
+# Full stats of functions called.
+Since function calls goes through amps topics, stats of each function call is available. This is a very powerful feature that helps you to find out which functions are used and how often. Very details stats can be collected e.g. response times for each function call or how many times a function timed out. This is very useful for capacity planning or removing unused functions.
+
 # Features coming very soon.
 * The ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
 * Ability to make a function call which is executed by several publishers. E.g. if you have BankOff function published by 5 different function publishers, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
