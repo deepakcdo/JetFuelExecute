@@ -57,6 +57,9 @@
             <Key>/ID</Key>
             <MessageType>json</MessageType>
             <Expiration>600m</Expiration>
+            <Enrichment>
+                <Field>'LDN-PRIMARY' as /AmpsInstanceOwner</Field>
+            </Enrichment>
         </Topic>
 
         <Topic>
@@ -67,7 +70,7 @@
             <Expiration>25h</Expiration>
             <Enrichment>
                 <Field>IF(/AmpsInstanceOwner OF PREVIOUS IS NULL, IF(/CurrentState OF CURRENT == 'RequestNew', 'LDN-PRIMARY', /AmpsInstanceOwner OF CURRENT), /AmpsInstanceOwner OF PREVIOUS) as /AmpsInstanceOwner</Field>
-        </Enrichment>
+            </Enrichment>
         </Topic>
 
         <Topic>
@@ -454,7 +457,7 @@
                 <Options>
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE</Topic>
-                    <Filter>1=1</Filter>
+                    <Filter>/AmpsInstanceOwner = 'LDN-PRIMARY'</Filter>
                 </Options>
             </Do>
         </Action>

@@ -43,6 +43,9 @@
             <Key>/ID</Key>
             <MessageType>json</MessageType>
             <Expiration>600m</Expiration>
+            <Enrichment>
+                <Field>'LDN-PRIMARY' as /AmpsInstanceOwner</Field>
+            </Enrichment>
         </Topic>
 
         <Topic>
@@ -186,7 +189,7 @@
                 <Options>
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE</Topic>
-                    <Filter>1=1</Filter>
+                    <Filter>/AmpsInstanceOwner = 'JETFUEL-PRIMARY'</Filter>
                 </Options>
             </Do>
         </Action>

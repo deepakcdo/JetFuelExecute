@@ -233,6 +233,23 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         }
     }
 
+    private void rePublishFunctionDesc(JetFuelFunction jetFuelFunction) {
+        checkInitalised();
+        try {
+            String deleteKey = "/ID='" + jetFuelFunction.getFullFunctionName() + "'";
+            ampsClient.sowDelete(getFunctionTopic(), deleteKey, 1000);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Published a delete function for " + deleteKey);
+            }
+            publishFunctionDesc(jetFuelFunction);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Re published function " + jetFuelFunction.getFullFunctionName());
+            }
+        } catch (Exception e) {
+            LOG.error("Unable to re publish Function " + jetFuelFunction.getFunctionName() + " with ID " + jetFuelFunction.getFullFunctionName(), e);
+        }
+    }
+
 
     private void processReplyMessage(String functionResponse) {
         String id = null;
@@ -640,8 +657,14 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         LOG.info("Detected a disconnection and reconnection to amps. We will republish all functions again");
                         Runnable republishFunctions = () -> {
                             try {
-                                Thread.sleep(3000); // sleep 3 seconds for amps to reconnect fully
-                                republishFunctions();
+                                Thread.sleep(4000); // sleep 4 seconds for amps to reconnect fully
+                                // clear received functions.
+                                functionsReceivedFromAmps.clear();
+                                //subscribe to functions
+                                subscribeToPublishedFunctions();
+                                // republish function descriptions
+                                Set<JetFuelFunction> functionsToProcess = new HashSet<>(functionsPublishedToAmps.values());
+                                functionsToProcess.forEach(AmpsJetFuelExecute.this::rePublishFunctionDesc);
                             } catch (Exception e) {
                                 LOG.error("Unable to republish functions", e);
                             }
