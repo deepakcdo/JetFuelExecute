@@ -166,7 +166,7 @@
                 <Options>
                     <MessageType>json</MessageType>
                     <Data>{{AMPS_DATA}}</Data>
-                    <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP())</Value>
+                    <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP()+ TIMEZONEOFFSET())</Value>
                 </Options>
             </Do>
             <Do>
@@ -212,6 +212,12 @@
             </Do>
         </Action>
     </Actions>
+    <Modules>
+        <Module>
+            <Library>libamps_udf_legacy_compatibility.so</Library>
+            <Name>compatibility-functions-module</Name>
+        </Module>
+    </Modules>
 
 </AMPSConfig>
 
