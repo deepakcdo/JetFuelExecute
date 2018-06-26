@@ -92,6 +92,18 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     }
 
     @Test
+    public void callUpdateBankStatusAndGetErrorResponse() throws Exception {
+        String expectedMsg = "Jack always throws error.";
+        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+                new Object[]{"Jack", true}, sleepValueForTest,
+                1, true,
+                0, false,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, null, "Authorisation exception", false,
+                new String[]{"Error"}, true, false, 0);
+    }
+
+    @Test
     public void callUpdateBankStatusAndGetNullPointer() throws Exception {
         String expectedMsg = "Unable to process Function call";
         String expectedErrorMsg = "null java.lang.NullPointerException";

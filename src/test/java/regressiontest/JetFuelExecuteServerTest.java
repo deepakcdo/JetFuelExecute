@@ -37,7 +37,7 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         int count = 1;
         while (keepRunning) {
             Thread.sleep(1000 * 60);
-            if (count == 5) {
+            if (count == -5) {
                 keepRunning = false;
             }
             LOG.info("Waited for " + count + " minute/s");

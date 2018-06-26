@@ -48,7 +48,7 @@ public class JetFuelExecuteSubServer {
                     "This function will give you the next 5 price ticks for the given Instrument. The update type will be a string of json",
                     functionParameters,
                     Double.class, "Return The current price of the instrument",
-                    new PriceCreatorVoteExecutor(), FunctionAccessType.Read, FunctionExecutionType.Subscription);
+                    new PriceCreatorExecutor(), FunctionAccessType.Read, FunctionExecutionType.Subscription);
 
             System.out.println("Publishing Function");
             // publish JetFuel Function on the bus
@@ -63,7 +63,7 @@ public class JetFuelExecuteSubServer {
         }
     }
 
-    static class PriceCreatorVoteExecutor extends AbstractFunctionExecutor {
+    static class PriceCreatorExecutor extends AbstractFunctionExecutor {
 
         @Override
         protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {

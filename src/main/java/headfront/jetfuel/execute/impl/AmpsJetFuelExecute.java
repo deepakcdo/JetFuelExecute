@@ -514,7 +514,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
                         @Override
                         public void onError(String id, Object message, Object exception) {
-                            createAndSendError(message, exception, id, caller, hostName);
+                            createAndSendError(message, exception, id, caller, callerHostName);
                         }
                     });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
@@ -537,7 +537,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
                         @Override
                         public void onError(String id, Object message, Object exception) {
-                            createAndSendError(message, exception, id, caller, hostName);
+                            createAndSendError(message, exception, id, caller, callerHostName);
                         }
                     });
                 } else {

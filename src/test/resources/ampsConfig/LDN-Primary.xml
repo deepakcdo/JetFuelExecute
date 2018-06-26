@@ -397,12 +397,29 @@
         </Action>
         <Action>
             <On>
-                <Module>amps-action-on-message-condition-timeout</Module>
+                <Module>amps-action-on-alert</Module>
                 <Options>
                     <MessageType>json</MessageType>
                     <Topic>JETFUEL_EXECUTE_BUS</Topic>
                     <Filter>/CurrentState = 'RequestNew' and /AmpsInstanceOwner = 'LDN-PRIMARY'</Filter>
                     <Duration>5s</Duration>
+                    <EventVariable>AMPS_ACTION_EVENT</EventVariable>
+                    <OOFEvent>ALERT_CLEARED</OOFEvent>
+                    <TimeoutEvent>ALERT_TIMEOUT</TimeoutEvent>
+                </Options>
+            </On>
+            <Do>
+                <Module>amps-action-do-execute-event</Module>
+                <Options>
+                    <EventVariable>AMPS_ACTION_EVENT</EventVariable>
+                </Options>
+            </Do>
+        </Action>
+        <Action>
+            <On>
+                <Module>amps-action-on-execute-event</Module>
+                <Options>
+                    <Event>ALERT_TIMEOUT</Event>
                 </Options>
             </On>
             <Do>
@@ -411,29 +428,8 @@
                     <MessageType>json</MessageType>
                     <Data>{{AMPS_DATA}}</Data>
                     <Value>ID_TO_USE=/ID</Value>
-                </Options>
-            </Do>
-            <Do>
-                <Module>amps-action-do-extract-values</Module>
-                <Options>
-                    <MessageType>json</MessageType>
-                    <Data>{{AMPS_DATA}}</Data>
                     <Value>CALLER_HOSTNAME=/FunctionCallerHostName</Value>
-                </Options>
-            </Do>
-            <Do>
-                <Module>amps-action-do-extract-values</Module>
-                <Options>
-                    <MessageType>json</MessageType>
-                    <Data>{{AMPS_DATA}}</Data>
                     <Value>CALLER=/FunctionInitiatorName</Value>
-                </Options>
-            </Do>
-            <Do>
-                <Module>amps-action-do-extract-values</Module>
-                <Options>
-                    <MessageType>json</MessageType>
-                    <Data>{{AMPS_DATA}}</Data>
                     <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP()+ TIMEZONEOFFSET())</Value>
                 </Options>
             </Do>
