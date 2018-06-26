@@ -78,6 +78,8 @@ public class JetFuelExecuteServer {
                 result.onCompleted(id, "You have to be a citizen to vote", false);
             } else if (age <= 20) {
                 result.onCompleted(id, "You have to be 21 or over to vote", false);
+            } else if (age > 150) {
+                result.onError(id, "No one lives longer and 150 years. You cant vote", false);
             } else {
                 result.onCompleted(id, "You can vote", true);
             }
