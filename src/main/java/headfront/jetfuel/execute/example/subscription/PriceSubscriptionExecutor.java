@@ -27,10 +27,15 @@ public class PriceSubscriptionExecutor extends SubscriptionExecutor {
             try {
                 Thread.sleep(1000);
                 System.out.println("sending " + callId);
-                result.onSubscriptionUpdate(callId, "Sending price " + count, "" + (100.25 * count));
-                count++;
+                if (count > 10) {
+                    result.onCompleted(callId, "Sending last price " + count, "" + (100.25 * count));
+                    keepRunning.set(false);
+                } else {
+                    result.onSubscriptionUpdate(callId, "Sending price " + count, "" + (100.25 * count));
+                    count++;
+                }
             } catch (InterruptedException e) {
-                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user" , FunctionState.SubCancelled);
+                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user", FunctionState.SubCancelled);
             }
         }
 
