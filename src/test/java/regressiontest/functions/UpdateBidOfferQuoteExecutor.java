@@ -26,7 +26,7 @@ public class UpdateBidOfferQuoteExecutor extends AbstractFunctionExecutor {
     }
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+    public void executeFunction(String id, List<Object> parameters,Map<String, Object> requestParameters,  FunctionResponseListener result) {
         try {
             String trader = parameters.get(0).toString();
             String instrument = parameters.get(1).toString();

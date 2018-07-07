@@ -27,7 +27,7 @@ public class PriceSubscriptionExecutor extends SubscriptionExecutor {
     public void run() {
         while (keepRunning.get()) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 double price = 100.25 * count;
                 result.onSubscriptionUpdate(callId, "Sending price " + count, "" + price);
                 count++;

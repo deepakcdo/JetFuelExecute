@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
 
@@ -24,7 +25,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
         this.functionParameters = functionParameters;
     }
 
-    public void validateAndExecuteFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+    public void validateAndExecuteFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String validate = FunctionUtils.validateParameters(parameters, functionParameters);
         if (validate == null) {
             try {
@@ -36,14 +37,15 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
                         result.onError(id, "Function not set up correctly", "");
 
                     } else {
-                        final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, (SubscriptionFunctionResponseListener) result);
+                        final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, requestParameters,
+                                (SubscriptionFunctionResponseListener) result);
                         final String reason = activeSubscriptionFactory.registerActiveServerSubscription(id, subscriptionExecutor);
                         if (reason != null) {
                             LOG.error("Unable to register SubscriptionExecutor for id " + id + " due to " + reason);
                         }
                     }
                 } else {
-                    executeFunction(id, parameters, result);
+                    executeFunction(id, parameters, requestParameters, result);
                 }
             } catch (Throwable e) {
                 result.onError(id, "Unable to process Function call", e.getMessage() + " " + e.toString());
@@ -56,7 +58,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     /**
      * Override this method
      */
-    protected void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+    protected void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeFunction() has not been extended";
         LOG.error(message);
         result.onError(id, "Function has not been setup correctly by the publisher", null);
@@ -66,7 +68,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     /**
      * Override this method
      */
-    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {
+    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, Map<String, Object> requestPArameters, SubscriptionFunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
         LOG.error(message);
         result.onError(id, "Function has not been setup correctly by the publisher", null);

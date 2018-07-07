@@ -12,6 +12,7 @@ import headfront.jetfuel.execute.utils.HaClientFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -66,7 +67,9 @@ public class JetFuelExecuteSubServer {
     static class PriceCreatorExecutor extends AbstractFunctionExecutor {
 
         @Override
-        protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, SubscriptionFunctionResponseListener result) {
+        protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters,
+                                                                   Map<String, Object> requestParameters,
+                                                                   SubscriptionFunctionResponseListener result) {
             String inst = parameters.get(0).toString();
             PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
             subExecutor.start();

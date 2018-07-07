@@ -4,6 +4,7 @@ import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -11,7 +12,8 @@ import java.util.List;
 public class UpdateBankTraderExecutor extends AbstractFunctionExecutor {
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+    public void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters,
+                                FunctionResponseListener result) {
         String name = parameters.get(0).toString();
         Boolean value = Boolean.parseBoolean(parameters.get(1).toString());
         String options = parameters.get(2).toString();

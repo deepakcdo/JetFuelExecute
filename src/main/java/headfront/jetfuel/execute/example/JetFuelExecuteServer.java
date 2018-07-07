@@ -14,6 +14,7 @@ import headfront.jetfuel.execute.utils.HaClientFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -71,7 +72,8 @@ public class JetFuelExecuteServer {
     static class AbleToVoteExecutor extends AbstractFunctionExecutor {
 
         @Override
-        protected void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+        protected void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters,
+                                       FunctionResponseListener result) {
             Boolean citizen = Boolean.parseBoolean(parameters.get(0).toString());
             Integer age = Integer.parseInt(parameters.get(1).toString());
             if (!citizen) {

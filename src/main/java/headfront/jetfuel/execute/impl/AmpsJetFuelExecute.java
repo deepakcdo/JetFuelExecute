@@ -484,7 +484,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private void processFunctionProcessRequest(String ampsFunctionCaller, String request, JetFuelFunction jetFuelFunction) {
         try {
-            Map map = jsonMapper.readValue(request, Map.class);
+            Map<String, Object> map = jsonMapper.readValue(request, Map.class);
             final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
             final String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
             final String currentState = map.get(JetFuelExecuteConstants.CURRENT_STATE).toString();
@@ -506,7 +506,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
                 LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFullFunctionName() + " with parameter " + parameters + " from caller " + caller);
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
-                    newExecutor.validateAndExecuteFunction(id, parameters, new FunctionResponseListener() {
+                    newExecutor.validateAndExecuteFunction(id, parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
                         @Override
                         public void onCompleted(String id, Object message, Object returnValue) {
                             createAndSendComplete(caller, message, returnValue, callerHostName, id);
@@ -519,7 +519,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
                     newExecutor.setActiveSubscriptionFactory(subscriptionRegistry);
-                    newExecutor.validateAndExecuteFunction(id, parameters, new SubscriptionFunctionResponseListener() {
+                    newExecutor.validateAndExecuteFunction(id, parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
                         @Override
                         public void onSubscriptionUpdate(String id, Object message, String update) {
                             createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
@@ -561,7 +561,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     private Map<String, Object> createDefaultMessageField(String caller, Object message, String callerHostName, String id) {
-        Map<String, Object> reply = new HashMap();
+        Map<String, Object> reply = new HashMap<>();
         reply.put(JetFuelExecuteConstants.FUNCTION_CALL_ID, id);
         reply.put(JetFuelExecuteConstants.MSG_CREATION_TIME, FunctionUtils.getIsoDateTime());
         reply.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);

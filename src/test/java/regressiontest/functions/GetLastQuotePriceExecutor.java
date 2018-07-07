@@ -11,6 +11,7 @@ import regressiontest.JetFuelExecuteServerTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,8 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
     }
 
     @Override
-    public void executeFunction(String id, List<Object> parameters, FunctionResponseListener result) {
+    public void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters,
+                                FunctionResponseListener result) {
         try {
             String instrument = parameters.get(0).toString();
             CountDownLatch wait = new CountDownLatch(1);
