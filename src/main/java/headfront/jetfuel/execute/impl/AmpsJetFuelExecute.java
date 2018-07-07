@@ -503,10 +503,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
             if (currentState.equalsIgnoreCase(FunctionState.RequestNew.name())) {
                 AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
-                newExecutor.setFunctionParameters(jetFuelFunction.getFunctionParameters());
                 LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFullFunctionName() + " with parameter " + parameters + " from caller " + caller);
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
-                    newExecutor.validateAndExecuteFunction(id, parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
+                    newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
+                            parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
                         @Override
                         public void onCompleted(String id, Object message, Object returnValue) {
                             createAndSendComplete(caller, message, returnValue, callerHostName, id);
@@ -519,7 +519,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
                     newExecutor.setActiveSubscriptionFactory(subscriptionRegistry);
-                    newExecutor.validateAndExecuteFunction(id, parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
+                    newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
+                            parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
                         @Override
                         public void onSubscriptionUpdate(String id, Object message, String update) {
                             createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);

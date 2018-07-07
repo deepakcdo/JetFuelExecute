@@ -8,6 +8,8 @@ import java.util.Map;
  */
 public interface FunctionProcessor {
 
-    void validateAndExecuteFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result);
+    void validateAndExecuteFunction(String id, List<FunctionParameter> functionParameters,
+                                    List<Object> parameters, Map<String, Object> requestParameters,
+                                    FunctionResponseListener result);
 
 }

@@ -16,16 +16,11 @@ import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
 public abstract class AbstractFunctionExecutor implements FunctionProcessor {
 
     private static Logger LOG = LoggerFactory.getLogger(AbstractFunctionExecutor.class);
-
-    private List<FunctionParameter> functionParameters;
     private ActiveSubscriptionRegistry activeSubscriptionFactory;
 
-    public void setFunctionParameters(List<FunctionParameter> functionParameters) {
-        notNull(functionParameters);
-        this.functionParameters = functionParameters;
-    }
 
-    public void validateAndExecuteFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
+    public void validateAndExecuteFunction(String id, List<FunctionParameter> functionParameters,
+                                           List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String validate = FunctionUtils.validateParameters(parameters, functionParameters);
         if (validate == null) {
             try {
