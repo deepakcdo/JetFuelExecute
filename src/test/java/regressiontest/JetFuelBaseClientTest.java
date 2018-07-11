@@ -1,5 +1,6 @@
 package regressiontest;
 
+import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.junit.Test;
@@ -22,7 +23,7 @@ import static junit.framework.TestCase.assertTrue;
 @ContextConfiguration(locations = {"/client/junitClientTest.xml"})
 public class JetFuelBaseClientTest extends JetFuelBaseTests {
 
-    public String callJetFuelFunction(String functionName, JetFuelFunction jetFuelFunction,
+    public String callJetFuelFunction(JetFuelExecute jetFuelExecute, String functionName, JetFuelFunction jetFuelFunction,
                                       Object[] functionParams, long testWaitTime,
                                       int onErrorCountExpected, boolean errorSetExpected,
                                       int onCompleteCountExpected, boolean completeSetExpected,
@@ -36,7 +37,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         if (runningBothClientAndSerer) {
 //            unPublishAndCheckFunction(jetFuelFunction);
             if (jetFuelExecute.getFunction(fullFunctionName) == null) {
-                publishAndCheckFunction(jetFuelFunction);
+                publishAndCheckFunction(jetFuelExecute, jetFuelFunction);
             }
         } else {
             if (!skipFunctionExistsTests) {
@@ -45,24 +46,36 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
                 assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
                         serverFunctions.size() >= 1);
+                boolean found = false;
+                final char lastChar = getLastChar(3);
+                String lookFor = "_" + lastChar + "_";
                 for (String existingFunction : functions) {
-                    if (existingFunction.endsWith(functionName)) {
+                    if (existingFunction.endsWith(functionName) && existingFunction.contains(lookFor)) {
                         fullFunctionName = existingFunction;
+                        found = true;
                         break;
                     }
                 }
+                if (!found) {
+                    for (String existingFunction : functions) {
+                        if (existingFunction.endsWith(functionName)) {
+                            fullFunctionName = existingFunction;
+                            break;
+                        }
+                    }
+                }
             } else {
-                final String connectionName = getAmpsConnectionNameToUse(functionName);
+                final String connectionName = getAmpsConnectionNameToUse(jetFuelExecute, functionName);
                 fullFunctionName = connectionName + FunctionUtils.NAME_SEPARATOR + functionName;
             }
         }
-        final String callID = callFunctionAndTest(fullFunctionName, functionParams, testWaitTime,
+        final String callID = callFunctionAndTest(jetFuelExecute, fullFunctionName, functionParams, testWaitTime,
                 onErrorCountExpected, errorSetExpected,
                 onCompleteCountExpected, completeSetExpected, onUdateCountExpected, onStateChangeExpected, updateMessages, updateValues,
                 messageExpected, returnValueExpected, exceptionMsgExpected, skipFunctionExistsTests, expectedSates,
                 checkMessagesAfterFunctionCall, isSubscription, cancelAfter);
         if (runningBothClientAndSerer) {
-            unPublishAndCheckFunction(jetFuelFunction);
+            unPublishAndCheckFunction(jetFuelExecute, jetFuelFunction);
         }
         return callID;
     }
@@ -70,7 +83,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callGetTradingDateWithNoParamsAndGetPositiveResponse() throws Exception {
         String expectedMsg = "Sending date";
-        callJetFuelFunction("getTradingDate", getTradingDateFunction,
+        callJetFuelFunction(getJetFuelExecute(), "getTradingDate", getTradingDateFunction,
                 new Object[]{}, sleepValueForTest,
                 0, false,
                 1, true,
@@ -82,7 +95,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callUpdateBankStatusAndGetPositiveResponse() throws Exception {
         String expectedMsg = "Deepak is authorised, Bank status is ON";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Deepak", true}, sleepValueForTest,
                 0, false,
                 1, true,
@@ -94,7 +107,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callUpdateBankStatusAndGetErrorResponse() throws Exception {
         String expectedMsg = "Jack always throws error.";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Jack", true}, sleepValueForTest,
                 1, true,
                 0, false,
@@ -107,7 +120,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     public void callUpdateBankStatusAndGetNullPointer() throws Exception {
         String expectedMsg = "Unable to process Function call";
         String expectedErrorMsg = "null java.lang.NullPointerException";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Amanda", true}, sleepValueForTest,
                 1, true,
                 0, false,
@@ -119,7 +132,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callUpdateBankStatusAndGetNegativeResponse() throws Exception {
         String expectedMsg = "Fred is not authorised";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Fred", true}, sleepValueForTest,
                 0, false,
                 1, true,
@@ -132,7 +145,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     public void callUpdatebankStatusAndGetTimeOutResponse() throws Exception {
         String expectedMsg = "Function Timeout";
         String expectedExceptionMsg = "Function publisher that published this function is not available now.";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Lucy", true}, 5000 + sleepValueForTest,
                 1, true, 0, false,
                 0, 0, new ArrayList<String>(), new ArrayList<String>(),
@@ -146,7 +159,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
 //        String expectedMsg = "Function Timeout";
         String expectedMsg = "Sarah is authorised, Bank status is ON";
         String expectedExecptionMsg = "Function publisher that published this function is not available now.";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"Sarah", true}, 8000 + sleepValueForTest,
                 1, true,
                 1, true,
@@ -160,8 +173,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callFunctionWithANameThatDoesNotExists() throws Exception {
         String invalidFunction = "updateBankStatusXXX";
-        String expectedMsg = "Function " + getAmpsConnectionNameToUse(invalidFunction) + ".updateBankStatusXXX(String, Boolean) is not available";
-        callJetFuelFunction(invalidFunction, updateBankStatusFunction,
+        String expectedMsg = "Function " + getAmpsConnectionNameToUse(getJetFuelExecute(), invalidFunction) + ".updateBankStatusXXX(String, Boolean) is not available";
+        callJetFuelFunction(getJetFuelExecute(), invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", true}, sleepValueForTest,
                 1, true, 0, false,
                 0, 0, new ArrayList<String>(), new ArrayList<String>(),
@@ -173,7 +186,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     public void callFunctionWithAParameterSetThatDoesNotExists() throws Exception {
         String expectedMsg = "Validation failed.";
         String expectedExecptionMsg = "Parameter at index 2 was 55 with type class java.lang.Integer we expected class java.lang.Boolean";
-        callJetFuelFunction("updateBankStatus", updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), "updateBankStatus", updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
                 false, 0, 0,
@@ -184,7 +197,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
 
     @Test
     public void callFunctionExecuteOnAFunctionThatIsOfTypeSubscriptionShouldFail() throws Exception {
-        callJetFuelFunction("getNextThreePriceTicksInvalid", getNextThreePriceTicksInvalidFunction,
+        callJetFuelFunction(getJetFuelExecute(), "getNextThreePriceTicksInvalid", getNextThreePriceTicksInvalidFunction,
                 new Object[]{"DE00012312"}, sleepValueForTest,
                 0, false, 0,
                 false, 0, 0,
@@ -196,8 +209,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callFunctionWithANameAndParameterSetThatDoesNotExists() throws Exception {
         String invalidFunction = "updateBankStatusXXX";
-        String expectedMsg = "Function " + getAmpsConnectionNameToUse(invalidFunction) + ".updateBankStatusXXX(String, Integer) is not available";
-        callJetFuelFunction(invalidFunction, updateBankStatusFunction,
+        String expectedMsg = "Function " + getAmpsConnectionNameToUse(getJetFuelExecute(), invalidFunction) + ".updateBankStatusXXX(String, Integer) is not available";
+        callJetFuelFunction(getJetFuelExecute(), invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", 55}, sleepValueForTest,
                 1, true, 0,
                 false,
@@ -209,7 +222,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callFunctionWithWithANullParameter() throws Exception {
         String functionName = "updateBankStatus";
-        callJetFuelFunction(functionName, updateBankStatusFunction,
+        callJetFuelFunction(getJetFuelExecute(), functionName, updateBankStatusFunction,
                 new Object[]{null, 55}, sleepValueForTest,
                 1, true, 0,
                 false,
@@ -222,8 +235,8 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
     @Test
     public void callFunctionWithUnSupportedParameter() throws Exception {
         String invalidFunction = "updateBankStatusXXX";
-        String expectedMsg = "Function " + getAmpsConnectionNameToUse(invalidFunction) + ".updateBankStatusXXX(String, BigDecimal) is not available";
-        callJetFuelFunction(invalidFunction, updateBankStatusFunction,
+        String expectedMsg = "Function " + getAmpsConnectionNameToUse(getJetFuelExecute(), invalidFunction) + ".updateBankStatusXXX(String, BigDecimal) is not available";
+        callJetFuelFunction(getJetFuelExecute(), invalidFunction, updateBankStatusFunction,
                 new Object[]{"James", new BigDecimal(45)}, sleepValueForTest,
                 1, true,
                 0, false, 0, 0,
@@ -243,7 +256,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         for (int i = 0; i < 10; i++) {
             lastBid = offset + i;
             lastOffer = offset + 1 + i;
-            lastCallId = callJetFuelFunction("updateQuotePrice", updateBidOfferQuoteStatusFunction,
+            lastCallId = callJetFuelFunction(getJetFuelExecute(), "updateQuotePrice", updateBidOfferQuoteStatusFunction,
                     new Object[]{"Deepak", testInstrument, lastBid, lastOffer}, sleepValueForTest,
                     0, false, 1, true,
                     0, 0, new ArrayList<String>(), new ArrayList<String>(),
@@ -255,7 +268,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         String functionName = "getLastQuote";
         String responseJson = "{\"FunctionID\":\"" + lastCallId + "\",\"BidPrice\":"
                 + lastBid + ",\"Trader\":\"Deepak\",\"ID\":\"" + testInstrument + "\",\"OfferPrice\":" + lastOffer + "}";
-        callJetFuelFunction(functionName, getLastQuoteFunction,
+        callJetFuelFunction(getJetFuelExecute(), functionName, getLastQuoteFunction,
                 new Object[]{testInstrument}, sleepValueForTest,
                 0, false,
                 1, true,
@@ -271,7 +284,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         String[] states = {"SubActive", "SubUpdate", "SubUpdate", "SubUpdate", "Completed"};
         String[] messages = {"Subscription  for DE123908 is valid", "Sending price 1", "Sending price 2", "Sending price 3", "Subscription completed as we sent the required prices"};
         String[] updates = {"100.25", "200.5", "300.75"};
-        callJetFuelFunction("getNextThreePriceTicks", getNextThreePriceTicksFunction,
+        callJetFuelFunction(getJetFuelExecute(), "getNextThreePriceTicks", getNextThreePriceTicksFunction,
                 new Object[]{"DE123908"}, sleepValueForSubTest,
                 0, false,
                 1, true,
@@ -286,11 +299,11 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
         String[] states = {"SubActive", "SubUpdate", "SubUpdate", "RequestCancelSub", "SubCancelled"};
         String[] messages = {"Subscription  for DE123908 is valid", "Sending price 1", "Sending price 2", "Subscription cancelled by user"};
         String[] updates = {"100.25", "200.5"};
-        callJetFuelFunction("getMarketPrice", getMarketPriceFunction,
+        callJetFuelFunction(getJetFuelExecute(), "getMarketPrice", getMarketPriceFunction,
                 new Object[]{"DE123908"}, sleepValueForSubTest,
                 0, false, 0, false,
                 2, 2, Arrays.asList(messages), Arrays.asList(updates),
                 expectedMsg, null, null, false,
-                states, true, true, 2900);
+                states, true, true, 2);
     }
 }

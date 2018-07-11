@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <bean id="haClient1" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}_1"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+
+    <bean id="haClient2" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}_2"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+    <bean id="haClient3" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}_3"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+    <bean id="haClient4" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}_4"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+    <bean id="haClient5" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="${appName}_5"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="true"/>
+    </bean>
+
+
+</beans>

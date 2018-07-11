@@ -6,6 +6,7 @@ import com.crankuptheamps.client.HAClient;
 import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
+import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
@@ -45,6 +46,16 @@ public class JetFuelBaseTests {
     @Autowired
     AmpsJetFuelExecute jetFuelExecute;
     @Autowired
+    AmpsJetFuelExecute jetFuelExecute1;
+    @Autowired
+    AmpsJetFuelExecute jetFuelExecute2;
+    @Autowired
+    AmpsJetFuelExecute jetFuelExecute3;
+    @Autowired
+    AmpsJetFuelExecute jetFuelExecute4;
+    @Autowired
+    AmpsJetFuelExecute jetFuelExecute5;
+    @Autowired
     JetFuelFunction updateBankStatusFunction;
     @Autowired
     JetFuelFunction updateBidOfferQuoteStatusFunction;
@@ -64,11 +75,22 @@ public class JetFuelBaseTests {
     JetFuelFunction getMarketPriceFunction;
 
     @Autowired
+    JetFuelFunction updateBankStatusFunction1;
+    @Autowired
+    JetFuelFunction updateBankStatusFunction2;
+    @Autowired
+    JetFuelFunction updateBankStatusFunction3;
+    @Autowired
+    JetFuelFunction updateBankStatusFunction4;
+    @Autowired
+    JetFuelFunction updateBankStatusFunction5;
+
+    @Autowired
     ObjectMapper jsonMapper;
 
     protected boolean runningBothClientAndSerer = true;
 
-    protected void publishAndCheckFunction(JetFuelFunction function) throws Exception {
+    protected void publishAndCheckFunction(JetFuelExecute jetFuelExecute, JetFuelFunction function) throws Exception {
         int expectedSize = jetFuelExecute.getAvailableFunctions().size() + 1;
         final String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), function.getFunctionName());
         CountDownLatch latch = new CountDownLatch(1);
@@ -86,7 +108,7 @@ public class JetFuelBaseTests {
                 availableFunctions.contains(fullFunctionName));
     }
 
-    protected void checkDuplicateFunctionsCantBePublished(JetFuelFunction function) throws Exception {
+    protected void checkDuplicateFunctionsCantBePublished(JetFuelExecute jetFuelExecute, JetFuelFunction function) throws Exception {
         Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
         assertTrue("We should have some function published  and we have " + availableFunctions.size() + " functions",
                 availableFunctions.size() > 0);
@@ -99,7 +121,7 @@ public class JetFuelBaseTests {
                 availableFunctions.size() > 0);
     }
 
-    protected void unPublishAndCheckFunction(JetFuelFunction function) throws Exception {
+    protected void unPublishAndCheckFunction(JetFuelExecute jetFuelExecute, JetFuelFunction function) throws Exception {
         int expectedSize = jetFuelExecute.getAvailableFunctions().size() - 1;
         CountDownLatch latch = new CountDownLatch(1);
         final String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), function.getFunctionName());
@@ -117,7 +139,7 @@ public class JetFuelBaseTests {
                 !availableFunctions.contains(fullFunctionName));
     }
 
-    protected String callFunctionAndTest(String fullFunctionName, Object[] functionParams, long testWaitTime,
+    protected String callFunctionAndTest(JetFuelExecute jetFuelExecute, String fullFunctionName, Object[] functionParams, long testWaitTime,
                                          int onErrorCountExpected, boolean errorSetExpected,
                                          int onCompleteCountExpected, boolean completeSetExpected,
                                          int onUdateCountExpected, int onStateChangeExpected,
@@ -160,11 +182,16 @@ public class JetFuelBaseTests {
         String callID;
         TestFunctionResponseListener response;
         if (isSubFunction) {
-            response = new TestSubscriptionFunctionResponseListener(responseWaitLatch);
+            CountDownLatch count = new CountDownLatch(cancelAfter);
+            response = new TestSubscriptionFunctionResponseListener(responseWaitLatch, update -> {
+                count.countDown();
+            });
             callID = jetFuelExecute.executeSubscriptionFunction(fullFunctionName, functionParams, (SubscriptionFunctionResponseListener) response);
-            if (cancelAfter > 0) {
-                Thread.sleep(cancelAfter);
-                jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
+            final boolean await = count.await(5, TimeUnit.SECONDS);
+            if (await) {
+                if (cancelAfter > 0) {
+                    jetFuelExecute.cancelSubscriptionFunctionRequest(callID);
+                }
             }
         } else {
             response = new TestFunctionResponseListener(responseWaitLatch);
@@ -233,7 +260,7 @@ public class JetFuelBaseTests {
 
             String instanceOwnerFromFirstMessage = null;
             for (int i = 0; i < expectedMessagesForFunction; i++) {
-                final Map<String, Object> expectedMessage = createExpectedMessage(i, expectedStates, fullFunctionName,
+                final Map<String, Object> expectedMessage = createExpectedMessage(jetFuelExecute, i, expectedStates, fullFunctionName,
                         msgCreationTime, nextId, functionParams, returnValueExpected, messageExpected, exceptionMsgExpected,
                         instanceOwnerFromFirstMessage, updateMessagesExpected, updateValuesExpected, isSubFunction);
                 final String messageFromSubscription = messages.get(i);
@@ -266,7 +293,7 @@ public class JetFuelBaseTests {
     }
 
 
-    private Map<String, Object> createExpectedMessage(int i, String[] expectedStates, String fullFunctionName,
+    private Map<String, Object> createExpectedMessage(JetFuelExecute jetFuelExecute, int i, String[] expectedStates, String fullFunctionName,
                                                       String msgCreationTime, String nextId, Object[] functionParams,
                                                       Object returnValueExpected, String messageExpected,
                                                       String exceptionMsgExpected,
@@ -364,7 +391,7 @@ public class JetFuelBaseTests {
         this.runningBothClientAndSerer = runningBothClientAndSerer;
     }
 
-    protected String getAmpsConnectionNameToUse(String functionName) {
+    protected String getAmpsConnectionNameToUse(JetFuelExecute jetFuelExecute, String functionName) {
         if (runningBothClientAndSerer) {
             return jetFuelExecute.getConnectionName();
         } else {
@@ -442,5 +469,31 @@ public class JetFuelBaseTests {
             default:
                 return "OverTenth";
         }
+    }
+
+    protected JetFuelExecute getJetFuelExecute() {
+        // test code so just find which one to use via method name
+        final char c = getLastChar(2);
+        switch (c) {
+            case '1':
+                return jetFuelExecute1;
+            case '2':
+                return jetFuelExecute2;
+            case '3':
+                return jetFuelExecute3;
+            case '4':
+                return jetFuelExecute4;
+            case '5':
+                return jetFuelExecute5;
+            default:
+                return jetFuelExecute;
+        }
+    }
+
+    protected char getLastChar(int index) {
+        final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+        final StackTraceElement stackTraceElement = ste[index];
+        final String methodName = stackTraceElement.getMethodName();
+        return methodName.charAt(methodName.length() - 1);
     }
 }

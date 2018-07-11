@@ -30,8 +30,7 @@ public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
             // We dont know about lucy so we never reply
         } else if (name.equalsIgnoreCase("Jack")) {
             result.onError(id, "Jack always throws error.", "Authorisation exception");
-        }
-        else if (name.equalsIgnoreCase("Fred")) {
+        } else if (name.equalsIgnoreCase("Fred")) {
             result.onCompleted(id, "Fred is not authorised", false);
         } else {
             Boolean value = Boolean.parseBoolean(parameters.get(1).toString());

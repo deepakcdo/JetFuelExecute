@@ -69,7 +69,9 @@
             <MessageType>json</MessageType>
             <Expiration>25h</Expiration>
             <Enrichment>
-                <Field>IF(/AmpsInstanceOwner OF PREVIOUS IS NULL, IF(/CurrentState OF CURRENT == 'RequestNew', 'LDN-PRIMARY', /AmpsInstanceOwner OF CURRENT), /AmpsInstanceOwner OF PREVIOUS) as /AmpsInstanceOwner</Field>
+                <Field>IF(/AmpsInstanceOwner OF PREVIOUS IS NULL, IF(/CurrentState OF CURRENT == 'RequestNew',
+                    'LDN-PRIMARY', /AmpsInstanceOwner OF CURRENT), /AmpsInstanceOwner OF PREVIOUS) as /AmpsInstanceOwner
+                </Field>
             </Enrichment>
         </Topic>
 
@@ -82,14 +84,31 @@
                 <Field>REGEXP_REPLACE(/MsgCreationTime,"T.*","") as /Date</Field>
             </Preprocessing>
             <Enrichment>
-                <Field>IF(/CurrentState OF CURRENT == 'RequestNew',IF(/RequestNewCount OF PREVIOUS IS NULL, 1, (/RequestNewCount OF PREVIOUS) + 1), /RequestNewCount OF PREVIOUS) as /RequestNewCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'Completed',IF(/CompletedCount OF PREVIOUS IS NULL, 1, (/CompletedCount OF PREVIOUS) + 1), /CompletedCount OF PREVIOUS) as /CompletedCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'Error', IF(/ErrorCount OF PREVIOUS IS NULL, 1, (/ErrorCount OF PREVIOUS) + 1), /ErrorCount OF PREVIOUS) as /ErrorCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'Timeout', IF(/TimeoutCount OF PREVIOUS IS NULL, 1, (/TimeoutCount OF PREVIOUS) + 1), /TimeoutCount OF PREVIOUS) as /TimeoutCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'RequestCancelSub', IF(/RequestCancelSubCount OF PREVIOUS IS NULL, 1, (/RequestCancelSubCount OF PREVIOUS) + 1), /RequestCancelSubCount OF PREVIOUS) as /RequestCancelSubCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'SubCancelled', IF(/SubCancelledCount OF PREVIOUS IS NULL, 1, (/SubCancelledCount OF PREVIOUS) + 1), /SubCancelledCount OF PREVIOUS) as /SubCancelledCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'SubUpdate', IF(/SubUpdateCount OF PREVIOUS IS NULL, 1, (/SubUpdateCount OF PREVIOUS) + 1), /SubUpdateCount OF PREVIOUS) as /SubUpdateCount</Field>
-                <Field>IF(/CurrentState OF CURRENT == 'SubActive', IF(/SubActiveCount OF PREVIOUS IS NULL, 1, (/SubActiveCount OF PREVIOUS) + 1), /SubActiveCount OF PREVIOUS) as /SubActiveCount</Field>
+                <Field>IF(/CurrentState OF CURRENT == 'RequestNew',IF(/RequestNewCount OF PREVIOUS IS NULL, 1,
+                    (/RequestNewCount OF PREVIOUS) + 1), /RequestNewCount OF PREVIOUS) as /RequestNewCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Completed',IF(/CompletedCount OF PREVIOUS IS NULL, 1,
+                    (/CompletedCount OF PREVIOUS) + 1), /CompletedCount OF PREVIOUS) as /CompletedCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Error', IF(/ErrorCount OF PREVIOUS IS NULL, 1, (/ErrorCount OF
+                    PREVIOUS) + 1), /ErrorCount OF PREVIOUS) as /ErrorCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'Timeout', IF(/TimeoutCount OF PREVIOUS IS NULL, 1, (/TimeoutCount
+                    OF PREVIOUS) + 1), /TimeoutCount OF PREVIOUS) as /TimeoutCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'RequestCancelSub', IF(/RequestCancelSubCount OF PREVIOUS IS NULL,
+                    1, (/RequestCancelSubCount OF PREVIOUS) + 1), /RequestCancelSubCount OF PREVIOUS) as
+                    /RequestCancelSubCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubCancelled', IF(/SubCancelledCount OF PREVIOUS IS NULL, 1,
+                    (/SubCancelledCount OF PREVIOUS) + 1), /SubCancelledCount OF PREVIOUS) as /SubCancelledCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubUpdate', IF(/SubUpdateCount OF PREVIOUS IS NULL, 1,
+                    (/SubUpdateCount OF PREVIOUS) + 1), /SubUpdateCount OF PREVIOUS) as /SubUpdateCount
+                </Field>
+                <Field>IF(/CurrentState OF CURRENT == 'SubActive', IF(/SubActiveCount OF PREVIOUS IS NULL, 1,
+                    (/SubActiveCount OF PREVIOUS) + 1), /SubActiveCount OF PREVIOUS) as /SubActiveCount
+                </Field>
                 <Field>IF(/MsgCreationTime == 1, NULL, NULL) AS /MsgCreationTime HINT OPTIONAL</Field>
                 <Field>IF(/MsgCreationName == 1, NULL, NULL) AS /MsgCreationName HINT OPTIONAL</Field>
                 <Field>IF(/FunctionCallerHostName == 1, NULL, NULL) AS /FunctionCallerHostName HINT OPTIONAL</Field>
@@ -430,7 +449,9 @@
                     <Value>ID_TO_USE=/ID</Value>
                     <Value>CALLER_HOSTNAME=/FunctionCallerHostName</Value>
                     <Value>CALLER=/FunctionInitiatorName</Value>
-                    <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP()+ TIMEZONEOFFSET())</Value>
+                    <Value>FORMATTED_DATE_TIME = STRFTIME("%Y-%m-%dT%H:%M:%S.%03f", UNIX_TIMESTAMP()+
+                        TIMEZONEOFFSET())
+                    </Value>
                 </Options>
             </Do>
             <Do>
@@ -440,7 +461,10 @@
                     <Topic>JETFUEL_EXECUTE_BUS</Topic>
                     <Delta>True</Delta>
                     <UpdateOnly>True</UpdateOnly>
-                    <Data>{"ID":"{{ID_TO_USE}}","FunctionCallerHostName":"{{CALLER_HOSTNAME}}","FunctionInitiatorName":"{{CALLER}}","MsgCreationName":"LDN-PRIMARY","MsgCreationTime":"{{FORMATTED_DATE_TIME}}","CurrentState":"Timeout","CurrentStateMsg":"Function publisher that published this function is not available now."}</Data>
+                    <Data>
+                        {"ID":"{{ID_TO_USE}}","FunctionCallerHostName":"{{CALLER_HOSTNAME}}","FunctionInitiatorName":"{{CALLER}}","MsgCreationName":"LDN-PRIMARY","MsgCreationTime":"{{FORMATTED_DATE_TIME}}","CurrentState":"Timeout","CurrentStateMsg":"Function
+                        publisher that published this function is not available now."}
+                    </Data>
                 </Options>
             </Do>
         </Action>

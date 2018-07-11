@@ -9,15 +9,56 @@
     <context:property-placeholder location="classpath*:shared.properties,server/junitServerTest.properties"/>
 
     <import resource="classpath:amps.xml"/>
+    <import resource="classpath:server\extra_amps.xml"/>
     <import resource="classpath:functions.xml"/>
 
     <bean id="jetFuelExecute" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
           init-method="initialise">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" ref="jsonMapper"/>
-        <property name="functionIDGenerator" ref="testIDGenerator" />
-        <property name="functionTopic" value="${functionTopic}" />
-        <property name="functionBusTopic" value="${functionBusTopic}" />
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
+    </bean>
+    <bean id="jetFuelExecute1" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
+          init-method="initialise">
+        <constructor-arg index="0" ref="haClient1"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
+    </bean>
+    <bean id="jetFuelExecute2" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
+          init-method="initialise">
+        <constructor-arg index="0" ref="haClient2"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
+    </bean>
+    <bean id="jetFuelExecute3" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
+          init-method="initialise">
+        <constructor-arg index="0" ref="haClient3"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
+    </bean>
+    <bean id="jetFuelExecute4" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
+          init-method="initialise">
+        <constructor-arg index="0" ref="haClient4"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
+    </bean>
+    <bean id="jetFuelExecute5" class="headfront.jetfuel.execute.impl.AmpsJetFuelExecute"
+          init-method="initialise">
+        <constructor-arg index="0" ref="haClient5"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <property name="functionIDGenerator" ref="testIDGenerator"/>
+        <property name="functionTopic" value="${functionTopic}"/>
+        <property name="functionBusTopic" value="${functionBusTopic}"/>
     </bean>
 
 </beans>

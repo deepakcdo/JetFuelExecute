@@ -26,6 +26,7 @@ public class TestFunctionResponseListener implements FunctionResponseListener {
         this.latch = latch;
     }
 
+
     @Override
     public void onCompleted(String id, Object message, Object returnValue) {
         this.id = id;

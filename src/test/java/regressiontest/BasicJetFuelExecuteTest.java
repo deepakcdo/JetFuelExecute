@@ -15,58 +15,58 @@ public class BasicJetFuelExecuteTest extends JetFuelBaseClientTest {
 
     @Test
     public void creatingBankUpdateFunctionsThenUnpublish() throws Exception {
-        publishAndCheckFunction(updateBankStatusFunction);
-        unPublishAndCheckFunction(updateBankStatusFunction);
+        publishAndCheckFunction(getJetFuelExecute(), updateBankStatusFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), updateBankStatusFunction);
     }
 
     @Test
     public void creatingBidOfferQuoteStatusFunctionsThenUnpublish() throws Exception {
-        publishAndCheckFunction(updateBidOfferQuoteStatusFunction);
-        unPublishAndCheckFunction(updateBidOfferQuoteStatusFunction);
+        publishAndCheckFunction(getJetFuelExecute(), updateBidOfferQuoteStatusFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), updateBidOfferQuoteStatusFunction);
     }
 
     @Test
     public void creatingUpdateQuoteStatusFunctionThenUnpublish() throws Exception {
-        publishAndCheckFunction(updateQuoteStatusFunction);
-        unPublishAndCheckFunction(updateQuoteStatusFunction);
+        publishAndCheckFunction(getJetFuelExecute(), updateQuoteStatusFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), updateQuoteStatusFunction);
     }
 
     @Test
     public void creatingGetLastQuoteFunctionsThenUnpublish() throws Exception {
-        publishAndCheckFunction(getLastQuoteFunction);
-        unPublishAndCheckFunction(getLastQuoteFunction);
+        publishAndCheckFunction(getJetFuelExecute(), getLastQuoteFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), getLastQuoteFunction);
     }
 
     @Test
     public void creatingGetTradingDateFunctionsThenUnpublish() throws Exception {
-        publishAndCheckFunction(getTradingDateFunction);
-        unPublishAndCheckFunction(getTradingDateFunction);
+        publishAndCheckFunction(getJetFuelExecute(), getTradingDateFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), getTradingDateFunction);
     }
 
     @Test
     public void creatingDuplicateBankUpdateFunctionsThenUnpublish() throws Exception {
-        publishAndCheckFunction(updateBankStatusFunction);
-        checkDuplicateFunctionsCantBePublished(updateBankStatusFunction);
-        unPublishAndCheckFunction(updateBankStatusFunction);
+        publishAndCheckFunction(getJetFuelExecute(), updateBankStatusFunction);
+        checkDuplicateFunctionsCantBePublished(getJetFuelExecute(), updateBankStatusFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), updateBankStatusFunction);
     }
 
     @Test
     public void testCreatingASameMethodWithDifferentParameters() throws Exception {
-        publishAndCheckFunction(updateBidOfferQuoteStatusFunction);
-        checkDuplicateFunctionsCantBePublished(updateBidQuoteStatusFunction);
-        unPublishAndCheckFunction(updateBankStatusFunction);
+        publishAndCheckFunction(getJetFuelExecute(), updateBidOfferQuoteStatusFunction);
+        checkDuplicateFunctionsCantBePublished(getJetFuelExecute(), updateBidQuoteStatusFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), updateBankStatusFunction);
     }
 
     @Test
     public void creatingGetNextThreePriceTicksThenUnpublish() throws Exception {
-        publishAndCheckFunction(getNextThreePriceTicksFunction);
-        unPublishAndCheckFunction(getNextThreePriceTicksFunction);
+        publishAndCheckFunction(getJetFuelExecute(), getNextThreePriceTicksFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), getNextThreePriceTicksFunction);
     }
 
     @Test
     public void creatingGetNextThreePriceTicksInvalidThenUnpublish() throws Exception {
-        publishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
-        unPublishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
+        publishAndCheckFunction(getJetFuelExecute(), getNextThreePriceTicksInvalidFunction);
+        unPublishAndCheckFunction(getJetFuelExecute(), getNextThreePriceTicksInvalidFunction);
     }
 
 }

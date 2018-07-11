@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 /**
  * Created by Deepak on 22/01/2018.
@@ -22,9 +23,11 @@ public class TestSubscriptionFunctionResponseListener extends TestFunctionRespon
     protected volatile List<String> allMessages = new ArrayList<>();
     protected volatile List<String> updateMessages = new ArrayList<>();
     protected volatile List<String> stateChnagedMessages = new ArrayList<>();
+    private Consumer<Integer> updateListener;
 
-    public TestSubscriptionFunctionResponseListener(CountDownLatch latch) {
+    public TestSubscriptionFunctionResponseListener(CountDownLatch latch, Consumer<Integer> updateListener) {
         super(latch);
+        this.updateListener = updateListener;
     }
 
     @Override
@@ -35,6 +38,9 @@ public class TestSubscriptionFunctionResponseListener extends TestFunctionRespon
         updateMessages.add((String) message);
         onSubUpdateCount++;
         subscriptionUpdates.add(update);
+        if (updateListener != null) {
+            updateListener.accept(onSubUpdateCount);
+        }
         latch.countDown();
         if (LOG.isDebugEnabled()) {
             LOG.debug("onSubscriptionUpdate called on " + id + " message " + message + " update " + update);

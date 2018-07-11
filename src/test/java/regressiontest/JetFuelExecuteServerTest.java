@@ -22,14 +22,20 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
     @Test
     public void publishFunctionsAndWait5min() throws Exception {
 
-        publishAndCheckFunction(updateBankStatusFunction);
-        publishAndCheckFunction(updateBidOfferQuoteStatusFunction);
-        publishAndCheckFunction(updateQuoteStatusFunction);
-        publishAndCheckFunction(getLastQuoteFunction);
-        publishAndCheckFunction(getTradingDateFunction);
-        publishAndCheckFunction(getNextThreePriceTicksFunction);
-        publishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
-        publishAndCheckFunction(getMarketPriceFunction);
+        publishAndCheckFunction(jetFuelExecute, updateBankStatusFunction);
+        publishAndCheckFunction(jetFuelExecute, updateBidOfferQuoteStatusFunction);
+        publishAndCheckFunction(jetFuelExecute, updateQuoteStatusFunction);
+        publishAndCheckFunction(jetFuelExecute, getLastQuoteFunction);
+        publishAndCheckFunction(jetFuelExecute, getTradingDateFunction);
+        publishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksFunction);
+        publishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksInvalidFunction);
+        publishAndCheckFunction(jetFuelExecute, getMarketPriceFunction);
+
+        publishAndCheckFunction(jetFuelExecute1, updateBankStatusFunction1);
+        publishAndCheckFunction(jetFuelExecute2, updateBankStatusFunction2);
+        publishAndCheckFunction(jetFuelExecute3, updateBankStatusFunction3);
+        publishAndCheckFunction(jetFuelExecute4, updateBankStatusFunction4);
+        publishAndCheckFunction(jetFuelExecute5, updateBankStatusFunction5);
 
         LOG.info("Waiting for 5 minutes");
         // run for 5 min
@@ -45,14 +51,21 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         }
         LOG.info("Done Waiting for test, unpublishing functions");
 
-        unPublishAndCheckFunction(updateBankStatusFunction);
-        unPublishAndCheckFunction(updateBidOfferQuoteStatusFunction);
-        unPublishAndCheckFunction(updateQuoteStatusFunction);
-        unPublishAndCheckFunction(getLastQuoteFunction);
-        unPublishAndCheckFunction(getTradingDateFunction);
-        unPublishAndCheckFunction(getNextThreePriceTicksFunction);
-        unPublishAndCheckFunction(getNextThreePriceTicksInvalidFunction);
-        unPublishAndCheckFunction(getMarketPriceFunction);
+        unPublishAndCheckFunction(jetFuelExecute, updateBankStatusFunction);
+        unPublishAndCheckFunction(jetFuelExecute, updateBidOfferQuoteStatusFunction);
+        unPublishAndCheckFunction(jetFuelExecute, updateQuoteStatusFunction);
+        unPublishAndCheckFunction(jetFuelExecute, getLastQuoteFunction);
+        unPublishAndCheckFunction(jetFuelExecute, getTradingDateFunction);
+        unPublishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksFunction);
+        unPublishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksInvalidFunction);
+        unPublishAndCheckFunction(jetFuelExecute, getMarketPriceFunction);
+
+        unPublishAndCheckFunction(jetFuelExecute1, updateBankStatusFunction1);
+        unPublishAndCheckFunction(jetFuelExecute2, updateBankStatusFunction2);
+        unPublishAndCheckFunction(jetFuelExecute3, updateBankStatusFunction3);
+        unPublishAndCheckFunction(jetFuelExecute4, updateBankStatusFunction4);
+        unPublishAndCheckFunction(jetFuelExecute5, updateBankStatusFunction5);
+
         jetFuelExecute.shutDown();
         LOG.info("All Tests completed");
     }

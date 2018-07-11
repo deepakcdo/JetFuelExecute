@@ -168,7 +168,8 @@
 
     <bean id="getNextThreePriceTicksInvalidFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="getNextThreePriceTicksInvalid"/>
-        <constructor-arg index="1" value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
+        <constructor-arg index="1"
+                         value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
         <constructor-arg index="2">
             <list>
                 <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
@@ -187,7 +188,8 @@
 
     <bean id="getNextThreePriceTicksFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="getNextThreePriceTicks"/>
-        <constructor-arg index="1" value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
+        <constructor-arg index="1"
+                         value="Get the next three price ticks from the market. The subscription message will be of a json string with fields of instrumentId and midPrice"/>
         <constructor-arg index="2">
             <list>
                 <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
@@ -206,7 +208,8 @@
 
     <bean id="getMarketPriceFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
         <constructor-arg index="0" value="getMarketPrice"/>
-        <constructor-arg index="1" value="Send the market price of the instrument. The subscription message will be of a string with a price in it"/>
+        <constructor-arg index="1"
+                         value="Send the market price of the instrument. The subscription message will be of a string with a price in it"/>
         <constructor-arg index="2">
             <list>
                 <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
@@ -264,6 +267,126 @@
         <constructor-arg index="3" value="java.lang.Boolean"/>
         <constructor-arg index="4" value="Return true if successful otherwise false"/>
         <constructor-arg index="5" ref="handleTraderStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction1" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction2" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction3" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction4" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="updateBankStatusFunction5" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="updateBankStatus"/>
+        <constructor-arg index="1" value="Update bank status by passing tradername and new status"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="traderName"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Trader name changing bank status"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="status"/>
+                    <constructor-arg value="java.lang.Boolean"/>
+                    <constructor-arg value="New bank status"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.Boolean"/>
+        <constructor-arg index="4" value="Return true if successful otherwise false"/>
+        <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
     </bean>
