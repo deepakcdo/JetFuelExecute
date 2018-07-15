@@ -110,4 +110,14 @@ public interface JetFuelExecute {
      */
     void cancelSubscriptionFunctionRequest(String callId);
 
+    /**
+     * @return number of functions that have not completed. i.e they are active and we may get a response
+     */
+    int getUncompletedFunctionCount();
+
+    /**
+     * @return a set of function id that we are still expecting a response
+     */
+    Set<String> getUncompletedFunctionIds();
+
 }

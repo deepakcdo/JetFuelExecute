@@ -1,5 +1,6 @@
 package regressiontest;
 
+import headfront.jetfuel.execute.JetFuelExecute;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -60,21 +62,58 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
         runNamedTest(foundFunction.get());
     }
 
-//    @Test
-//    public void callUpdateBankStatusAndGetPositiveResponseALL() throws Exception {
-//        runNamedTest("*.updateBankStatus");
-//    }
+    @Test
+    public void callUpdateBankStatusAndGetPositiveResponseALL() throws Exception {
+        JetFuelExecute jetFuelExecuteToUse = getJetFuelExecute();
+        final int uncompletedFunctionCountBeforeTest = jetFuelExecuteToUse.getUncompletedFunctionCount();
+        String functionName = "*.updateBankStatus";
+        String expectedMsg = "Deepak is authorised, Bank status is ON";
+        callJetFuelFunction(jetFuelExecuteToUse, functionName, null,
+                new Object[]{"Deepak", true}, sleepValueForTest,
+                0, false,
+                6, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, true, null, false,
+                new String[]{"Completed", "Completed", "Completed", "Completed", "Completed", "Completed"},
+                true, false, 0);
+        assertEquals("UnComplete function count should match", uncompletedFunctionCountBeforeTest + 1,
+                jetFuelExecuteToUse.getUncompletedFunctionCount());
+    }
+
+    @Test
+    public void callUpdateBankStatusAndGetPositiveResponseFrom_1_And_3_only() throws Exception {
+        JetFuelExecute jetFuelExecuteToUse = getJetFuelExecute();
+        final int uncompletedFunctionCountBeforeTest = jetFuelExecuteToUse.getUncompletedFunctionCount();
+        String functionName = "*.updateBankStatus";
+        String traderName = "1_3_Only";
+        String expectedMsg = traderName + " is authorised, Bank status is ON";
+        callJetFuelFunction(jetFuelExecuteToUse, functionName, null,
+                new Object[]{traderName, true}, sleepValueForTest,
+                0, false,
+                2, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, true, null, false,
+                new String[]{"Completed", "Completed"},
+                true, false, 0);
+        assertEquals("UnComplete function count should match", uncompletedFunctionCountBeforeTest + 1,
+                jetFuelExecuteToUse.getUncompletedFunctionCount());
+    }
 
     private void runNamedTest(String functionName) throws Exception {
+        JetFuelExecute jetFuelExecuteToUse = getJetFuelExecute();
+        final int uncompletedFunctionCountBeforeTest = jetFuelExecuteToUse.getUncompletedFunctionCount();
         String expectedMsg = "Deepak is authorised, Bank status is ON";
-        callJetFuelFunction(getJetFuelExecute(), functionName, null,
+        callJetFuelFunction(jetFuelExecuteToUse, functionName, null,
                 new Object[]{"Deepak", true}, sleepValueForTest,
                 0, false,
                 1, true,
                 0, 0, new ArrayList<String>(), new ArrayList<String>(),
                 expectedMsg, true, null, false,
                 new String[]{"Completed"}, true, false, 0);
+        assertEquals("UnComplete function count should match",  uncompletedFunctionCountBeforeTest,
+                jetFuelExecuteToUse.getUncompletedFunctionCount());
     }
+
 
     private Optional<String> getFunction(String tag, String functionSuffix) {
         final Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();

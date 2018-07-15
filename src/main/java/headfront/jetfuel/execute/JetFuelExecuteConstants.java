@@ -34,6 +34,7 @@ public interface JetFuelExecuteConstants {
     String MSG_CREATION_TIME = "MsgCreationTime";
     String MSG_CREATION_NAME = "MsgCreationName";
     String FUNCTION_INITIATOR_NAME = "FunctionInitiatorName";
+    String FUNCTION_RECEIEVED_BY = "FunctionReceivedBy";
 
 
     String CURRENT_STATE = "CurrentState";

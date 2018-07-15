@@ -1,5 +1,6 @@
 package regressiontest.functions;
 
+import headfront.jetfuel.execute.JetFuelExecuteConstants;
 import headfront.jetfuel.execute.functions.AbstractFunctionExecutor;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
@@ -14,6 +15,21 @@ public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
     @Override
     public void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String name = parameters.get(0).toString();
+        final String functionToCall = (String)requestParameters.get(JetFuelExecuteConstants.FUNCTION_TO_CALL);
+        if (functionToCall != null){
+            if (functionToCall.startsWith("*") && name.startsWith("1_3")){
+                // this is a multi execute
+                final String functionReceivedBy = (String)requestParameters.get(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY);
+                final String[] split = name.split("_");
+                for(String check: split){
+                    if(functionReceivedBy.contains("_" + check+ "_")){
+                        result.onCompleted(id, name + " is authorised, Bank status is ON", true);
+                    }
+                }
+                return;
+            }
+        }
+
         if (name.equalsIgnoreCase("Sarah")) {
             // Sarah is a late bloomer she replies after timeout happens
             try {

@@ -7,6 +7,7 @@ import com.crankuptheamps.client.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.JetFuelExecute;
+import headfront.jetfuel.execute.JetFuelExecuteConstants;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
@@ -260,12 +261,13 @@ public class JetFuelBaseTests {
 
             String instanceOwnerFromFirstMessage = null;
             for (int i = 0; i < expectedMessagesForFunction; i++) {
-                final Map<String, Object> expectedMessage = createExpectedMessage(jetFuelExecute, i, expectedStates, fullFunctionName,
-                        msgCreationTime, nextId, functionParams, returnValueExpected, messageExpected, exceptionMsgExpected,
-                        instanceOwnerFromFirstMessage, updateMessagesExpected, updateValuesExpected, isSubFunction);
                 final String messageFromSubscription = messages.get(i);
                 final String messageFromBookmarkSubscription = bookmarkMessages.get(i);
                 Map<String, Object> messageFromSubscriptionMap = jsonMapper.readValue(messageFromSubscription, Map.class);
+                final Map<String, Object> expectedMessage = createExpectedMessage(jetFuelExecute, i, expectedStates, fullFunctionName,
+                        msgCreationTime, nextId, functionParams, returnValueExpected, messageExpected, exceptionMsgExpected,
+                        instanceOwnerFromFirstMessage, updateMessagesExpected, updateValuesExpected, isSubFunction,
+                        messageFromSubscriptionMap.get(JetFuelExecuteConstants.MSG_CREATION_NAME).toString());
                 // firstmessage so fix AmpsInstanceOwner for now add this to the expected message. but see if you can find a better way
                 if (i == 0) {
                     // check contains
@@ -299,7 +301,8 @@ public class JetFuelBaseTests {
                                                       String exceptionMsgExpected,
                                                       String instanceOwnerFromFirstMessage,
                                                       List<String> updateMessagesExpected,
-                                                      List<String> updateValuesExpected, boolean isSubFunction) throws Exception {
+                                                      List<String> updateValuesExpected, boolean isSubFunction,
+                                                      String replyMessageCreator) throws Exception {
         Map<String, Object> message = new HashMap<>();
         message.put(MSG_CREATION_TIME, msgCreationTime);
         message.put(FUNCTION_CALLER_HOSTNAME, InetAddress.getLocalHost().getHostName());
@@ -313,10 +316,14 @@ public class JetFuelBaseTests {
         } else {
             final String expectedState = expectedStates[(i - 1)];
             message.put(CURRENT_STATE, expectedState);
+            String msgCreatorName = fullFunctionName.substring(0, fullFunctionName.indexOf("."));
+            if (msgCreatorName.equalsIgnoreCase("*")) {
+                msgCreatorName = replyMessageCreator;
+            }
             if (expectedState.equalsIgnoreCase(FunctionState.Error.name())) {
                 message.put(EXCEPTION_MESSAGE, exceptionMsgExpected);
                 message.put(CURRENT_STATE_MSG, messageExpected);
-                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(MSG_CREATION_NAME, msgCreatorName);
             } else if (expectedState.equalsIgnoreCase(FunctionState.Timeout.name())) {
                 message.put(CURRENT_STATE_MSG, exceptionMsgExpected);
                 message.put(MSG_CREATION_NAME, instanceOwnerFromFirstMessage);
@@ -326,21 +333,21 @@ public class JetFuelBaseTests {
                 if (isSubFunction) {
                     message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
                 }
-                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(MSG_CREATION_NAME, msgCreatorName);
             } else if (expectedState.equalsIgnoreCase(FunctionState.SubUpdate.name())) {
                 message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(i - 2));
                 message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(i - 1));
-                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(MSG_CREATION_NAME, msgCreatorName);
             } else if (expectedState.equalsIgnoreCase(FunctionState.SubActive.name())) {
                 message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(i - 1));
-                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(MSG_CREATION_NAME, msgCreatorName);
             } else if (expectedState.equalsIgnoreCase(FunctionState.RequestCancelSub.name())) {
                 message.put(CURRENT_STATE_MSG, CANCEL_REQ_MESSAGE);
                 message.put(MSG_CREATION_NAME, jetFuelExecute.getConnectionName());
                 message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(1));
             } else if (expectedState.equalsIgnoreCase(FunctionState.SubCancelled.name())) {
                 message.put(CURRENT_STATE_MSG, updateMessagesExpected.get(updateMessagesExpected.size() - 1));
-                message.put(MSG_CREATION_NAME, fullFunctionName.substring(0, fullFunctionName.indexOf(".")));
+                message.put(MSG_CREATION_NAME, msgCreatorName);
                 message.put(FUNCTION_UPDATE_MESSAGE, updateValuesExpected.get(updateValuesExpected.size() - 1));
             }
             message.put(FUNCTION_AMPS_INSTANCE_OWNER, instanceOwnerFromFirstMessage);

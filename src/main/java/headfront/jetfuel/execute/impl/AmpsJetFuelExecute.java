@@ -233,6 +233,16 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         }
     }
 
+    @Override
+    public int getUncompletedFunctionCount() {
+        return callBackBackLog.size();
+    }
+
+    @Override
+    public Set<String> getUncompletedFunctionIds() {
+        return Collections.unmodifiableSet(callBackBackLog.keySet());
+    }
+
     private void rePublishFunctionDesc(JetFuelFunction jetFuelFunction) {
         checkInitalised();
         try {
@@ -258,12 +268,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             Map<String, Object> map = jsonMapper.readValue(functionResponse, Map.class);
             Object state = map.get(JetFuelExecuteConstants.CURRENT_STATE);
             id = map.get(JetFuelExecuteConstants.PUBLISH_FUNCTION_ID).toString();
-            final Object  message = map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG);
+            final Object message = map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG);
             final Object returnVal = map.get(JetFuelExecuteConstants.RETURN_VALUE);
             final Object exception = map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE);
+            final Object functionName = map.get(JetFuelExecuteConstants.FUNCTION_TO_CALL);
             log("Received JetFuelExecuteFunction execution response for ID " + id + " with state '" + state +
-                    "' , message '" + message  + "' and return value '" + returnVal + "'" +
-                    " , exception '" + exception  + "'"
+                            "' , message '" + message + "' and return value '" + returnVal + "'" +
+                            " , exception '" + exception + "'"
                     , " response was " + functionResponse);
             result = callBackBackLog.get(id);
             if (result != null) {
@@ -275,7 +286,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     FunctionState currentState = FunctionState.valueOf(state.toString());
                     switch (currentState) {
                         case Completed:
-                            result.onCompleted(id, message,returnVal);
+                            result.onCompleted(id, message, returnVal);
                             break;
                         case Error:
                             result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
@@ -305,8 +316,11 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             break;
                     }
                     if (currentState.isFinalState()) {
-                        subscriptionRegistry.removeActiveClientSubscription(id);
-                        callBackBackLog.remove(id);
+                        //only cleanup if this was not multiExecute
+                        if (!functionName.toString().contains("*")) {
+                            subscriptionRegistry.removeActiveClientSubscription(id);
+                            callBackBackLog.remove(id);
+                        }
                     }
                 }
             } else {
@@ -325,7 +339,16 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                                            FunctionExecutionType functionExecutionType) {
         String callID = functionIDGenerator.apply(ampsConnectionName);
         try {
-            final JetFuelFunction jetFuelFunction = functionsReceivedFromAmps.get(functionName);
+            JetFuelFunction jetFuelFunction = functionsReceivedFromAmps.get(functionName);
+            if (functionName.startsWith("*")) {
+                // here a function will not exists so check atleast one function is available as the user is trying
+                // to call all functions
+                final String lastPartOfFunctionName = functionName.split("\\.")[1];
+                final List<String> function = findFunction(lastPartOfFunctionName);
+                if (function.size() > 0) {
+                    jetFuelFunction = functionsReceivedFromAmps.get(function.get(0));
+                }
+            }
             if (jetFuelFunction != null) {
                 // check valid type of Function
                 if (jetFuelFunction.getExecutionType() == functionExecutionType) {
@@ -340,15 +363,15 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     functionCall.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);
                     String jsonMsg = jsonMapper.writeValueAsString(functionCall);
                     log("Sending JetFuelExecuteFunction execution request with id " +
-                            callID + " to topic " + getFunctionBusTopic() + " function "  + jetFuelFunction.getFullFunctionName() +
-                            " with parameters " + Arrays.toString(functionParameters) , " request " + jsonMsg);
+                            callID + " to topic " + getFunctionBusTopic() + " function " + jetFuelFunction.getFullFunctionName() +
+                            " with parameters " + Arrays.toString(functionParameters), " request " + jsonMsg);
                     ampsClient.publish(getFunctionBusTopic(), jsonMsg);
                     callBackBackLog.put(callID, response);
                     return callID;
                 } else {
                     LOG.error("Unable to call function " + functionName + " as the executionType is " + jetFuelFunction.getExecutionType() +
                             ". For FunctionExecutionType.RequestResponse call AmpsJetFuelExecute.executeFunctions() " +
-                            ", For  FunctionExecutionType.Subscription call AmpsJetFuelExecute.executeSubscriptionFunction()");
+                            ", For FunctionExecutionType.Subscription call AmpsJetFuelExecute.executeSubscriptionFunction()");
                     return null;
                 }
             } else {
@@ -462,8 +485,9 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     private boolean subscribeForCallBacks(final JetFuelFunction jetFuelFunction) {
-        String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + "='" + jetFuelFunction.getFullFunctionName() +
-                "' and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.RequestNew
+        String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + " IN ('" + jetFuelFunction.getFullFunctionName()
+                + "', '*." + jetFuelFunction.getFunctionName() + "')"
+                 + " and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.RequestNew
                 + "', '" + FunctionState.RequestCancelSub + "')";
         try {
             final CommandId subscription = ampsClient.subscribe(m -> {
@@ -485,6 +509,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private void processFunctionProcessRequest(String ampsFunctionCaller, String request, JetFuelFunction jetFuelFunction) {
         try {
             Map<String, Object> map = jsonMapper.readValue(request, Map.class);
+            map.put(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY, ampsConnectionName);
             final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
             final String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
             final String currentState = map.get(JetFuelExecuteConstants.CURRENT_STATE).toString();
@@ -507,40 +532,40 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
-                        @Override
-                        public void onCompleted(String id, Object message, Object returnValue) {
-                            createAndSendComplete(caller, message, returnValue, callerHostName, id);
-                        }
+                                @Override
+                                public void onCompleted(String id, Object message, Object returnValue) {
+                                    createAndSendComplete(caller, message, returnValue, callerHostName, id);
+                                }
 
-                        @Override
-                        public void onError(String id, Object message, Object exception) {
-                            createAndSendError(message, exception, id, caller, callerHostName);
-                        }
-                    });
+                                @Override
+                                public void onError(String id, Object message, Object exception) {
+                                    createAndSendError(message, exception, id, caller, callerHostName);
+                                }
+                            });
                 } else if (jetFuelFunction.getExecutionType() == FunctionExecutionType.Subscription) {
                     newExecutor.setActiveSubscriptionFactory(subscriptionRegistry);
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
-                        @Override
-                        public void onSubscriptionUpdate(String id, Object message, String update) {
-                            createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
-                        }
+                                @Override
+                                public void onSubscriptionUpdate(String id, Object message, String update) {
+                                    createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
+                                }
 
-                        @Override
-                        public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
-                            createAndSendSubscriptionStateChanged(caller, id, state, message, callerHostName);
-                        }
+                                @Override
+                                public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
+                                    createAndSendSubscriptionStateChanged(caller, id, state, message, callerHostName);
+                                }
 
-                        @Override
-                        public void onCompleted(String id, Object message, Object returnValue) {
-                            createAndSendComplete(caller, message, returnValue, callerHostName, id);
-                        }
+                                @Override
+                                public void onCompleted(String id, Object message, Object returnValue) {
+                                    createAndSendComplete(caller, message, returnValue, callerHostName, id);
+                                }
 
-                        @Override
-                        public void onError(String id, Object message, Object exception) {
-                            createAndSendError(message, exception, id, caller, callerHostName);
-                        }
-                    });
+                                @Override
+                                public void onError(String id, Object message, Object exception) {
+                                    createAndSendError(message, exception, id, caller, callerHostName);
+                                }
+                            });
                 } else {
                     LOG.error("Cant process " + id + " for function name " + jetFuelFunction.getFunctionName() + " as we are not setup for " + jetFuelFunction.getExecutionType());
                 }
@@ -577,10 +602,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             String json = jsonMapper.writeValueAsString(reply);
             ampsClient.deltaPublish(getFunctionBusTopic(), json);
             log("Sending JetFuelExecuteFunction execution response '" + methodName +
-                    "' with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
-                    "',  Message was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
-                    "' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE)  +
-                    "'  exception '" + reply.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE)  + "' "
+                            "' with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
+                            "',  Message was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
+                            "' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE) +
+                            "'  exception '" + reply.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE) + "' "
                     , "and  json " + json);
         } catch (Exception e) {
             LOG.error("Unable to process JetFuelExecuteFunction execution request with id " +
