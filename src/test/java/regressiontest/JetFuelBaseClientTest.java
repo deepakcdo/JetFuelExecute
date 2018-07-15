@@ -33,40 +33,48 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                                       String exceptionMsgExpected, boolean skipFunctionExistsTests, String[] expectedSates,
                                       boolean checkMessagesAfterFunctionCall, boolean isSubscription,
                                       int cancelAfter) throws Exception {
+        if (functionName.startsWith("*")){
+            skipFunctionExistsTests = true;
+        }
         String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);
-        if (runningBothClientAndSerer) {
+        if (runningBothClientAndSerer && jetFuelFunction != null) {
 //            unPublishAndCheckFunction(jetFuelFunction);
             if (jetFuelExecute.getFunction(fullFunctionName) == null) {
                 publishAndCheckFunction(jetFuelExecute, jetFuelFunction);
             }
         } else {
-            if (!skipFunctionExistsTests) {
-                final List<String> functions = jetFuelExecute.findFunction(functionName);
-                // Here we might be running several servers so pick a server functions
-                final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
-                assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
-                        serverFunctions.size() >= 1);
-                boolean found = false;
-                final char lastChar = getLastChar(3);
-                String lookFor = "_" + lastChar + "_";
-                for (String existingFunction : functions) {
-                    if (existingFunction.endsWith(functionName) && existingFunction.contains(lookFor)) {
-                        fullFunctionName = existingFunction;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
+            final JetFuelFunction function = jetFuelExecute.getFunction(functionName);
+            if (function == null && !functionName.startsWith("*")) {
+                if (!skipFunctionExistsTests) {
+                    final List<String> functions = jetFuelExecute.findFunction(functionName);
+                    // Here we might be running several servers so pick a server functions
+                    final List<String> serverFunctions = functions.stream().filter(name -> name.startsWith("JunitServerTest")).collect(Collectors.toList());
+                    assertTrue("We have atleast function that ends with " + functionName + " but we had " + serverFunctions,
+                            serverFunctions.size() >= 1);
+                    boolean found = false;
+                    final char lastChar = getLastChar(3);
+                    String lookFor = "_" + lastChar + "_";
                     for (String existingFunction : functions) {
-                        if (existingFunction.endsWith(functionName)) {
+                        if (existingFunction.endsWith(functionName) && existingFunction.contains(lookFor)) {
                             fullFunctionName = existingFunction;
+                            found = true;
                             break;
                         }
                     }
+                    if (!found) {
+                        for (String existingFunction : functions) {
+                            if (existingFunction.endsWith(functionName)) {
+                                fullFunctionName = existingFunction;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    final String connectionName = getAmpsConnectionNameToUse(jetFuelExecute, functionName);
+                    fullFunctionName = connectionName + FunctionUtils.NAME_SEPARATOR + functionName;
                 }
             } else {
-                final String connectionName = getAmpsConnectionNameToUse(jetFuelExecute, functionName);
-                fullFunctionName = connectionName + FunctionUtils.NAME_SEPARATOR + functionName;
+                fullFunctionName = functionName;
             }
         }
         final String callID = callFunctionAndTest(jetFuelExecute, fullFunctionName, functionParams, testWaitTime,
