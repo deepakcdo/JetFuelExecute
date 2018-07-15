@@ -7,8 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-
-import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
+import java.util.Optional;
 
 /**
  * Created by Deepak on 28/05/2017.
@@ -29,7 +28,7 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
                         LOG.error("ActiveSubscriptionRegistry is not set for  SubscriptionFunctionResponseListener " +
                                 " please set this by calling setActiveSubscriptionFactory(). Function with id " + id +
                                 " is not processed and we will send and error");
-                        result.onError(id, "Function not set up correctly", "");
+                        result.onError(id, Optional.empty(), "Function not set up correctly", "");
 
                     } else {
                         final SubscriptionExecutor subscriptionExecutor = executeSubscriptionFunction(id, parameters, requestParameters,
@@ -43,10 +42,10 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
                     executeFunction(id, parameters, requestParameters, result);
                 }
             } catch (Throwable e) {
-                result.onError(id, "Unable to process Function call", e.getMessage() + " " + e.toString());
+                result.onError(id, Optional.empty(), "Unable to process Function call", e.getMessage() + " " + e.toString());
             }
         } else {
-            result.onError(id, "Validation failed.", validate);
+            result.onError(id, Optional.empty(), "Validation failed.", validate);
         }
     }
 
@@ -56,17 +55,17 @@ public abstract class AbstractFunctionExecutor implements FunctionProcessor {
     protected void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeFunction() has not been extended";
         LOG.error(message);
-        result.onError(id, "Function has not been setup correctly by the publisher", null);
+        result.onError(id, Optional.empty(), "Function has not been setup correctly by the publisher", null);
         throw new AbstractMethodError(message);
     }
 
     /**
      * Override this method
      */
-    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, Map<String, Object> requestPArameters, SubscriptionFunctionResponseListener result) {
+    protected SubscriptionExecutor executeSubscriptionFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, SubscriptionFunctionResponseListener result) {
         String message = "AbstractFunctionExecutor.executeSubscriptionFunction() has not been extended";
         LOG.error(message);
-        result.onError(id, "Function has not been setup correctly by the publisher", null);
+        result.onError(id, Optional.empty(), "Function has not been setup correctly by the publisher", null);
         throw new AbstractMethodError(message);
     }
 

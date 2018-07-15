@@ -277,6 +277,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             "' , message '" + message + "' and return value '" + returnVal + "'" +
                             " , exception '" + exception + "'"
                     , " response was " + functionResponse);
+            final Optional<Map<String, Object>> unmodifiableMap = Optional.of(Collections.unmodifiableMap(map));
             result = callBackBackLog.get(id);
             if (result != null) {
                 if (state != null) {
@@ -287,32 +288,32 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     FunctionState currentState = FunctionState.valueOf(state.toString());
                     switch (currentState) {
                         case Completed:
-                            result.onCompleted(id, message, returnVal);
+                            result.onCompleted(id, unmodifiableMap, message, returnVal);
                             break;
                         case Error:
-                            result.onError(id, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
+                            result.onError(id, unmodifiableMap, map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE));
                             break;
                         case Timeout:
-                            result.onError(id, "Function Timeout",
+                            result.onError(id, unmodifiableMap, "Function Timeout",
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG));
                             break;
                         case SubUpdate:
-                            subscriptionFunctionResponse.onSubscriptionUpdate(id,
+                            subscriptionFunctionResponse.onSubscriptionUpdate(id, unmodifiableMap,
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG),
                                     (String) map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE));
                             break;
                         case SubActive:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id,
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, unmodifiableMap,
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubActive);
                             subscriptionRegistry.registerActiveClientSubscription(id);
                             break;
                         case SubCancelled:
-                            subscriptionFunctionResponse.onSubscriptionStateChanged(id,
+                            subscriptionFunctionResponse.onSubscriptionStateChanged(id, unmodifiableMap,
                                     map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), FunctionState.SubCancelled);
                             break;
                         default:
-                            result.onError(id, "Unknown state " + currentState + " and message  "
+                            result.onError(id, unmodifiableMap, "Unknown state " + currentState + " and message  "
                                     + map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG), null);
                             break;
                     }
@@ -330,7 +331,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             // else wait for functionResponse
         } catch (Exception e) {
             if (result != null) {
-                result.onError(id, "Unable to process functionResponse " + functionResponse + " " + e.getMessage(), e);
+                result.onError(id, null, "Unable to process functionResponse " + functionResponse + " " + e.getMessage(), e);
             }
             LOG.error("Unable to process functionResponse " + functionResponse, e);
         }
@@ -378,13 +379,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             } else {
                 final String functionSignature = FunctionUtils.getFunctionSignature(functionName, functionParameters);
                 LOG.error("Unable to call function " + functionSignature + " with parameter " + Arrays.toString(functionParameters) + " as it does not exist");
-                response.onError(callID, "Function " + functionSignature + " is not available", null);
+                response.onError(callID, Optional.empty(), "Function " + functionSignature + " is not available", null);
                 return callID;
             }
         } catch (Exception e) {
             final String functionSignature = FunctionUtils.getFunctionSignature(functionName, functionParameters);
             LOG.error("Unable to call function " + functionSignature + " with parameter " + Arrays.toString(functionParameters) + " as it does not exist", e);
-            response.onError(callID, "Function " + functionSignature + " is not available", e);
+            response.onError(callID, Optional.empty(), "Function " + functionSignature + " is not available", e);
             return callID;
         }
     }
@@ -487,12 +488,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private boolean subscribeForCallBacks(final JetFuelFunction jetFuelFunction) {
         String multiExecuteFilter = "";
-        if (allowMultiExecute){
+        if (allowMultiExecute) {
             multiExecuteFilter = "', '*." + jetFuelFunction.getFunctionName();
         }
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + " IN ('" + jetFuelFunction.getFullFunctionName()
-                +  multiExecuteFilter + "')"
-                 + " and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.RequestNew
+                + multiExecuteFilter + "')"
+                + " and /" + JetFuelExecuteConstants.CURRENT_STATE + " IN ('" + FunctionState.RequestNew
                 + "', '" + FunctionState.RequestCancelSub + "')";
         try {
             final CommandId subscription = ampsClient.subscribe(m -> {
@@ -538,12 +539,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
                                 @Override
-                                public void onCompleted(String id, Object message, Object returnValue) {
+                                public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
                                     createAndSendComplete(caller, message, returnValue, callerHostName, id);
                                 }
 
                                 @Override
-                                public void onError(String id, Object message, Object exception) {
+                                public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
                                     createAndSendError(message, exception, id, caller, callerHostName);
                                 }
                             });
@@ -552,22 +553,22 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
                                 @Override
-                                public void onSubscriptionUpdate(String id, Object message, String update) {
+                                public void onSubscriptionUpdate(String id, Optional<Map<String, Object>> map, Object message, String update) {
                                     createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
                                 }
 
                                 @Override
-                                public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
+                                public void onSubscriptionStateChanged(String id, Optional<Map<String, Object>> map, Object message, FunctionState state) {
                                     createAndSendSubscriptionStateChanged(caller, id, state, message, callerHostName);
                                 }
 
                                 @Override
-                                public void onCompleted(String id, Object message, Object returnValue) {
+                                public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
                                     createAndSendComplete(caller, message, returnValue, callerHostName, id);
                                 }
 
                                 @Override
-                                public void onError(String id, Object message, Object exception) {
+                                public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
                                     createAndSendError(message, exception, id, caller, callerHostName);
                                 }
                             });
@@ -730,7 +731,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         this.functionIDGenerator = functionIDGenerator;
     }
 
-    public void allowMulitExecute(boolean allowMultiExecute){
+    public void allowMulitExecute(boolean allowMultiExecute) {
         this.allowMultiExecute = allowMultiExecute;
     }
 

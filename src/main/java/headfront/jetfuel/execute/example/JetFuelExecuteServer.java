@@ -15,6 +15,7 @@ import headfront.jetfuel.execute.utils.HaClientFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -77,13 +78,13 @@ public class JetFuelExecuteServer {
             Boolean citizen = Boolean.parseBoolean(parameters.get(0).toString());
             Integer age = Integer.parseInt(parameters.get(1).toString());
             if (!citizen) {
-                result.onCompleted(id, "You have to be a citizen to vote", false);
+                result.onCompleted(id, Optional.empty(), "You have to be a citizen to vote", false);
             } else if (age <= 20) {
-                result.onCompleted(id, "You have to be 21 or over to vote", false);
+                result.onCompleted(id, Optional.empty(), "You have to be 21 or over to vote", false);
             } else if (age > 150) {
-                result.onError(id, "No one lives longer and 150 years. You cant vote", false);
+                result.onError(id, Optional.empty(), "No one lives longer and 150 years. You cant vote", false);
             } else {
-                result.onCompleted(id, "You can vote", true);
+                result.onCompleted(id, Optional.empty(), "You can vote", true);
             }
         }
     }

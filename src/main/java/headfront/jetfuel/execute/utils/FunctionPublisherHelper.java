@@ -27,7 +27,7 @@ public class FunctionPublisherHelper {
         this.functions = functions;
     }
 
-    public void init(){
+    public void init() {
         AssertChecks.notNull(jetFuelExecute);
         LOG.info("FunctionPublisherHelper will initialise " + functions.size() + " functions");
         functions.forEach(jetFuelExecute::publishFunction);

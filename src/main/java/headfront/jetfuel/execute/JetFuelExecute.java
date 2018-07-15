@@ -86,18 +86,20 @@ public interface JetFuelExecute {
 
     /**
      * Execute a function in JetFuel Execute. Call this for Functions that have a FunctionExecutionType of RequestResponse
-     * @param functionName full name of the function you want to call
+     *
+     * @param functionName       full name of the function you want to call
      * @param functionParameters parameters for the function
-     * @param response callback listener for the function call
+     * @param response           callback listener for the function call
      * @return The uniqueId for this function call
      */
     String executeFunction(String functionName, Object[] functionParameters, FunctionResponseListener response);
 
     /**
      * Execute a Subscription function in JetFuel Execute.  Call this for Functions that have a FunctionExecutionType of Subscription
-     * @param functionName full name of the function you want to call
+     *
+     * @param functionName       full name of the function you want to call
      * @param functionParameters parameters for the function
-     * @param response callback listener for the function call
+     * @param response           callback listener for the function call
      * @return The uniqueId for this function call
      */
     String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponseListener response);
@@ -106,6 +108,7 @@ public interface JetFuelExecute {
      * If JetFuelFunction of type FunctionExecutionType#Subscription was executed then you can cancel this subscription
      * when its no longer require updates. This is an async call
      * Note this is not implemented yet
+     *
      * @param callId to be cancelled.
      */
     void cancelSubscriptionFunctionRequest(String callId);

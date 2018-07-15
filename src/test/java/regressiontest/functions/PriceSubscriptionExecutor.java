@@ -4,6 +4,7 @@ import headfront.jetfuel.execute.FunctionState;
 import headfront.jetfuel.execute.functions.SubscriptionExecutor;
 import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,14 +30,14 @@ public class PriceSubscriptionExecutor extends SubscriptionExecutor {
             try {
                 Thread.sleep(1000);
                 double price = 100.25 * count;
-                result.onSubscriptionUpdate(callId, "Sending price " + count, "" + price);
+                result.onSubscriptionUpdate(callId, Optional.empty(), "Sending price " + count, "" + price);
                 count++;
                 if (count == stop) {
                     keepRunning.set(false);
-                    result.onCompleted(callId, "Subscription completed as we sent the required prices", "" + price);
+                    result.onCompleted(callId, Optional.empty(), "Subscription completed as we sent the required prices", "" + price);
                 }
             } catch (InterruptedException e) {
-                result.onSubscriptionStateChanged(callId, "Subscription cancelled by user", FunctionState.SubCancelled);
+                result.onSubscriptionStateChanged(callId, Optional.empty(), "Subscription cancelled by user", FunctionState.SubCancelled);
             }
         }
 

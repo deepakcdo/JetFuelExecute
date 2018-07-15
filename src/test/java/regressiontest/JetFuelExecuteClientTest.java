@@ -110,7 +110,7 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
                 0, 0, new ArrayList<String>(), new ArrayList<String>(),
                 expectedMsg, true, null, false,
                 new String[]{"Completed"}, true, false, 0);
-        assertEquals("UnComplete function count should match",  uncompletedFunctionCountBeforeTest,
+        assertEquals("UnComplete function count should match", uncompletedFunctionCountBeforeTest,
                 jetFuelExecuteToUse.getUncompletedFunctionCount());
     }
 

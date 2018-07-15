@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
@@ -31,7 +33,7 @@ public class TestSubscriptionFunctionResponseListener extends TestFunctionRespon
     }
 
     @Override
-    public void onSubscriptionUpdate(String id, Object message, String update) {
+    public void onSubscriptionUpdate(String id, Optional<Map<String, Object>> responseMap, Object message, String update) {
         this.id = id;
         this.message = message;
         allMessages.add((String) message);
@@ -48,7 +50,7 @@ public class TestSubscriptionFunctionResponseListener extends TestFunctionRespon
     }
 
     @Override
-    public void onSubscriptionStateChanged(String id, Object message, FunctionState state) {
+    public void onSubscriptionStateChanged(String id, Optional<Map<String, Object>> responseMap, Object message, FunctionState state) {
         this.id = id;
         this.message = message;
         allMessages.add((String) message);

@@ -3,9 +3,13 @@ package headfront.jetfuel.execute.example;
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.JetFuelExecute;
+import headfront.jetfuel.execute.JetFuelExecuteConstants;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -43,15 +47,24 @@ public class JetFuelExecuteClient {
 
     }
 
-   static class ClientFunctionResponseListener implements FunctionResponseListener {
+    static class ClientFunctionResponseListener implements FunctionResponseListener {
         @Override
-        public void onCompleted(String id, Object message, Object returnValue) {
-            System.out.println("Got onCompleted for id '" + id + "' with message '" + message + "' and returnValue '" + returnValue + "'");
+        public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
+            String replyFrom = "";
+            if (map.isPresent()){
+                replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
+            }
+            System.out.println("Got onCompleted from " + replyFrom + " for id '" +
+                    id + "' with message '" + message + "' and returnValue '" + returnValue + "'");
         }
 
         @Override
-        public void onError(String id, Object message, Object exception) {
-            System.out.println("Got onError for id '" + id + "' with message '" + message + "' and exception '" + exception + "'");
+        public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
+            String replyFrom = "";
+            if (map.isPresent()){
+                replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
+            }
+            System.out.println("Got onCompleted from " + replyFrom + " for id '" + id + "' with message '" + message + "' and exception '" + exception + "'");
         }
     }
 }

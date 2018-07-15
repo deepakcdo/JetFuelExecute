@@ -8,6 +8,7 @@ import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -39,10 +40,10 @@ public class UpdateQuoteStatusExecutor extends AbstractFunctionExecutor {
             data.put("FunctionID", id);
             String jsonMsg = jsonMapper.writeValueAsString(data);
             ampsClient.deltaPublish(quoteTopic, jsonMsg);
-            result.onCompleted(id, "Quote update was successful", true);
+            result.onCompleted(id, Optional.empty(), "Quote update was successful", true);
 
         } catch (Exception e) {
-            result.onError(id, "Unable to get update quote " + e.getMessage(), e);
+            result.onError(id, Optional.empty(), "Unable to get update quote " + e.getMessage(), e);
         }
     }
 }

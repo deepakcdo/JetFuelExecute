@@ -6,6 +6,7 @@ import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -15,15 +16,15 @@ public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
     @Override
     public void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
         String name = parameters.get(0).toString();
-        final String functionToCall = (String)requestParameters.get(JetFuelExecuteConstants.FUNCTION_TO_CALL);
-        if (functionToCall != null){
-            if (functionToCall.startsWith("*") && name.startsWith("1_3")){
+        final String functionToCall = (String) requestParameters.get(JetFuelExecuteConstants.FUNCTION_TO_CALL);
+        if (functionToCall != null) {
+            if (functionToCall.startsWith("*") && name.startsWith("1_3")) {
                 // this is a multi execute
-                final String functionReceivedBy = (String)requestParameters.get(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY);
+                final String functionReceivedBy = (String) requestParameters.get(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY);
                 final String[] split = name.split("_");
-                for(String check: split){
-                    if(functionReceivedBy.contains("_" + check+ "_")){
-                        result.onCompleted(id, name + " is authorised, Bank status is ON", true);
+                for (String check : split) {
+                    if (functionReceivedBy.contains("_" + check + "_")) {
+                        result.onCompleted(id, Optional.empty(), name + " is authorised, Bank status is ON", true);
                     }
                 }
                 return;
@@ -45,13 +46,13 @@ public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
         } else if (name.equalsIgnoreCase("Lucy")) {
             // We dont know about lucy so we never reply
         } else if (name.equalsIgnoreCase("Jack")) {
-            result.onError(id, "Jack always throws error.", "Authorisation exception");
+            result.onError(id, Optional.empty(), "Jack always throws error.", "Authorisation exception");
         } else if (name.equalsIgnoreCase("Fred")) {
-            result.onCompleted(id, "Fred is not authorised", false);
+            result.onCompleted(id, Optional.empty(), "Fred is not authorised", false);
         } else {
             Boolean value = Boolean.parseBoolean(parameters.get(1).toString());
             String printValue = value ? "ON" : "OFF";
-            result.onCompleted(id, name + " is authorised, Bank status is " + printValue, true);
+            result.onCompleted(id, Optional.empty(), name + " is authorised, Bank status is " + printValue, true);
         }
     }
 }

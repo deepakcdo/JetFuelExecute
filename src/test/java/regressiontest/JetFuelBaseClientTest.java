@@ -33,7 +33,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                                       String exceptionMsgExpected, boolean skipFunctionExistsTests, String[] expectedSates,
                                       boolean checkMessagesAfterFunctionCall, boolean isSubscription,
                                       int cancelAfter) throws Exception {
-        if (functionName.startsWith("*")){
+        if (functionName.startsWith("*")) {
             skipFunctionExistsTests = true;
         }
         String fullFunctionName = FunctionUtils.getFullFunctionName(jetFuelExecute.getConnectionName(), functionName);

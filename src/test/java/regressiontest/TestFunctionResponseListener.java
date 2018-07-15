@@ -4,6 +4,8 @@ import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -28,7 +30,7 @@ public class TestFunctionResponseListener implements FunctionResponseListener {
 
 
     @Override
-    public void onCompleted(String id, Object message, Object returnValue) {
+    public void onCompleted(String id, Optional<Map<String, Object>> responseMap, Object message, Object returnValue) {
         this.id = id;
         this.message = message;
         addMessage(message);
@@ -42,7 +44,7 @@ public class TestFunctionResponseListener implements FunctionResponseListener {
     }
 
     @Override
-    public void onError(String id, Object message, Object exception) {
+    public void onError(String id, Optional<Map<String, Object>> responseMap, Object message, Object exception) {
         this.id = id;
         this.message = message;
         addMessage(message);
