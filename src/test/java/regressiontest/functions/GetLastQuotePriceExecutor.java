@@ -12,7 +12,6 @@ import regressiontest.JetFuelExecuteServerTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -53,15 +52,15 @@ public class GetLastQuotePriceExecutor extends AbstractFunctionExecutor {
                     , "/ID='" + instrument + "'", 10, 4000);
             wait.await(4, TimeUnit.SECONDS);
             if (messages.size() == 0) {
-                result.onError(id, Optional.empty(), "No Quote found for inst " + instrument, true);
+                result.onError(id, "No Quote found for inst " + instrument, true);
             } else if (messages.size() == 1) {
-                result.onCompleted(id, Optional.empty(), "Quote found for inst " + instrument, messages.get(0));
+                result.onCompleted(id, "Quote found for inst " + instrument, messages.get(0));
             } else {
-                result.onError(id, Optional.empty(), "More than one Quote found for inst " + instrument, true);
+                result.onError(id, "More than one Quote found for inst " + instrument, true);
             }
         } catch (Exception e) {
             LOG.error("Unable to get quote ", e);
-            result.onError(id, Optional.empty(), "Unable to get quote " + e.getMessage(), e);
+            result.onError(id, "Unable to get quote " + e.getMessage(), e);
         }
     }
 }

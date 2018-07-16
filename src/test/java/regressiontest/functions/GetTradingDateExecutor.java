@@ -5,7 +5,6 @@ import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -14,6 +13,6 @@ public class GetTradingDateExecutor extends AbstractFunctionExecutor {
 
     @Override
     public void executeFunction(String id, List<Object> parameters, Map<String, Object> requestParameters, FunctionResponseListener result) {
-        result.onCompleted(id, Optional.empty(), "Sending date", "20180225");
+        result.onCompleted(id, "Sending date", "20180225");
     }
 }

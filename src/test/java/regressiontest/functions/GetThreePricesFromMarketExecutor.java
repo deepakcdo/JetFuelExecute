@@ -7,7 +7,6 @@ import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -19,7 +18,7 @@ public class GetThreePricesFromMarketExecutor extends AbstractFunctionExecutor {
         String inst = parameters.get(0).toString();
         PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result, 3);
         subExecutor.start();
-        result.onSubscriptionStateChanged(id, Optional.empty(), "Subscription  for " + inst + " is valid", FunctionState.SubActive);
+        result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.SubActive);
         return subExecutor;
     }
 

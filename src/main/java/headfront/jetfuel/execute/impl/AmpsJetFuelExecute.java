@@ -379,13 +379,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             } else {
                 final String functionSignature = FunctionUtils.getFunctionSignature(functionName, functionParameters);
                 LOG.error("Unable to call function " + functionSignature + " with parameter " + Arrays.toString(functionParameters) + " as it does not exist");
-                response.onError(callID, Optional.empty(), "Function " + functionSignature + " is not available", null);
+                response.onError(callID, "Function " + functionSignature + " is not available", null);
                 return callID;
             }
         } catch (Exception e) {
             final String functionSignature = FunctionUtils.getFunctionSignature(functionName, functionParameters);
             LOG.error("Unable to call function " + functionSignature + " with parameter " + Arrays.toString(functionParameters) + " as it does not exist", e);
-            response.onError(callID, Optional.empty(), "Function " + functionSignature + " is not available", e);
+            response.onError(callID, "Function " + functionSignature + " is not available", e);
             return callID;
         }
     }

@@ -5,7 +5,6 @@ import headfront.jetfuel.execute.functions.FunctionResponseListener;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Deepak on 09/05/2017.
@@ -20,7 +19,7 @@ public class UpdateBankTraderExecutor extends AbstractFunctionExecutor {
         String options = parameters.get(2).toString();
 
         String printValue = value ? "ON" : "OFF";
-        result.onCompleted(id, Optional.empty(), "Trader  " + name + " is " + printValue + " with option " + options, true);
+        result.onCompleted(id, "Trader  " + name + " is " + printValue + " with option " + options, true);
 
     }
 }

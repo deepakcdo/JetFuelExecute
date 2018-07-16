@@ -13,7 +13,6 @@ import headfront.jetfuel.execute.utils.HaClientFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -74,7 +73,7 @@ public class JetFuelExecuteSubServer {
             String inst = parameters.get(0).toString();
             PriceSubscriptionExecutor subExecutor = new PriceSubscriptionExecutor(id, result);
             subExecutor.start();
-            result.onSubscriptionStateChanged(id, Optional.empty(), "Subscription  for " + inst + " is valid", FunctionState.SubActive);
+            result.onSubscriptionStateChanged(id, "Subscription  for " + inst + " is valid", FunctionState.SubActive);
             return subExecutor;
         }
     }

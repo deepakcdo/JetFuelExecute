@@ -51,7 +51,7 @@ public class JetFuelExecuteClient {
         @Override
         public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
             String replyFrom = "";
-            if (map.isPresent()){
+            if (map.isPresent()) {
                 replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
             }
             System.out.println("Got onCompleted from " + replyFrom + " for id '" +
@@ -61,7 +61,7 @@ public class JetFuelExecuteClient {
         @Override
         public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
             String replyFrom = "";
-            if (map.isPresent()){
+            if (map.isPresent()) {
                 replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
             }
             System.out.println("Got onCompleted from " + replyFrom + " for id '" + id + "' with message '" + message + "' and exception '" + exception + "'");
