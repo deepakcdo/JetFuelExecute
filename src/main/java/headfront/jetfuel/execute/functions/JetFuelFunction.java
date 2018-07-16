@@ -33,6 +33,7 @@ public class JetFuelFunction {
     private String returnTypeDescription;
     private FunctionAccessType functionAccessType;
     private FunctionExecutionType executionType;
+    private boolean allowMultiExecute = false;
 
     public JetFuelFunction(String functionName, String functionDescription,
                            List<FunctionParameter> functionParameters,
@@ -64,6 +65,10 @@ public class JetFuelFunction {
         fullFunctionName = FunctionUtils.getFullFunctionName(functionPublisherName, functionName);
     }
 
+    public void setAllowMultiExecute(boolean allowMultiExecute) {
+        this.allowMultiExecute = allowMultiExecute;
+    }
+
     // These are getters for data that is set at publish time
 
     public String getFunctionPublisherName() {
@@ -80,6 +85,10 @@ public class JetFuelFunction {
 
 
     // Normal getters
+
+    public boolean isAllowMultiExecute() {
+        return allowMultiExecute;
+    }
 
     public String getFunctionName() {
         return functionName;
@@ -156,4 +165,5 @@ public class JetFuelFunction {
         }
         return null;
     }
+
 }

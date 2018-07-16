@@ -53,6 +53,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
     <bean id="updateBidOfferQuoteStatusFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
@@ -293,6 +294,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
     <bean id="updateBankStatusFunction2" class="headfront.jetfuel.execute.functions.JetFuelFunction">
@@ -317,6 +319,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
     <bean id="updateBankStatusFunction3" class="headfront.jetfuel.execute.functions.JetFuelFunction">
@@ -341,6 +344,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
     <bean id="updateBankStatusFunction4" class="headfront.jetfuel.execute.functions.JetFuelFunction">
@@ -365,6 +369,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
     <bean id="updateBankStatusFunction5" class="headfront.jetfuel.execute.functions.JetFuelFunction">
@@ -389,6 +394,7 @@
         <constructor-arg index="5" ref="handleBankStatus"/>
         <constructor-arg index="6" value="Write"/>
         <constructor-arg index="7" value="RequestResponse"/>
+        <property name="allowMultiExecute" value="true"/>
     </bean>
 
 

@@ -61,7 +61,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private String functionTopic = "JETFUEL_EXECUTE";
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
     private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
-    private boolean allowMultiExecute = true;
 
     public AmpsJetFuelExecute(HAClient ampsClient, ObjectMapper jsonMapper) {
         notNull(ampsClient, "ampsClient cannot be null");
@@ -488,7 +487,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private boolean subscribeForCallBacks(final JetFuelFunction jetFuelFunction) {
         String multiExecuteFilter = "";
-        if (allowMultiExecute) {
+        if (jetFuelFunction.isAllowMultiExecute()) {
             multiExecuteFilter = "', '*." + jetFuelFunction.getFunctionName();
         }
         String filter = "/" + JetFuelExecuteConstants.FUNCTION_TO_CALL + " IN ('" + jetFuelFunction.getFullFunctionName()
@@ -729,10 +728,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     public void setFunctionIDGenerator(Function<String, String> functionIDGenerator) {
         this.functionIDGenerator = functionIDGenerator;
-    }
-
-    public void allowMulitExecute(boolean allowMultiExecute) {
-        this.allowMultiExecute = allowMultiExecute;
     }
 
     public String getFunctionTopic() {

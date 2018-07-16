@@ -27,6 +27,7 @@ public interface JetFuelExecuteConstants {
     String FUNCTION_EXECUTION_TYPE = "FunctionExecutionType";
     String FUNCTION_UPDATE_MESSAGE = "FunctionUpdateMsg";
     String FUNCTION_AMPS_INSTANCE_OWNER = "AmpsInstanceOwner";
+    String ALLOW_MULTI_EXECUTE = "AllowMultiExecute";
 
 
     String FUNCTION_CALL_ID = "ID";

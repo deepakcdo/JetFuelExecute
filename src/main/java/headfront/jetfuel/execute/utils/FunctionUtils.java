@@ -182,6 +182,7 @@ public class FunctionUtils {
         publishMap.put(JetFuelExecuteConstants.RETURN_DESCRIPTION, jetFuelFunction.getReturnTypeDescription());
         publishMap.put(JetFuelExecuteConstants.FUNCTION_ACCESS_TYPE, jetFuelFunction.getFunctionAccessType().name());
         publishMap.put(JetFuelExecuteConstants.FUNCTION_EXECUTION_TYPE, jetFuelFunction.getExecutionType().name());
+        publishMap.put(JetFuelExecuteConstants.ALLOW_MULTI_EXECUTE, jetFuelFunction.isAllowMultiExecute());
         return publishMap;
     }
 
@@ -208,6 +209,10 @@ public class FunctionUtils {
         jetFuelFunction.setTransientFunctionDetatils((String) map.get(JetFuelExecuteConstants.FUNCTION_PUBLISHER_NAME),
                 (String) map.get(JetFuelExecuteConstants.FUNCTION_PUBLISHER_HOSTNAME),
                 (String) map.get(JetFuelExecuteConstants.FUNCTION_PUBLISH_TIME));
+        final Boolean allowMultiExecute = (Boolean) map.get(JetFuelExecuteConstants.ALLOW_MULTI_EXECUTE);
+        if (allowMultiExecute != null) {
+            jetFuelFunction.setAllowMultiExecute(allowMultiExecute);
+        }
 
         return jetFuelFunction;
     }
