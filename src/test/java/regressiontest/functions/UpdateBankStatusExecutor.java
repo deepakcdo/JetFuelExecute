@@ -19,7 +19,7 @@ public class UpdateBankStatusExecutor extends AbstractFunctionExecutor {
         if (functionToCall != null) {
             if (functionToCall.startsWith("*") && name.startsWith("1_3")) {
                 // this is a multi execute
-                final String functionReceivedBy = (String) requestParameters.get(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY);
+                final String functionReceivedBy = (String) requestParameters.get(JetFuelExecuteConstants.FUNCTION_RECEIVED_BY);
                 final String[] split = name.split("_");
                 for (String check : split) {
                     if (functionReceivedBy.contains("_" + check + "_")) {

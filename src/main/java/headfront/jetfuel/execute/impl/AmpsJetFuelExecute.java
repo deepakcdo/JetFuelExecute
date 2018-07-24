@@ -9,10 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.*;
 import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.utils.FunctionUtils;
-import headfront.jetfuel.execute.utils.NamedThreadFactory;
+import headfront.jetfuel.execute.utils.SameThreadExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -44,8 +45,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final Map<String, FunctionResponseListener> callBackBackLog = new ConcurrentHashMap<>();
     private final Map<String, CommandId> activePublishedFunctions = new ConcurrentHashMap<>();
     private final Set<CommandId> jetFuelActiveSubscriptions = new HashSet<>();
-    private ExecutorService functionRequestProcessorExecutorService = null;
-    private ExecutorService functionReplyProcessorExecutorService = null;
+    private SameThreadExecutor processingThreadFactory = null;
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
     private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
     private final ActiveSubscriptionRegistry subscriptionRegistry = new AmpsActiveSubscriptionRegistry();
@@ -56,8 +56,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private Consumer<String> onFunctionRemovedListener = name -> {
     };
     //JetFuelExecute Defaults. These can be overridden by setters before the initialise() is called
-    private int noOfFunctionRequestProcessorsThreads = 10;
-    private int noOfFunctionReplyProcessorThreads = 1;
+    private int noOfProcessingThreads = 10;
     private String functionTopic = "JETFUEL_EXECUTE";
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
     private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
@@ -104,10 +103,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             try {
 
                 // Initialise executors
-                functionRequestProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionRequestProcessorsThreads,
-                        new NamedThreadFactory("FunctionProcessor"));
-                functionReplyProcessorExecutorService = Executors.newFixedThreadPool(noOfFunctionReplyProcessorThreads
-                        , new NamedThreadFactory("FunctionReplyThread"));
+                processingThreadFactory = new SameThreadExecutor(noOfProcessingThreads);
 
                 // Disable this for now as this info is only available per instance.
                 // Listen for disconnection so functions that need to know about dsconnections can act on it
@@ -261,13 +257,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
 
-    private void processReplyMessage(String functionResponse) {
-        String id = null;
+    private void processReplyMessage(String id, Map<String, Object> map, String functionResponse) {
         FunctionResponseListener result = null;
         try {
-            Map<String, Object> map = jsonMapper.readValue(functionResponse, Map.class);
             Object state = map.get(JetFuelExecuteConstants.CURRENT_STATE);
-            id = map.get(JetFuelExecuteConstants.PUBLISH_FUNCTION_ID).toString();
             final Object message = map.get(JetFuelExecuteConstants.CURRENT_STATE_MSG);
             final Object returnVal = map.get(JetFuelExecuteConstants.RETURN_VALUE);
             final Object exception = map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE);
@@ -321,6 +314,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         if (!functionName.toString().contains("*")) {
                             subscriptionRegistry.removeActiveClientSubscription(id);
                             callBackBackLog.remove(id);
+                            processingThreadFactory.removeCompletedTask(id);
                         }
                     }
                 }
@@ -421,9 +415,14 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         final CommandId subscribe = ampsClient.subscribe(m -> {
                     final String functionResponse = m.getData().trim();
                     if (functionResponse.length() > 0) {
-                        functionReplyProcessorExecutorService.submit(() -> {
-                            processReplyMessage(functionResponse);
-                        });
+                        try {
+                            final Map<String, Object> map = jsonMapper.readValue(functionResponse, Map.class);
+                            final String id = map.get(JetFuelExecuteConstants.PUBLISH_FUNCTION_ID).toString();
+                            processingThreadFactory.processTask(id, () ->
+                                    processReplyMessage(id, map, functionResponse));
+                        } catch (IOException e) {
+                            LOG.error("Unable to parse message  " + functionResponse, e);
+                        }
                     }
                 },
                 getFunctionBusTopic(), filter, AMPS_OPTIONS, 5000);
@@ -498,9 +497,14 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             final CommandId subscription = ampsClient.subscribe(m -> {
                 String request = m.getData().trim();
                 if (request.length() > 0) {
-                    functionRequestProcessorExecutorService.submit(() -> {
-                        processFunctionProcessRequest(m.getUserId(), request, jetFuelFunction);
-                    });
+                    try {
+                       final Map<String, Object> map = jsonMapper.readValue(request, Map.class);
+                        final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
+                        processingThreadFactory.processTask(id,
+                                () -> processFunctionProcessRequest(m.getUserId(), id, map, request, jetFuelFunction));
+                    } catch (IOException e) {
+                        LOG.error("Unable to parse message  " + request, e);
+                    }
                 }
             }, getFunctionBusTopic(), filter, 1000);
             activePublishedFunctions.put(jetFuelFunction.getFullFunctionName(), subscription);
@@ -511,11 +515,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         return true;
     }
 
-    private void processFunctionProcessRequest(String ampsFunctionCaller, String request, JetFuelFunction jetFuelFunction) {
+    private void processFunctionProcessRequest(String ampsFunctionCaller, String id, Map<String, Object> map,
+                                               String request, JetFuelFunction jetFuelFunction) {
         try {
-            Map<String, Object> map = jsonMapper.readValue(request, Map.class);
-            map.put(JetFuelExecuteConstants.FUNCTION_RECEIEVED_BY, ampsConnectionName);
-            final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
+            map.put(JetFuelExecuteConstants.FUNCTION_RECEIVED_BY, ampsConnectionName);
             final String caller = map.get(JetFuelExecuteConstants.FUNCTION_INITIATOR_NAME).toString();
             final String currentState = map.get(JetFuelExecuteConstants.CURRENT_STATE).toString();
             final List parameters = (List) map.get(JetFuelExecuteConstants.PARAMETERS);
@@ -710,12 +713,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     }
 
-    public void setNoOfFunctionRequestProcessorsThreads(int noOfFunctionRequestProcessorsThreads) {
-        this.noOfFunctionRequestProcessorsThreads = noOfFunctionRequestProcessorsThreads;
-    }
-
-    public void setNoOfFunctionReplyProcessorThreads(int noOfFunctionReplyProcessorThreads) {
-        this.noOfFunctionReplyProcessorThreads = noOfFunctionReplyProcessorThreads;
+    public void setNoOfProcessingThreads(int noOfProcessingThreads) {
+        this.noOfProcessingThreads = noOfProcessingThreads;
     }
 
     public void setFunctionTopic(String functionTopic) {

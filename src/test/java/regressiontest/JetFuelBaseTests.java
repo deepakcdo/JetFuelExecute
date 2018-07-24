@@ -140,7 +140,8 @@ public class JetFuelBaseTests {
                 !availableFunctions.contains(fullFunctionName));
     }
 
-    protected String callFunctionAndTest(JetFuelExecute jetFuelExecute, String fullFunctionName, Object[] functionParams, long testWaitTime,
+    protected String callFunctionAndTest(JetFuelExecute jetFuelExecute, String fullFunctionName, Object[] functionParams,
+                                         long testWaitTime,
                                          int onErrorCountExpected, boolean errorSetExpected,
                                          int onCompleteCountExpected, boolean completeSetExpected,
                                          int onUdateCountExpected, int onStateChangeExpected,
@@ -154,6 +155,7 @@ public class JetFuelBaseTests {
         if (cancelAfter > 0) {
             expectedMessagesForFunction++; // This is for the cancel request
         }
+        long totalWaitTime = testWaitTime * expectedMessagesForFunction;
         CountDownLatch responseWaitLatch = new CountDownLatch(totalResponses);
         if (!skipFunctionExistsTests) {
             final Set<String> availableFunctions = jetFuelExecute.getAvailableFunctions();
@@ -199,7 +201,7 @@ public class JetFuelBaseTests {
             callID = jetFuelExecute.executeFunction(fullFunctionName, functionParams, response);
         }
 
-        final boolean responseWait = responseWaitLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
+        final boolean responseWait = responseWaitLatch.await(totalWaitTime, TimeUnit.MILLISECONDS);
         if (!responseWait) {
             LOG.error("Wait time elapsed for " + callID +
                     " we should have for the right number of callbacks for normal messages. We expected " +
@@ -219,7 +221,7 @@ public class JetFuelBaseTests {
             }
 
             //check received messages from subscription
-            assertEquals("Should have received " + expectedMessagesForFunction + " messages from normal subscription ",
+            assertEquals("Function id " + id + ", Should have received " + expectedMessagesForFunction + " messages from normal subscription ",
                     expectedMessagesForFunction, messages.size());
 
             // do a bookmark subscription
@@ -252,7 +254,7 @@ public class JetFuelBaseTests {
                 }
             });
             bookmarkLatch.await(testWaitTime, TimeUnit.MILLISECONDS);
-            assertEquals("Should have received " + expectedMessagesForFunction + "  messages a bookmark subscription ",
+            assertEquals("Function id " + id + ", Should have received " + expectedMessagesForFunction + "  messages a bookmark subscription ",
                     expectedMessagesForFunction, bookmarkMessages.size());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Subscription messages " + messages);
@@ -260,6 +262,7 @@ public class JetFuelBaseTests {
             }
 
             String instanceOwnerFromFirstMessage = null;
+            String requestCreatorName = null;
             for (int i = 0; i < expectedMessagesForFunction; i++) {
                 final String messageFromSubscription = messages.get(i);
                 final String messageFromBookmarkSubscription = bookmarkMessages.get(i);
@@ -271,18 +274,20 @@ public class JetFuelBaseTests {
                 // firstmessage so fix AmpsInstanceOwner for now add this to the expected message. but see if you can find a better way
                 if (i == 0) {
                     // check contains
-                    assertTrue("First message should have a field 'AmpsInstanceOwner' but we had " + messageFromSubscriptionMap,
+                    assertTrue("Function id " + id + ", First message should have a field 'AmpsInstanceOwner' but we had " + messageFromSubscriptionMap,
                             messageFromSubscriptionMap.containsKey("AmpsInstanceOwner"));
                     //
-                    instanceOwnerFromFirstMessage = messageFromSubscriptionMap.get("AmpsInstanceOwner").toString();
-                    expectedMessage.put("AmpsInstanceOwner", instanceOwnerFromFirstMessage);
+                    requestCreatorName = messageFromSubscriptionMap.get(JetFuelExecuteConstants.MSG_CREATION_NAME).toString();
+                    instanceOwnerFromFirstMessage = messageFromSubscriptionMap.get(JetFuelExecuteConstants.FUNCTION_AMPS_INSTANCE_OWNER).toString();
+                    expectedMessage.put(JetFuelExecuteConstants.FUNCTION_AMPS_INSTANCE_OWNER, instanceOwnerFromFirstMessage);
+
                 }
                 // compare the subscription map
-                compareCustomMap(getTextNumber(i) + "SubscriptionMessage", expectedMessage, messageFromSubscriptionMap);
+                compareCustomMap(id, getTextNumber(i) + "SubscriptionMessage", expectedMessage, messageFromSubscriptionMap, requestCreatorName);
 
                 //compare the bookmark subscription map
                 Map<String, Object> messageFromBookmarkSubscriptionMap = jsonMapper.readValue(messageFromBookmarkSubscription, Map.class);
-                compareCustomMap(getTextNumber(i) + "BookmarkMessage", expectedMessage, messageFromBookmarkSubscriptionMap);
+                compareCustomMap(id, getTextNumber(i) + "BookmarkMessage", expectedMessage, messageFromBookmarkSubscriptionMap, requestCreatorName);
             }
 
             // unsubscribe from both subscription
@@ -364,33 +369,33 @@ public class JetFuelBaseTests {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Checking response for " + id);
         }
-        assertEquals("ID was not correct", id, response.getId());
-        assertEquals("OnError should have been called " + onErrorCountExpected + " time/s", onErrorCountExpected, response.getOnErrorCount());
-        assertEquals("OnError was Set incorrectly", errorSetExpected, response.isOnErrorCalled());
-        assertEquals("OnComplete should have been called " + onCompleteCountExpected + " time/s", onCompleteCountExpected, response.getOnCompletedCount());
-        assertEquals("OnComplete was Set incorrectly", completeSetExpected, response.isOnCompletedCalled());
-        assertEquals("Message was not correct", messageExpected, response.getMessage());
+        assertEquals("Function id " + id + ", ID was not correct", id, response.getId());
+        assertEquals("Function id " + id + ", OnError should have been called " + onErrorCountExpected + " time/s", onErrorCountExpected, response.getOnErrorCount());
+        assertEquals("Function id " + id + ", OnError was Set incorrectly", errorSetExpected, response.isOnErrorCalled());
+        assertEquals("Function id " + id + ", OnComplete should have been called " + onCompleteCountExpected + " time/s", onCompleteCountExpected, response.getOnCompletedCount());
+        assertEquals("Function id " + id + ", OnComplete was Set incorrectly", completeSetExpected, response.isOnCompletedCalled());
+        assertEquals("Function id " + id + ", Message was not correct", messageExpected, response.getMessage());
         // if the return value is of string and json then convert to map and compare
         if (returnValueExpected != null && returnValueExpected instanceof String && ((String) returnValueExpected).trim().startsWith("{")) {
             Map<String, Object> expectedMap = jsonMapper.readValue(returnValueExpected.toString(), Map.class);
             final Object returnValue = response.getReturnValue();
             if (returnValue != null && returnValue instanceof String && ((String) returnValue).trim().startsWith("{")) {
                 Map<String, Object> returnedMap = jsonMapper.readValue(returnValue.toString(), Map.class);
-                compareCustomMap("JsonReply", expectedMap, returnedMap);
+                compareCustomMap(id, "JsonReply", expectedMap, returnedMap, null);
             } else {
-                assertTrue("Expected a json message back and got [" + returnValue + "] of type  " + returnValue.getClass().getCanonicalName(),
+                assertTrue("Function id " + id + ", Expected a json message back and got [" + returnValue + "] of type  " + returnValue.getClass().getCanonicalName(),
                         false);
             }
         } else {
-            assertEquals("Return was not correct", returnValueExpected, response.getReturnValue());
+            assertEquals("Function id " + id + ", Return was not correct", returnValueExpected, response.getReturnValue());
         }
-        assertEquals("Exception Message was not correct", exceptionMsgExpected, response.getException());
+        assertEquals("Function id " + id + ", Exception Message was not correct", exceptionMsgExpected, response.getException());
         if (response instanceof TestSubscriptionFunctionResponseListener) {
             TestSubscriptionFunctionResponseListener subscriptionFunctionResponse = (TestSubscriptionFunctionResponseListener) response;
-            assertEquals("onUpdateCount should have been called " + onUpdateCountExpected + " time/s", onUpdateCountExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubUpdateCount());
-            assertEquals("onStateChange should have been called " + onStateChangeExpected + " time/s", onStateChangeExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubStateChangeCount());
-            assertEquals("Update messages should be equal", updateMessagesExpected, subscriptionFunctionResponse.getAllMessages());
-            assertEquals("Update values should be equal", updateValuesExpected, subscriptionFunctionResponse.getSubscriptionUpdates());
+            assertEquals("Function id " + id + ", onUpdateCount should have been called " + onUpdateCountExpected + " time/s", onUpdateCountExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubUpdateCount());
+            assertEquals("Function id " + id + ", onStateChange should have been called " + onStateChangeExpected + " time/s", onStateChangeExpected, ((TestSubscriptionFunctionResponseListener) response).getOnSubStateChangeCount());
+            assertEquals("Function id " + id + ", Update messages should be equal", updateMessagesExpected, subscriptionFunctionResponse.getAllMessages());
+            assertEquals("Function id " + id + ", Update values should be equal", updateValuesExpected, subscriptionFunctionResponse.getSubscriptionUpdates());
         }
     }
 
@@ -428,26 +433,33 @@ public class JetFuelBaseTests {
         return split[0] + FunctionUtils.NAME_SEPARATOR + i;
     }
 
-    private void compareCustomMap(String messagePrefix, Map<String, Object> expectedMap, Map<String, Object> receivedMap) {
+    private void compareCustomMap(String id, String messagePrefix, Map<String, Object> expectedMap,
+                                  Map<String, Object> receivedMap, String requestCreatorName) {
         expectedMap.keySet().forEach(keyToCheck -> {
-            assertTrue("Expected " + messagePrefix + " map to have a key " + keyToCheck + " but received map that didnt",
+            assertTrue("Function id " + id + ", Expected " + messagePrefix + " map to have a key " + keyToCheck + " but received map that didnt",
                     receivedMap.containsKey(keyToCheck));
             final Object expectedValue = expectedMap.get(keyToCheck);
             final Object receivedValue = receivedMap.get(keyToCheck);
             // handle special fields
-            if (keyToCheck.equals("MsgCreationTime")) {
+            if (keyToCheck.equals(JetFuelExecuteConstants.MSG_CREATION_TIME)) {
                 LocalDateTime expectedDate = LocalDateTime.parse(expectedValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 LocalDateTime receivedDate = LocalDateTime.parse(receivedValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                assertTrue("Expected " + messagePrefix + "s MsgCreationTime  '" + expectedValue + "' to be just before or equal to received MsgCreationTime '" + receivedValue + "'",
+                String receivedRequestCreatorName = receivedMap.get(JetFuelExecuteConstants.MSG_CREATION_NAME).toString();
+                if (!receivedRequestCreatorName.equalsIgnoreCase(requestCreatorName)) { // function requestor and executor running on different boxes so there might be time sync issue
+                    expectedDate = expectedDate.minusMinutes(1);// go back 1 mins
+                }
+
+                assertTrue("Function id " + id + ", Expected " + messagePrefix + "s MsgCreationTime  '" + expectedValue + "' to be just before or equal to received MsgCreationTime '" + receivedValue + "'",
                         expectedDate.equals(receivedDate) || expectedDate.isBefore(receivedDate));
+
             } else {
-                assertEquals("Value from " + messagePrefix + " for " + keyToCheck + " should be equal", expectedValue, receivedValue);
+                assertEquals("Function id " + id + ", Value from " + messagePrefix + " for " + keyToCheck + " should be equal", expectedValue, receivedValue);
             }
         });
         final List<String> extraFields = receivedMap.keySet().stream().filter(key -> !expectedMap.containsKey(key)).collect(Collectors.toList());
-        assertTrue("Received " + messagePrefix + " map that had extra fields " + extraFields + " this was not expected", extraFields.size() == 0);
+        assertTrue("Function id " + id + ", Received " + messagePrefix + " map that had extra fields " + extraFields + " this was not expected", extraFields.size() == 0);
         // check size are the sme last as the above give a better failure reason. Its actually not even required.
-        assertEquals(messagePrefix + " maps should have same keys Size", expectedMap.keySet(), receivedMap.keySet());
+        assertEquals("Function id " + id + ", " + messagePrefix + " maps should have same keys Size", expectedMap.keySet(), receivedMap.keySet());
     }
 
     private String getTextNumber(int i) {
