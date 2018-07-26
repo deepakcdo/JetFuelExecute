@@ -1,5 +1,5 @@
 # JetFuelExecute
-A Flexible and Dynamic RPC Framework over a Highly Performant Journaled Message Bus.
+A Flexible and Dynamic RPC Framework over a AMPS. AMPS is a Highly Performant Journaled Message Bus.
 
 JetFuelExecute allows a process to publish a function on AMPS which can be called by any other process connected to the AMPS. This is an excellent implementation of a request / response design pattern. This is the most fundamental task for most applications. When one process has to tell another process to do something and report back.
 
@@ -19,20 +19,6 @@ In addition to JetFuelExecute having the awesome flexibility of just publishing 
 * Automatic timeout response generated if the server publishing a function goes down,  so your client is not waiting forever.
 * Removal of unavailable functions - A client will never call a function if the publisher of that function disconnects. 
 * High performance and high availability provided by AMPS along with various authentication options.
-
-# JetFuelExecute demo using JetFuelExplorer 
-
-1) View available functions that are published by other servers
-![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
-
-2) Test a function - this is so useful
-![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
-
-3) View the full Request/Response message - your support team will love you
-![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
-
-Note:- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
-
 
 # JetFuelExecute State Diagram.
 JetFuelExecute supports two Execution modes.
@@ -153,3 +139,16 @@ Ability to make a function call which is executed by several publishers. E.g. if
 # Features coming very soon.
 * The ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
 * API’s in different languages e.g. Javascript and C. This means JetFuelExecute functions can be published and called from multiple languages.
+
+# JetFuelExecute demo using JetFuelExplorer 
+
+1) View available functions that are published by other servers
+![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
+
+2) Test a function - this is so useful
+![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
+
+3) View the full Request/Response message - your support team will love you
+![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
+
+Note:- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
