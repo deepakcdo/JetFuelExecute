@@ -324,7 +324,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             // else wait for functionResponse
         } catch (Exception e) {
             if (result != null) {
-                result.onError(id, null, "Unable to process functionResponse " + functionResponse + " " + e.getMessage(), e);
+                result.onError(id, "Unable to process functionResponse " + functionResponse + " " + e.getMessage(), e);
             }
             LOG.error("Unable to process functionResponse " + functionResponse, e);
         }
