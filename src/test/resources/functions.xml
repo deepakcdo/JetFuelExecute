@@ -4,6 +4,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                     http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
+
+    <bean id="responseStatsWriter" class="regressiontest.util.ResponseStatsWriter">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" ref="jsonMapper"/>
+        <constructor-arg index="2" value="${quoteTopic}"/>
+    </bean>
     <bean id="testInstrument" class="java.lang.String">
         <constructor-arg value="#{'DE0124' +  new java.util.Random().nextInt(10000)}"/>
     </bean>

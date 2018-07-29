@@ -473,7 +473,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             }
                         }
                     } catch (Exception e) {
-                        LOG.error("Unable to process published function update  " + data, e);
+                        LOG.error("Unable to process published function update from topic " + m.getTopic() + " data " + data, e);
                     }
                 }, getFunctionTopic(), "",
                 100, AMPS_OPTIONS_WITH_OOF, 5000);

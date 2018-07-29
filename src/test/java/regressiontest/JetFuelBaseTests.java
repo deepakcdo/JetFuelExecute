@@ -15,6 +15,7 @@ import headfront.jetfuel.execute.utils.FunctionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import regressiontest.util.ResponseStatsWriter;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
@@ -74,6 +75,10 @@ public class JetFuelBaseTests {
     JetFuelFunction getNextThreePriceTicksInvalidFunction;
     @Autowired
     JetFuelFunction getMarketPriceFunction;
+    @Autowired
+    JetFuelFunction updateTraderStatusFunction;
+    @Autowired
+    ResponseStatsWriter responseStatsWriter;
 
     @Autowired
     JetFuelFunction updateBankStatusFunction1;

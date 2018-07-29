@@ -8,9 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -120,6 +124,21 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
         final Optional<String> foundFunction = availableFunctions.stream().filter(function -> function.contains(tag) && function.contains(functionSuffix)).findAny();
         assertTrue("Function with tag '" + tag + "' and functions Suffix '" + functionSuffix + "' not found", foundFunction.isPresent());
         return foundFunction;
+    }
+
+    @Test
+    public void checkResponseTimeForFunctionsIsBelow1Sec() throws Exception {
+        final long startTime = System.currentTimeMillis();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        final JetFuelExecute jetFuelExecuteToUse = getJetFuelExecute();
+        TestFunctionResponseListener response = new TestFunctionResponseListener(countDownLatch);
+        String fullFunctionName = jetFuelExecuteToUse.findFunction(updateTraderStatusFunction.getFunctionName()).get(0);
+        String callID = jetFuelExecuteToUse.executeFunction(fullFunctionName, new Object[]{"Deepak", true, "safe"}, response);
+        countDownLatch.await(sleepValueForTest, TimeUnit.MILLISECONDS);
+        assertEquals("Call should complete successfully", response.getOnCompletedCount(), 1);
+        final long timeTaken = System.currentTimeMillis() - startTime;
+        responseStatsWriter.writeStats(callID, timeTaken);
+        assertTrue("Test should take less than 1 sec and test " + callID  + " took " + timeTaken + " millis.", timeTaken < 1000);
     }
 
 }

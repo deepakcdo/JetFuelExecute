@@ -39,7 +39,7 @@ public class JetFuelExecuteSubClient {
                     new Object[]{"DE0022456"}, new ClientFunctionResponseListener());
             System.out.println("Called " + functionName + " with id  " + id1);
 
-            Thread.sleep(5000);
+            Thread.sleep(5500);
             jetFuelExecute.cancelSubscriptionFunctionRequest(id1);
 
         } catch (Exception e) {

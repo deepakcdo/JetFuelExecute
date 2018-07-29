@@ -30,6 +30,7 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         publishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksFunction);
         publishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksInvalidFunction);
         publishAndCheckFunction(jetFuelExecute, getMarketPriceFunction);
+        publishAndCheckFunction(jetFuelExecute, updateTraderStatusFunction);
 
         publishAndCheckFunction(jetFuelExecute1, updateBankStatusFunction1);
         publishAndCheckFunction(jetFuelExecute2, updateBankStatusFunction2);
@@ -59,6 +60,7 @@ public class JetFuelExecuteServerTest extends JetFuelBaseTests {
         unPublishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksFunction);
         unPublishAndCheckFunction(jetFuelExecute, getNextThreePriceTicksInvalidFunction);
         unPublishAndCheckFunction(jetFuelExecute, getMarketPriceFunction);
+        unPublishAndCheckFunction(jetFuelExecute, updateTraderStatusFunction);
 
         unPublishAndCheckFunction(jetFuelExecute1, updateBankStatusFunction1);
         unPublishAndCheckFunction(jetFuelExecute2, updateBankStatusFunction2);
