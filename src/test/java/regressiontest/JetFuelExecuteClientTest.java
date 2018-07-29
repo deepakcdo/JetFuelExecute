@@ -126,15 +126,15 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
 
     @Test
     public void checkResponseTimeForFunctionsIsBelow1Sec() throws Exception {
-        final long startTime = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final JetFuelExecute jetFuelExecuteToUse = getJetFuelExecute();
         TestFunctionResponseListener response = new TestFunctionResponseListener(countDownLatch);
         String fullFunctionName = jetFuelExecuteToUse.findFunction(updateTraderStatusFunction.getFunctionName()).get(0);
+        final long startTime = System.currentTimeMillis();
         String callID = jetFuelExecuteToUse.executeFunction(fullFunctionName, new Object[]{"Deepak", true, "safe"}, response);
         countDownLatch.await(sleepValueForTest, TimeUnit.MILLISECONDS);
-        assertEquals("Call should complete successfully", response.getOnCompletedCount(), 1);
         final long timeTaken = System.currentTimeMillis() - startTime;
+        assertEquals("Call should complete successfully", response.getOnCompletedCount(), 1);
         responseStatsWriter.writeStats(callID, timeTaken);
         assertTrue("Test should take less than 1 sec and test " + callID + " took " + timeTaken + " millis.", timeTaken < 1000);
     }

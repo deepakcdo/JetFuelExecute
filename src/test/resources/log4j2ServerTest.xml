@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+    <Appenders>
+        <RollingFile name="fileAppender" append="true"
+                     fileName="log/JunitServer.log"
+                     filePattern="log/JunitServer.%d{yyyy-MM-dd}.%i.log">
+            <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5p [%c{3}] %m%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="300 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1000"/>
+        </RollingFile>
+        <Console name="consoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d [%t] %-5p [%c{3}] %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="headfront.jetfuel" level="info"/>
+        <Logger name="regressiontest" level="info"/>
+        <Root level="info">
+            <AppenderRef ref="fileAppender"/>
+            <AppenderRef ref="consoleAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
