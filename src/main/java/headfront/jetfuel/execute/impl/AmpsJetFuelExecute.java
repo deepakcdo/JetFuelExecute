@@ -224,7 +224,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     public void cancelSubscriptionFunctionRequest(String callId) {
         if (subscriptionRegistry.isActiveClientSubscription(callId)) {
             final Map<String, Object> reply = createDefaultMessageField(ampsConnectionName, CANCEL_REQ_MESSAGE, hostName, callId);
-            reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub.name());
+            reply.put(JetFuelExecuteConstants.CURRENT_STATE, FunctionState.RequestCancelSub);
             sendMessageToAmps("cancelSubscriptionFunctionRequest", reply, CANCEL_REQ_MESSAGE);
         } else {
             LOG.error("Got a request to cancel subscription request for id " + callId + " but there was no active subscription.");
@@ -267,10 +267,24 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             final Object returnVal = map.get(JetFuelExecuteConstants.RETURN_VALUE);
             final Object exception = map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE);
             final Object functionName = map.get(JetFuelExecuteConstants.FUNCTION_TO_CALL);
+            String valueMsg;
+            if (state.equals(FunctionState.SubUpdate.getText())) {
+                valueMsg = "',  'UpdateValue' was '" + map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE);
+
+            } else if (state.equals(FunctionState.Completed.getText())) {
+                valueMsg = ",' return value '" + map.get(JetFuelExecuteConstants.RETURN_VALUE);
+
+            } else {
+                valueMsg = "',  'UpdateValue' was '" + map.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE) +
+                        ",' return value '" + map.get(JetFuelExecuteConstants.RETURN_VALUE);
+            }
+            String errorMessage = "";
+            if (state.equals(FunctionState.Error.getText())) {
+                errorMessage = ",' exception '" + map.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE) + "' ";
+            }
             log("Received JetFuelExecuteFunction execution response for ID " + id + " with state '" + state +
-                            "' , message '" + message + "' and return value '" + returnVal + "'" +
-                            " , exception '" + exception + "'"
-                    , " response was " + functionResponse);
+                            "' , message '" + message + valueMsg + errorMessage,
+                    " response was " + functionResponse);
             final Map<String, Object> unmodifiableMap = Collections.unmodifiableMap(map);
             result = callBackBackLog.get(id);
             if (result != null) {
@@ -611,12 +625,27 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         try {
             String json = jsonMapper.writeValueAsString(reply);
             ampsClient.deltaPublish(getFunctionBusTopic(), json);
+            final FunctionState currentState = (FunctionState) reply.get(JetFuelExecuteConstants.CURRENT_STATE);
+            String valueMsg;
+            if (currentState.equals(FunctionState.SubUpdate)) {
+                valueMsg = "',  'UpdateValue' was '" + reply.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE);
+
+            } else if (currentState.equals(FunctionState.Completed)) {
+                valueMsg = ",' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE);
+
+            } else {
+                valueMsg = "',  'UpdateValue' was '" + reply.get(JetFuelExecuteConstants.FUNCTION_UPDATE_MESSAGE) +
+                        ",' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE);
+            }
+            String errorMessage = "";
+            if (currentState.equals(FunctionState.Error)) {
+                errorMessage = ",' exception '" + reply.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE) + "' ";
+            }
             log("Sending JetFuelExecuteFunction execution response '" + methodName +
                             "' with id '" + reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID) +
-                            "',  Message was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
-                            "' return value '" + reply.get(JetFuelExecuteConstants.RETURN_VALUE) +
-                            "'  exception '" + reply.get(JetFuelExecuteConstants.EXCEPTION_MESSAGE) + "' "
-                    , "and  json " + json);
+                            "',  'Message' was '" + reply.get(JetFuelExecuteConstants.CURRENT_STATE_MSG) +
+                            valueMsg + errorMessage,
+                    "and  json " + json);
         } catch (Exception e) {
             LOG.error("Unable to process JetFuelExecuteFunction execution request with id " +
                     reply.get(JetFuelExecuteConstants.FUNCTION_CALL_ID), e);
@@ -625,7 +654,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     private void createAndSendSubscriptionStateChanged(String caller, String id, FunctionState state, Object message, String callerHostName) {
         final Map<String, Object> reply = createDefaultMessageField(caller, message, callerHostName, id);
-        reply.put(JetFuelExecuteConstants.CURRENT_STATE, state.name());
+        reply.put(JetFuelExecuteConstants.CURRENT_STATE, state);
         sendMessageToAmps("onSubscriptionChanged to '" + state + "'", reply, message);
     }
 
