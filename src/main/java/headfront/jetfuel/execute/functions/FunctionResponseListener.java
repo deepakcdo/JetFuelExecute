@@ -1,7 +1,7 @@
 package headfront.jetfuel.execute.functions;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * The same interface is used for the client receiving the callback and the server sending the response.
@@ -13,16 +13,16 @@ import java.util.Optional;
  */
 public interface FunctionResponseListener {
 
-    void onCompleted(String id, Optional<Map<String, Object>> responseMap, Object message, Object returnValue);
+    void onCompleted(String id, Map<String, Object> responseMap, Object message, Object returnValue);
 
     default void onCompleted(String id, Object message, Object returnValue) {
-        onCompleted(id, Optional.empty(), message, returnValue);
+        onCompleted(id, Collections.EMPTY_MAP, message, returnValue);
     }
 
-    void onError(String id, Optional<Map<String, Object>> responseMap, Object message, Object exception);
+    void onError(String id, Map<String, Object> responseMap, Object message, Object exception);
 
     default void onError(String id, Object message, Object exception) {
-        onError(id, Optional.empty(), message, exception);
+        onError(id, Collections.EMPTY_MAP, message, exception);
     }
 
 

@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -269,7 +271,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                             "' , message '" + message + "' and return value '" + returnVal + "'" +
                             " , exception '" + exception + "'"
                     , " response was " + functionResponse);
-            final Optional<Map<String, Object>> unmodifiableMap = Optional.of(Collections.unmodifiableMap(map));
+            final Map<String, Object> unmodifiableMap = Collections.unmodifiableMap(map);
             result = callBackBackLog.get(id);
             if (result != null) {
                 if (state != null) {
@@ -498,7 +500,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 String request = m.getData().trim();
                 if (request.length() > 0) {
                     try {
-                       final Map<String, Object> map = jsonMapper.readValue(request, Map.class);
+                        final Map<String, Object> map = jsonMapper.readValue(request, Map.class);
                         final String id = map.get(JetFuelExecuteConstants.FUNCTION_CALL_ID).toString();
                         processingThreadFactory.processTask(id,
                                 () -> processFunctionProcessRequest(m.getUserId(), id, map, request, jetFuelFunction));
@@ -541,12 +543,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new FunctionResponseListener() {
                                 @Override
-                                public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
+                                public void onCompleted(String id, Map<String, Object> map, Object message, Object returnValue) {
                                     createAndSendComplete(caller, message, returnValue, callerHostName, id);
                                 }
 
                                 @Override
-                                public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
+                                public void onError(String id, Map<String, Object> map, Object message, Object exception) {
                                     createAndSendError(message, exception, id, caller, callerHostName);
                                 }
                             });
@@ -555,22 +557,22 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),
                             parameters, Collections.unmodifiableMap(map), new SubscriptionFunctionResponseListener() {
                                 @Override
-                                public void onSubscriptionUpdate(String id, Optional<Map<String, Object>> map, Object message, String update) {
+                                public void onSubscriptionUpdate(String id, Map<String, Object> map, Object message, String update) {
                                     createAndSendSubscriptionUpdate(caller, id, update, message, callerHostName);
                                 }
 
                                 @Override
-                                public void onSubscriptionStateChanged(String id, Optional<Map<String, Object>> map, Object message, FunctionState state) {
+                                public void onSubscriptionStateChanged(String id, Map<String, Object> map, Object message, FunctionState state) {
                                     createAndSendSubscriptionStateChanged(caller, id, state, message, callerHostName);
                                 }
 
                                 @Override
-                                public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
+                                public void onCompleted(String id, Map<String, Object> map, Object message, Object returnValue) {
                                     createAndSendComplete(caller, message, returnValue, callerHostName, id);
                                 }
 
                                 @Override
-                                public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
+                                public void onError(String id, Map<String, Object> map, Object message, Object exception) {
                                     createAndSendError(message, exception, id, caller, callerHostName);
                                 }
                             });

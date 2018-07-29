@@ -9,7 +9,6 @@ import headfront.jetfuel.execute.impl.AmpsJetFuelExecute;
 import headfront.jetfuel.execute.utils.HaClientFactory;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Deepak on 01/02/2018.
@@ -49,20 +48,20 @@ public class JetFuelExecuteClient {
 
     static class ClientFunctionResponseListener implements FunctionResponseListener {
         @Override
-        public void onCompleted(String id, Optional<Map<String, Object>> map, Object message, Object returnValue) {
+        public void onCompleted(String id, Map<String, Object> map, Object message, Object returnValue) {
             String replyFrom = "";
-            if (map.isPresent()) {
-                replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
+            if (map.size() > 0) {
+                replyFrom = (String) map.get(JetFuelExecuteConstants.MSG_CREATION_NAME);
             }
             System.out.println("Got onCompleted from " + replyFrom + " for id '" +
                     id + "' with message '" + message + "' and returnValue '" + returnValue + "'");
         }
 
         @Override
-        public void onError(String id, Optional<Map<String, Object>> map, Object message, Object exception) {
+        public void onError(String id, Map<String, Object> map, Object message, Object exception) {
             String replyFrom = "";
-            if (map.isPresent()) {
-                replyFrom = (String) map.get().get(JetFuelExecuteConstants.MSG_CREATION_NAME);
+            if (map.size() > 0) {
+                replyFrom = (String) map.get(JetFuelExecuteConstants.MSG_CREATION_NAME);
             }
             System.out.println("Got onCompleted from " + replyFrom + " for id '" + id + "' with message '" + message + "' and exception '" + exception + "'");
         }

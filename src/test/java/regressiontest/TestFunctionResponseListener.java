@@ -30,7 +30,7 @@ public class TestFunctionResponseListener implements FunctionResponseListener {
 
 
     @Override
-    public void onCompleted(String id, Optional<Map<String, Object>> responseMap, Object message, Object returnValue) {
+    public void onCompleted(String id, Map<String, Object> responseMap, Object message, Object returnValue) {
         this.id = id;
         this.message = message;
         addMessage(message);
@@ -44,7 +44,7 @@ public class TestFunctionResponseListener implements FunctionResponseListener {
     }
 
     @Override
-    public void onError(String id, Optional<Map<String, Object>> responseMap, Object message, Object exception) {
+    public void onError(String id, Map<String, Object> responseMap, Object message, Object exception) {
         this.id = id;
         this.message = message;
         addMessage(message);
