@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -138,7 +136,7 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
         assertEquals("Call should complete successfully", response.getOnCompletedCount(), 1);
         final long timeTaken = System.currentTimeMillis() - startTime;
         responseStatsWriter.writeStats(callID, timeTaken);
-        assertTrue("Test should take less than 1 sec and test " + callID  + " took " + timeTaken + " millis.", timeTaken < 1000);
+        assertTrue("Test should take less than 1 sec and test " + callID + " took " + timeTaken + " millis.", timeTaken < 1000);
     }
 
 }
