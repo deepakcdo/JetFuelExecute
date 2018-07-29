@@ -134,7 +134,7 @@ public class JetFuelExecuteClientTest extends JetFuelBaseClientTest {
         String callID = jetFuelExecuteToUse.executeFunction(fullFunctionName, new Object[]{"Deepak", true, "safe"}, response);
         countDownLatch.await(sleepValueForTest, TimeUnit.MILLISECONDS);
         final long timeTaken = System.currentTimeMillis() - startTime;
-        assertEquals("Call should complete successfully", response.getOnCompletedCount(), 1);
+        assertEquals("Call should complete successfully for test " + callID, response.getOnCompletedCount(), 1);
         responseStatsWriter.writeStats(callID, timeTaken);
         assertTrue("Test should take less than 1 sec and test " + callID + " took " + timeTaken + " millis.", timeTaken < 1000);
     }
