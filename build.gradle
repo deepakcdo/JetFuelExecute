@@ -26,7 +26,7 @@ def props = new Properties()
 file("JetFuelExecute.properties").withInputStream { props.load(it) }
 
 jar {
-    baseName = 'JetFuelExecute-' + props.getProperty("version")
+    baseName = 'headfront-jetfuelexecute-' + props.getProperty("version")
     manifest {
         attributes 'Company': 'Head Front Consulting',
                 'App': 'JetFuelExecute',
