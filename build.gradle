@@ -43,24 +43,6 @@ task testJar(type: Jar) {
     from sourceSets.test.output
 }
 
-def buildLoc = "build/BuildApp/JetFuelExecute-" + props.getProperty("version")
-task BuildApp {
-    delete(buildLoc)
-    mkdir(buildLoc)
-
-    copy {
-        into buildLoc + '/libs/'
-        from configurations
-    }
-
-    copy {
-        from 'build/libs'
-        into buildLoc + '/libs/'
-        include '*.jar'
-    }
-
-}
-
 
 task runJetFuelExecuteSubServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
