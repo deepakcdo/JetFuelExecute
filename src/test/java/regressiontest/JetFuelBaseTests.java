@@ -92,6 +92,20 @@ public class JetFuelBaseTests {
     JetFuelFunction updateBankStatusFunction5;
 
     @Autowired
+    JetFuelFunction getListOfWeekendDaysFunction;
+    @Autowired
+    JetFuelFunction getNoOfHolidaysPerMonthFunction;
+
+    @Autowired
+    JetFuelFunction placeOrderWithMapFunction;
+    @Autowired
+    JetFuelFunction placeOrderWithMapAndStringFunction;
+    @Autowired
+    JetFuelFunction placeOrderWithListFunction;
+    @Autowired
+    JetFuelFunction placeOrderWithListAndStringFunction;
+
+    @Autowired
     ObjectMapper jsonMapper;
 
     protected boolean runningBothClientAndSerer = true;

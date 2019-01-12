@@ -9,9 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertTrue;
@@ -314,4 +312,99 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 expectedMsg, null, null, false,
                 states, true, true, 2);
     }
+
+    @Test
+    public void callGetWeekends() throws Exception {
+        String expectedMsg = "Sending weekends";
+        ArrayList arrayList = new ArrayList();
+        arrayList.add("Saturday");
+        arrayList.add("Sunday");
+        callJetFuelFunction(getJetFuelExecute(), "getListOfWeekendDays", getListOfWeekendDaysFunction,
+                new Object[]{"UK"}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, arrayList, null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
+    @Test
+    public void callGetNoOfHolidaysPerMonthFunction() throws Exception {
+        String expectedMsg = "Sending Holidays";
+        Map<String, Integer> holidays = new HashMap<>();
+        holidays.put("Dec", 2);
+        holidays.put("Jan", 1);
+        callJetFuelFunction(getJetFuelExecute(), "getNoOfHolidaysPerMonth", getNoOfHolidaysPerMonthFunction,
+                new Object[]{"UK"}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, holidays, null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
+    @Test
+    public void callPlaceOrderWithMapFunction() throws Exception {
+        String expectedMsg = "Placed Buy order for 10 at price 99.94";
+        Map<String, Object> orderParameters = new HashMap<>();
+        orderParameters.put("side", "Buy");
+        orderParameters.put("quantity", 10);
+        orderParameters.put("price", 99.94);
+        callJetFuelFunction(getJetFuelExecute(), "placeOrderWithMap", placeOrderWithMapFunction,
+                new Object[]{orderParameters}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, "Order_ID_Map_99.94", null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
+    //@Test -- raised bug waiting for response
+    public void callPlaceOrderWithMapAndStringFunction() throws Exception {
+        String expectedMsg = "Placed Buy order for 10 at price 99.94";
+        Map<String, Object> orderParameters = new HashMap<>();
+        orderParameters.put("side", "Buy");
+        orderParameters.put("quantity", 10);
+        orderParameters.put("price", 99.94);
+        callJetFuelFunction(getJetFuelExecute(), "placeOrderWithMapAndString", placeOrderWithMapAndStringFunction,
+                new Object[]{orderParameters, "BBG"}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, "BBG_Order_ID_Map_99.94", null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
+//    @Test
+    public void callPlaceOrderWithListFunction() throws Exception {
+        String expectedMsg = "Placed Buy order for 10 at price 99.94";
+        List<Object> orderParameters = new ArrayList<>();
+        orderParameters.add("Buy");
+        orderParameters.add(10);
+        orderParameters.add( 99.94);
+        callJetFuelFunction(getJetFuelExecute(), "placeOrderWithList", placeOrderWithListFunction,
+                new Object[]{orderParameters}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, "Order_ID_List_99.94", null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
+//    @Test
+    public void callPlaceOrderWithListAndStringFunction() throws Exception {
+        String expectedMsg = "Placed Buy order for 10 at price 99.94";
+        List<Object> orderParameters = new ArrayList<>();
+        orderParameters.add("Buy");
+        orderParameters.add(10);
+        orderParameters.add( 99.94);
+        callJetFuelFunction(getJetFuelExecute(), "placeOrderWithListAndString", placeOrderWithListAndStringFunction,
+                new Object[]{orderParameters, "TW"}, sleepValueForTest,
+                0, false,
+                1, true,
+                0, 0, new ArrayList<String>(), new ArrayList<String>(),
+                expectedMsg, "TW_Order_ID_List_99.94", null, false,
+                new String[]{"Completed"}, true, false, 0);
+    }
+
 }

@@ -1,10 +1,9 @@
 package headfront.jetfuel.execute.utils;
 
+import headfront.jetfuel.execute.functions.FunctionParameter;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -45,14 +44,6 @@ public class FunctionUtilsTest {
         }
     }
 
-    @Test
-    public void generateFunctionHash() throws Exception {
-        List<Class> parameters = Arrays.asList(Long.class, Double.class, String.class);
-        String functionHashName = FunctionUtils.getFunctionHashName("changeBankStatus", parameters);
-        String expectedMessage = "changeBankStatus" + FunctionUtils.FUNCTION_SEPARATOR + "4" + FunctionUtils.FUNCTION_SEPARATOR + "3" + FunctionUtils.FUNCTION_SEPARATOR + "5";
-        assertEquals(expectedMessage, functionHashName);
-    }
-
 
     @Test
     public void testGetFunctionSignature() throws Exception {
@@ -63,13 +54,39 @@ public class FunctionUtilsTest {
 
     @Test
     public void createCorrectTypeOfParam() throws Exception {
-        Class[] parameters = {Long.class, Double.class, String.class, Boolean.class, Integer.class, Integer.class};
-        Object[] values = {45l, "45.4", "ringclass", true, 8, 5};
+        Class[] parameters = {Long.class, Double.class, String.class, Boolean.class, Integer.class, Integer.class, List.class, Map.class};
+        Object[] values = {45l, "45.4", "ringclass", true, 8, 5, "[2,2.33]", "{age=23,name=deepak}"};
         for (int i = 0; i < parameters.length; i++) {
             Object correctTypeOfParam = FunctionUtils.createCorrectTypeOfParam(parameters[i], values[i]);
-            assertEquals("Testing " + values[i] + " for type " + parameters[i], parameters[i], correctTypeOfParam.getClass());
-        }
+            if (parameters[i].isInterface()) {
+                assertTrue("Testing " + values[i] + " for type " + parameters[i] + " and we got " + correctTypeOfParam.getClass()
+                        , parameters[i].isAssignableFrom(correctTypeOfParam.getClass()));
+            } else {
+                assertEquals("Testing " + values[i] + " for type " + parameters[i], parameters[i], correctTypeOfParam.getClass());
+            }
 
+        }
+    }
+
+    @Test
+    public void testValidateParameters() throws Exception {
+        List<FunctionParameter> expectedParameters = Arrays.asList(
+                new FunctionParameter("", Long.class, ""),
+                new FunctionParameter("", Double.class, ""),
+                new FunctionParameter("", String.class, ""),
+                new FunctionParameter("", Boolean.class, ""),
+                new FunctionParameter("", Integer.class, ""),
+                new FunctionParameter("", Integer.class, ""),
+                new FunctionParameter("", List.class, ""),
+                new FunctionParameter("", Map.class, ""));
+        Object[] rawValues = {45l, "45.4", "ringclass", true, 8, 5, "[2,2.33]", "{age=23,name=deepak}"};
+        List<Object> values = new ArrayList<>();
+        for (int i = 0; i < expectedParameters.size(); i++) {
+            Object correctValue = FunctionUtils.createCorrectTypeOfParam(expectedParameters.get(i).getParameterType(), rawValues[i]);
+            values.add(correctValue);
+        }
+        String reason = FunctionUtils.validateParameters(values, expectedParameters);
+        assertTrue("Parameters was not valid due to " + reason, reason == null);
     }
 
 }

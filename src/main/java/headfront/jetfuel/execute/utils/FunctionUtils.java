@@ -28,7 +28,9 @@ public class FunctionUtils {
             new SimpleEntry<>(Integer.class, 2),
             new SimpleEntry<>(Double.class, 3),
             new SimpleEntry<>(Long.class, 4),
-            new SimpleEntry<>(String.class, 5))
+            new SimpleEntry<>(String.class, 5),
+            new SimpleEntry<>(Map.class, 6),
+            new SimpleEntry<>(List.class, 7))
             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)));
 
     public static final String FUNCTION_SEPARATOR = "_";
@@ -39,26 +41,6 @@ public class FunctionUtils {
     private static AtomicInteger counter = new AtomicInteger();
 
 
-    //  Parameters list can be empty
-    public static String getFunctionHashName(String functionName, List<Class> parameters) throws IllegalArgumentException {
-        notNull(functionName, "FunctionName cannot be null");
-        hasLength(functionName, "FunctionName cannot be empty String");
-        validateParameters(parameters);
-        List<String> functionHashParts = new ArrayList<>();
-        functionHashParts.add(functionName);
-        parameters.forEach(parameter -> {
-            functionHashParts.add(FunctionsTypes.get(parameter).toString());
-        });
-        return String.join(FUNCTION_SEPARATOR, functionHashParts);
-    }
-
-    public static String getFunctionHashName(String functionName, Object... parameters) throws IllegalArgumentException {
-        List<Class> parameterClass = new ArrayList<>();
-        for (Object param : parameters) {
-            parameterClass.add(param.getClass());
-        }
-        return getFunctionHashName(functionName, parameterClass);
-    }
 
     public static String getFunctionSignature(String functionName, Object... parameters) throws IllegalArgumentException {
         List<String> functionSignature = new ArrayList<>();
@@ -108,6 +90,12 @@ public class FunctionUtils {
                 if (parameterType.equals(String.class)) {
                     return value.toString();
                 }
+                if (parameterType.equals(Map.class)) {
+                    return getMap(value);
+                }
+                if (parameterType.equals(List.class)) {
+                    return getList(value);
+                }
             } else {
                 return "<NULL>";
             }
@@ -115,6 +103,42 @@ public class FunctionUtils {
             throw new RuntimeException("Unsupported parameter class " + parameterType);
         }
         return null;
+    }
+
+    private static Map getMap(Object value) {
+        String stringValue = value.toString();
+        stringValue = removeBrackets(stringValue);
+        String[] split = stringValue.split(",");
+        Map map = new LinkedHashMap();
+        for(String part:split){
+            String[] keyValue = part.split("=");
+            map.put(keyValue[0],keyValue[1]);
+        }
+        return map;
+    }
+
+    private static List getList(Object value) {
+        String stringValue = value.toString();
+        stringValue = removeBrackets(stringValue);
+        String[] split = stringValue.split(",");
+        return Arrays.asList(split);
+    }
+
+    private static String removeBrackets(String stringValue) {
+        //remove all brackets
+        if (stringValue.startsWith("[")) {
+            stringValue = stringValue.substring(1);
+        }
+        if (stringValue.startsWith("{")) {
+            stringValue = stringValue.substring(1);
+        }
+        if (stringValue.endsWith("]")) {
+            stringValue = stringValue.substring(0, stringValue.length() - 1);
+        }
+        if (stringValue.endsWith("}")) {
+            stringValue = stringValue.substring(0, stringValue.length() - 1);
+        }
+        return stringValue;
     }
 
     public static boolean getBoolean(Object s) {
@@ -149,21 +173,6 @@ public class FunctionUtils {
         }
     }
 
-    public static String getParameterHash(Object... functionParameters) {
-        if (functionParameters.length == 0) {
-            return "";
-        }
-        List<String> functionHashParts = new ArrayList<>();
-        for (Object parameter : functionParameters) {
-            Integer integer = FunctionsTypes.get(parameter.getClass());
-            if (integer == null) {
-                throw new RuntimeException("Unsupported parameter value = " + parameter + " type = " + parameter.getClass());
-            } else {
-                functionHashParts.add(integer.toString());
-            }
-        }
-        return FUNCTION_SEPARATOR + String.join(FUNCTION_SEPARATOR, functionHashParts);
-    }
 
     public static Map<String, Object> createMapFromJetFuelFunction(JetFuelFunction jetFuelFunction, String ampsConnectionName, String hostName) {
         Map<String, Object> publishMap = new HashMap<>();
@@ -230,27 +239,31 @@ public class FunctionUtils {
         return dateTimeStr;
     }
 
-    public static String validateParameters(List<Object> parameters, List<FunctionParameter> configuredParameters) {
+    public static String validateParameters(List<Object> receivedParameters, List<FunctionParameter> configuredParameters) {
         if (configuredParameters == null) {
             throw new RuntimeException("The setFunctionParameters(List<FunctionParameter>) has not been called so we cant validateParameters this. Please set it.");
         }
-        String gotAndExpectedMsg = "Got " + parameters + " expected " + configuredParameters;
-        if (parameters.size() != configuredParameters.size()) {
-            return "Got " + parameters.size() + " parameters but expected " + configuredParameters.size() + " parameters. " + gotAndExpectedMsg;
+        String gotAndExpectedMsg = "Got " + receivedParameters + " expected " + configuredParameters;
+        if (receivedParameters.size() != configuredParameters.size()) {
+            return "Got " + receivedParameters.size() + " parameters but expected " + configuredParameters.size() + " parameters. " + gotAndExpectedMsg;
         }
-        for (int i = 0; i < parameters.size(); i++) {
-            final FunctionParameter configuredParam = configuredParameters.get(i);
-            Object parameter = parameters.get(i);
-            if (parameter == null) {
-                return "Got a null value for " + configuredParam.getParameterName() + " this is not allowed";
+        for (int i = 0; i < receivedParameters.size(); i++) {
+            final FunctionParameter configuredParameter = configuredParameters.get(i);
+            Object receivedParameter = receivedParameters.get(i);
+            if (receivedParameter == null) {
+                return "Got a null value for " + configuredParameter.getParameterName() + " this is not allowed";
             }
-            Class<?> parameterClass = parameter.getClass();
-            Class configuredParameterType = configuredParam.getParameterType();
-            if (parameter.getClass() == Integer.class && configuredParameterType == Long.class) {
+            Class<?> receivedParameterClass = receivedParameter.getClass();
+            Class configuredParameterType = configuredParameter.getParameterType();
+            if (receivedParameter.getClass() == Integer.class && configuredParameterType == Long.class) {
                 return null; //allow this as long are bigger than ints
+            }if (configuredParameterType.isInterface()) {
+                if(configuredParameterType.isAssignableFrom(receivedParameter.getClass())){
+                    return null;
+                }
             }
-            if (!parameterClass.equals(configuredParameterType)) {
-                return "Parameter at index " + (i + 1) + " was " + parameter + " with type " + parameterClass + " we expected " + configuredParameterType;
+            if (!receivedParameterClass.equals(configuredParameterType)) {
+                return "Parameter at index " + (i + 1) + " was " + receivedParameter + " with type " + receivedParameterClass + " we expected " + configuredParameterType;
             }
         }
         return null;

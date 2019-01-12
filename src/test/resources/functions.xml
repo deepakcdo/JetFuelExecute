@@ -15,6 +15,13 @@
     </bean>
 
     <bean id="testIDGenerator" class="regressiontest.TestIDGenerator"/>
+    <bean id="placeOrderWithMap" class="regressiontest.functions.PlaceOrderWithMapExecutor"/>
+    <bean id="placeOrderWithMapAndString" class="regressiontest.functions.PlaceOrderWithMapAndStringExecutor"/>
+    <bean id="placeOrderWithList" class="regressiontest.functions.PlaceOrderWithListExecutor"/>
+    <bean id="placeOrderWithListAndString" class="regressiontest.functions.PlaceOrderWithListAndStringExecutor"/>
+
+    <bean id="getWeekends" class="regressiontest.functions.TestGetWeekends"/>
+    <bean id="getNoOfHolidaysPerMonth" class="regressiontest.functions.TestGetNoOfHolidaysPerMonth"/>
     <bean id="handleBankStatus" class="regressiontest.functions.UpdateBankStatusExecutor"/>
     <bean id="handleTraderStatus" class="regressiontest.functions.UpdateBankTraderExecutor"/>
     <bean id="getTradingDate" class="regressiontest.functions.GetTradingDateExecutor"/>
@@ -403,5 +410,128 @@
         <property name="allowMultiExecute" value="true"/>
     </bean>
 
+    <bean id="getListOfWeekendDaysFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="getListOfWeekendDays"/>
+        <constructor-arg index="1" value="Get the list of weekend days"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="country"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Country for which you need weekend days"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.util.List"/>
+        <constructor-arg index="4" value="Return the list of weekend days for the given country"/>
+        <constructor-arg index="5" ref="getWeekends"/>
+        <constructor-arg index="6" value="Read"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="getNoOfHolidaysPerMonthFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="getNoOfHolidaysPerMonth"/>
+        <constructor-arg index="1" value="Get Number of Holidays per month for the given country"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="country"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Country for which you need holidays"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.util.List"/>
+        <constructor-arg index="4" value="Return a Map  of Holidays per month for the given country"/>
+        <constructor-arg index="5" ref="getNoOfHolidaysPerMonth"/>
+        <constructor-arg index="6" value="Read"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="placeOrderWithMapFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="placeOrderWithMap"/>
+        <constructor-arg index="1" value="Place Order by sending in a map of parameters"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="mapOfParameters"/>
+                    <constructor-arg value="java.util.Map"/>
+                    <constructor-arg value="Map of Parameters, should have side, quantity and price"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return a the order id of the order placed"/>
+        <constructor-arg index="5" ref="placeOrderWithMap"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="placeOrderWithMapAndStringFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="placeOrderWithMapAndString"/>
+        <constructor-arg index="1" value="Place Order by sending in a map of parameters and a String"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="mapOfParameters"/>
+                    <constructor-arg value="java.util.Map"/>
+                    <constructor-arg value="Map of Parameters, should have side, quantity and price"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="prefix"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Prefix For Order ID"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return a the order id of the order placed"/>
+        <constructor-arg index="5" ref="placeOrderWithMapAndString"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="placeOrderWithListFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="placeOrderWithList"/>
+        <constructor-arg index="1" value="Place Order by sending in a List of parameters"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="listOfParameters"/>
+                    <constructor-arg value="java.util.List"/>
+                    <constructor-arg value="List of Parameters, should have side, quantity and price in order"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return a the order id of the order placed"/>
+        <constructor-arg index="5" ref="placeOrderWithList"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
+
+    <bean id="placeOrderWithListAndStringFunction" class="headfront.jetfuel.execute.functions.JetFuelFunction">
+        <constructor-arg index="0" value="placeOrderWithListAndString"/>
+        <constructor-arg index="1" value="Place Order by sending in a List of parameters and String"/>
+        <constructor-arg index="2">
+            <list>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="listOfParameters"/>
+                    <constructor-arg value="java.util.List"/>
+                    <constructor-arg value="List of Parameters, should have side, quantity and price in order"/>
+                </bean>
+                <bean class="headfront.jetfuel.execute.functions.FunctionParameter">
+                    <constructor-arg value="prefix"/>
+                    <constructor-arg value="java.lang.String"/>
+                    <constructor-arg value="Prefix For Order ID"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="3" value="java.lang.String"/>
+        <constructor-arg index="4" value="Return a the order id of the order placed"/>
+        <constructor-arg index="5" ref="placeOrderWithListAndString"/>
+        <constructor-arg index="6" value="Write"/>
+        <constructor-arg index="7" value="RequestResponse"/>
+    </bean>
 
 </beans>
