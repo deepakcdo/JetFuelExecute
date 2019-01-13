@@ -151,4 +151,9 @@ Ability to make a function call which is executed by several publishers. E.g. if
 3) View the full Request/Response message - your support team will love you
 ![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
 
-Note:- JetFuelExplorer (http://headfront.co.uk/JetFuelExplorer.html) is an independent tool. JetFuelExecute can be used without JetFuelExplorer
+# Testing Support
+JetFuelExecute was written with testing in mind. These two features help you test your app easily
+* Every FunctionExecutor is an independent class so can be tested throughly on its own.
+* DefaultJetFuelExecuteService can be used for integration test as this does not connect to any middleware.
+
+Note:- JetFuelView - https://github.com/deepakcdo/JetFuelView (https://jetfuel.solutions/) is an independent tool. JetFuelExecute can be used without JetFuelView
