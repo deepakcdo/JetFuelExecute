@@ -258,6 +258,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         }
     }
 
+    @Override
+    public void setFunctionIDGenerator(Function<String, String> functionIDGenerator) {
+        this.functionIDGenerator = functionIDGenerator;
+    }
 
     private void processReplyMessage(String id, Map<String, Object> map, String functionResponse) {
         FunctionResponseListener result = null;
@@ -754,10 +758,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     public void setFunctionBusTopic(String functionsBusTopic) {
         this.functionBusTopic = functionsBusTopic;
-    }
-
-    public void setFunctionIDGenerator(Function<String, String> functionIDGenerator) {
-        this.functionIDGenerator = functionIDGenerator;
     }
 
     public String getFunctionTopic() {

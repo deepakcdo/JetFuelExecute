@@ -14,9 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static headfront.jetfuel.execute.utils.AssertChecks.hasLength;
-import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
-
 
 /**
  * Created by Deepak on 09/04/2017.
@@ -41,7 +38,6 @@ public class FunctionUtils {
     private static AtomicInteger counter = new AtomicInteger();
 
 
-
     public static String getFunctionSignature(String functionName, Object... parameters) throws IllegalArgumentException {
         List<String> functionSignature = new ArrayList<>();
         for (Object param : parameters) {
@@ -62,6 +58,10 @@ public class FunctionUtils {
 
     public static String getNextID(String name) {
         return name + NAME_SEPARATOR + DATE_TIME + FUNCTION_SEPARATOR + counter.incrementAndGet();
+    }
+
+    public static String getNextSimpleID(String name) {
+        return name + FUNCTION_SEPARATOR + counter.incrementAndGet();
     }
 
     public static String getFullFunctionName(JetFuelFunction function) {
@@ -110,9 +110,9 @@ public class FunctionUtils {
         stringValue = removeBrackets(stringValue);
         String[] split = stringValue.split(",");
         Map map = new LinkedHashMap();
-        for(String part:split){
+        for (String part : split) {
             String[] keyValue = part.split("=");
-            map.put(keyValue[0],keyValue[1]);
+            map.put(keyValue[0], keyValue[1]);
         }
         return map;
     }
@@ -257,8 +257,9 @@ public class FunctionUtils {
             Class configuredParameterType = configuredParameter.getParameterType();
             if (receivedParameter.getClass() == Integer.class && configuredParameterType == Long.class) {
                 return null; //allow this as long are bigger than ints
-            }if (configuredParameterType.isInterface()) {
-                if(configuredParameterType.isAssignableFrom(receivedParameter.getClass())){
+            }
+            if (configuredParameterType.isInterface()) {
+                if (configuredParameterType.isAssignableFrom(receivedParameter.getClass())) {
                     return null;
                 }
             }

@@ -7,6 +7,7 @@ import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Deepak on 10/01/2018.
@@ -122,5 +123,13 @@ public interface JetFuelExecute {
      * @return a set of function id that we are still expecting a response
      */
     Set<String> getUncompletedFunctionIds();
+
+
+    /**
+     * Set how FunctionID is Generated
+     *
+     * @param functionIDGenerator
+     */
+    void setFunctionIDGenerator(Function<String, String> functionIDGenerator);
 
 }

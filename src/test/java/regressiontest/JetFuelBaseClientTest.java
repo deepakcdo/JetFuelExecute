@@ -375,13 +375,13 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new String[]{"Completed"}, true, false, 0);
     }
 
-//    @Test
+    //    @Test
     public void callPlaceOrderWithListFunction() throws Exception {
         String expectedMsg = "Placed Buy order for 10 at price 99.94";
         List<Object> orderParameters = new ArrayList<>();
         orderParameters.add("Buy");
         orderParameters.add(10);
-        orderParameters.add( 99.94);
+        orderParameters.add(99.94);
         callJetFuelFunction(getJetFuelExecute(), "placeOrderWithList", placeOrderWithListFunction,
                 new Object[]{orderParameters}, sleepValueForTest,
                 0, false,
@@ -391,13 +391,13 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new String[]{"Completed"}, true, false, 0);
     }
 
-//    @Test
+    //    @Test
     public void callPlaceOrderWithListAndStringFunction() throws Exception {
         String expectedMsg = "Placed Buy order for 10 at price 99.94";
         List<Object> orderParameters = new ArrayList<>();
         orderParameters.add("Buy");
         orderParameters.add(10);
-        orderParameters.add( 99.94);
+        orderParameters.add(99.94);
         callJetFuelFunction(getJetFuelExecute(), "placeOrderWithListAndString", placeOrderWithListAndStringFunction,
                 new Object[]{orderParameters, "TW"}, sleepValueForTest,
                 0, false,
