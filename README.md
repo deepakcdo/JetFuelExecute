@@ -156,4 +156,5 @@ JetFuelExecute was written with testing in mind. These two features help you tes
 * Every FunctionExecutor is an independent class so can be tested throughly on its own.
 * DefaultJetFuelExecuteService can be used for integration test as this does not connect to any middleware.
 
-Note:- JetFuelView - https://github.com/deepakcdo/JetFuelView (https://jetfuel.solutions/) is an independent tool. JetFuelExecute can be used without JetFuelView
+# JetFuelView 
+JetFuelView - https://github.com/deepakcdo/JetFuelView (https://jetfuel.solutions/) is an independent tool. JetFuelExecute can be used without JetFuelView. JetFuelView will make monitoring and developing against Amps easier and fun.
