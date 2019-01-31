@@ -359,7 +359,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new String[]{"Completed"}, true, false, 0);
     }
 
-    //@Test -- raised bug waiting for response
+    @Test
     public void callPlaceOrderWithMapAndStringFunction() throws Exception {
         String expectedMsg = "Placed Buy order for 10 at price 99.94";
         Map<String, Object> orderParameters = new HashMap<>();
@@ -375,7 +375,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new String[]{"Completed"}, true, false, 0);
     }
 
-    //    @Test
+     @Test
     public void callPlaceOrderWithListFunction() throws Exception {
         String expectedMsg = "Placed Buy order for 10 at price 99.94";
         List<Object> orderParameters = new ArrayList<>();
@@ -391,7 +391,7 @@ public class JetFuelBaseClientTest extends JetFuelBaseTests {
                 new String[]{"Completed"}, true, false, 0);
     }
 
-    //    @Test
+    @Test
     public void callPlaceOrderWithListAndStringFunction() throws Exception {
         String expectedMsg = "Placed Buy order for 10 at price 99.94";
         List<Object> orderParameters = new ArrayList<>();

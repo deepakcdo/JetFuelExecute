@@ -555,7 +555,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             }
 
             if (currentState.equalsIgnoreCase(FunctionState.RequestNew.name())) {
-                AbstractFunctionExecutor newExecutor = (AbstractFunctionExecutor) jetFuelFunction.getExecutor();
+                FunctionProcessor newExecutor = (FunctionProcessor) jetFuelFunction.getExecutor();
                 LOG.info("Processing JetFuelExecuteFunction execution request with id " + id + " functionName " + jetFuelFunction.getFullFunctionName() + " with parameter " + parameters + " from caller " + caller);
                 if (jetFuelFunction.getExecutionType() == FunctionExecutionType.RequestResponse) {
                     newExecutor.validateAndExecuteFunction(id, jetFuelFunction.getFunctionParameters(),

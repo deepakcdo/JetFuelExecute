@@ -7,6 +7,7 @@ import headfront.jetfuel.execute.functions.JetFuelFunction;
 import headfront.jetfuel.execute.functions.SubscriptionExecutor;
 import headfront.jetfuel.execute.functions.SubscriptionFunctionResponseListener;
 import headfront.jetfuel.execute.utils.FunctionUtils;
+import headfront.jetfuel.execute.utils.SameThreadExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,8 @@ public class DefaultJetFuelExecuteService implements JetFuelExecute {
     private Consumer<String> functionAddedListener = newFunction -> {
     };
     private Map<String, JetFuelFunction> availableFunctions = new HashMap<>();
+    private SameThreadExecutor processingThreadFactory = new SameThreadExecutor(1);
+    private boolean executeOnDifferentThread = false;
 
     @Override
     public void initialise() {
@@ -75,6 +78,7 @@ public class DefaultJetFuelExecuteService implements JetFuelExecute {
 
     @Override
     public boolean publishFunction(JetFuelFunction jetFuelFunction) {
+        jetFuelFunction.setTransientFunctionDetatils(getConnectionName(), "DeepakHomeMac", new Date().toString());
         availableFunctions.put(jetFuelFunction.getFullFunctionName(), jetFuelFunction);
         functionAddedListener.accept(jetFuelFunction.getFullFunctionName());
         return true;
@@ -90,13 +94,19 @@ public class DefaultJetFuelExecuteService implements JetFuelExecute {
     @Override
     public String executeFunction(String functionName, Object[] functionParameters,
                                   FunctionResponseListener functionResponse) {
-        String functionID = functionIDGenerator.apply("MOCK");
+        final String functionID = functionIDGenerator.apply("MOCK");
         try {
             final JetFuelFunction jetFuelFunction = availableFunctions.get(functionName);
             if (jetFuelFunction != null) {
                 List<Object> parameters = Arrays.asList(functionParameters);
-                jetFuelFunction.getExecutor().validateAndExecuteFunction(functionID, jetFuelFunction.getFunctionParameters(),
-                        parameters, new HashMap<>(), functionResponse);
+                if (executeOnDifferentThread) {
+                    processingThreadFactory.processTask(functionID, () ->
+                            jetFuelFunction.getExecutor().validateAndExecuteFunction(functionID, jetFuelFunction.getFunctionParameters(),
+                                    parameters, new HashMap<>(), functionResponse));
+                } else {
+                    jetFuelFunction.getExecutor().validateAndExecuteFunction(functionID, jetFuelFunction.getFunctionParameters(),
+                            parameters, new HashMap<>(), functionResponse);
+                }
             } else {
                 LOG.error("Unable to processFunction " + functionName + " with parameter " + Arrays.toString(functionParameters)
                         + " as the function was not found");
@@ -163,6 +173,10 @@ public class DefaultJetFuelExecuteService implements JetFuelExecute {
 
     public void setConnectionName(String connectionName) {
         this.connectionName = connectionName;
+    }
+
+    public void setExecuteOnDifferentThread(boolean executeOnDifferentThread) {
+        this.executeOnDifferentThread = executeOnDifferentThread;
     }
 }
 

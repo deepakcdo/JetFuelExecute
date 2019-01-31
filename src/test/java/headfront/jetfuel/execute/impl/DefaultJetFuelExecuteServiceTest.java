@@ -3,6 +3,7 @@ package headfront.jetfuel.execute.impl;
 import headfront.jetfuel.execute.FunctionAccessType;
 import headfront.jetfuel.execute.FunctionExecutionType;
 import headfront.jetfuel.execute.FunctionState;
+import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.functions.FunctionParameter;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
 import headfront.jetfuel.execute.functions.JetFuelFunction;
@@ -24,16 +25,21 @@ import static org.junit.Assert.assertEquals;
 
 public class DefaultJetFuelExecuteServiceTest {
 
-    private static DefaultJetFuelExecuteService jetFuelExecute = null;
+    private static DefaultJetFuelExecuteService jetFuelExecuteInSameThread = null;
+    private static DefaultJetFuelExecuteService jetFuelExecuteInDifferentThread = null;
     private static AtomicInteger idCounter = new AtomicInteger(0);
 
 
     @BeforeClass
     public static void setUp() {
-        jetFuelExecute = new DefaultJetFuelExecuteService();
-        jetFuelExecute.setFunctionIDGenerator(in -> in + "-" + idCounter.get());
+        jetFuelExecuteInSameThread = new DefaultJetFuelExecuteService();
+        jetFuelExecuteInSameThread.setFunctionIDGenerator(in -> in + "-" + idCounter.get());
+        jetFuelExecuteInDifferentThread = new DefaultJetFuelExecuteService();
+        jetFuelExecuteInDifferentThread.setFunctionIDGenerator(in -> in + "-" + idCounter.get());
+        jetFuelExecuteInDifferentThread.setExecuteOnDifferentThread(true);
         createAverageFunction();
-        createPricePublisherFunction();
+        createPricePublisherFunction(jetFuelExecuteInSameThread);
+        createPricePublisherFunction(jetFuelExecuteInDifferentThread);
     }
 
     private static void createAverageFunction() {
@@ -45,11 +51,11 @@ public class DefaultJetFuelExecuteServiceTest {
         JetFuelFunction function = new JetFuelFunction("Average", "Calculates Average of two numbers", parameters,
                 Integer.class, "Returns the average of the two numbers", new AverageCalc(), FunctionAccessType.Refresh,
                 FunctionExecutionType.RequestResponse);
-        function.setTransientFunctionDetatils(jetFuelExecute.getConnectionName(), "DeepakHomeMac", new Date().toString());
-        jetFuelExecute.publishFunction(function);
+        jetFuelExecuteInSameThread.publishFunction(function);
+        jetFuelExecuteInDifferentThread.publishFunction(function);
     }
 
-    private static void createPricePublisherFunction() {
+    private static void createPricePublisherFunction(DefaultJetFuelExecuteService jetFuelExecute) {
         FunctionParameter paramA = new FunctionParameter("instID", String.class, "Instrument ID");
         List<FunctionParameter> parameters = new ArrayList<>();
         parameters.add(paramA);
@@ -58,22 +64,30 @@ public class DefaultJetFuelExecuteServiceTest {
                 String.class, "Returns the lastPrice", objectPricePublisher, FunctionAccessType.Refresh,
                 FunctionExecutionType.Subscription);
         objectPricePublisher.setActiveSubscriptionFactory(jetFuelExecute.getSubscriptionRegistry());
-        function.setTransientFunctionDetatils(jetFuelExecute.getConnectionName(), "DeepakHomeMac", new Date().toString());
         jetFuelExecute.publishFunction(function);
     }
 
 
     @Test
     public void testDefaultJetFuelExecuteFunctionCall() throws InterruptedException {
+        //same Thread JetFuelExecutor
         idCounter.set(1);
-        testAverageFunction(99, 88, "Average is 93", "MOCK-1");
+        testAverageFunction(99, 88, "Average is 93", "MOCK-1", jetFuelExecuteInSameThread);
         idCounter.set(1999);
-        testAverageFunction(2, 8, "Average is 5", "MOCK-1999");
+        testAverageFunction(2, 8, "Average is 5", "MOCK-1999", jetFuelExecuteInSameThread);
         idCounter.set(45);
-        testAverageFunction(1000, 3, "Average is 501", "MOCK-45");
+        testAverageFunction(1000, 3, "Average is 501", "MOCK-45", jetFuelExecuteInSameThread);
+
+        //same Thread Different JetFuelExecutor
+        idCounter.set(11);
+        testAverageFunction(99, 88, "Average is 93", "MOCK-11", jetFuelExecuteInDifferentThread);
+        idCounter.set(19991);
+        testAverageFunction(2, 8, "Average is 5", "MOCK-19991", jetFuelExecuteInDifferentThread);
+        idCounter.set(451);
+        testAverageFunction(1000, 3, "Average is 501", "MOCK-451", jetFuelExecuteInDifferentThread);
     }
 
-    private void testAverageFunction(int a, int b, String returnValue, String id) throws InterruptedException {
+    private void testAverageFunction(int a, int b, String returnValue, String id, JetFuelExecute jetFuelExecute) throws InterruptedException {
         AtomicReference completedValue = new AtomicReference();
         AtomicBoolean completed = new AtomicBoolean();
         CountDownLatch latch = new CountDownLatch(1);
@@ -100,8 +114,17 @@ public class DefaultJetFuelExecuteServiceTest {
 
     @Test
     public void testDefaultJetFuelExecuteSubscriptionFunctionCall() throws InterruptedException {
-        idCounter.set(42);
-        String expectedId = "MOCK-42";
+
+        //same Thread JetFuelExecutor
+        testSubscriptionFunctionCall(333, jetFuelExecuteInSameThread);
+
+        //same Thread Different JetFuelExecutor
+        testSubscriptionFunctionCall(3331, jetFuelExecuteInDifferentThread);
+    }
+
+    private void testSubscriptionFunctionCall(int id,  JetFuelExecute jetFuelExecute)throws InterruptedException{
+        idCounter.set(id);
+        String expectedId = "MOCK-" + id;
         AtomicReference<List> updatesValue = new AtomicReference<>();
         updatesValue.set(new ArrayList());
         AtomicBoolean subscribed = new AtomicBoolean();

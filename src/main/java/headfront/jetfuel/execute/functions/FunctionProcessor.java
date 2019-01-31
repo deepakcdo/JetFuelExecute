@@ -1,5 +1,7 @@
 package headfront.jetfuel.execute.functions;
 
+import headfront.jetfuel.execute.ActiveSubscriptionRegistry;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,4 +14,5 @@ public interface FunctionProcessor {
                                     List<Object> parameters, Map<String, Object> requestParameters,
                                     FunctionResponseListener result);
 
+    void setActiveSubscriptionFactory(ActiveSubscriptionRegistry subscriptionRegistry);
 }

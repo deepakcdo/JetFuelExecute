@@ -1,5 +1,6 @@
 package headfront.jetfuel.execute.impl.functions;
 
+import headfront.jetfuel.execute.ActiveSubscriptionRegistry;
 import headfront.jetfuel.execute.functions.FunctionParameter;
 import headfront.jetfuel.execute.functions.FunctionProcessor;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
@@ -28,6 +29,11 @@ public class AverageCalc<T> implements FunctionProcessor {
         } else {
             functionPublisherResult.onError(s, "Expected 2 values and got " + list, null);
         }
+    }
+
+    @Override
+    public void setActiveSubscriptionFactory(ActiveSubscriptionRegistry subscriptionRegistry) {
+
     }
 
     public static boolean isInteger(Object s) {
