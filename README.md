@@ -24,7 +24,7 @@ In addition to JetFuelExecute having the awesome flexibility of just publishing 
 JetFuelExecute supports two Execution modes.
 * Request/Response - Use this when you want to send a command and get a reply
 * Subscription - Use this when you need a stream of data for a given command. This can be cancelled later.
-![screenshot](http://headfront.co.uk/JetFuelExecuteStateDiagram.jpg)
+![screenshot](https://github.com/deepakcdo/JetFuelView/blob/master/src/main/resources/doc/JetFuelExecuteStateDiagram.jpg)
 
 
 # JetFuelExecute code example.
@@ -143,13 +143,13 @@ Ability to make a function call which is executed by several publishers. E.g. if
 # JetFuelExecute demo using JetFuelExplorer 
 
 1) View available functions that are published by other servers
-![screenshot](http://headfront.co.uk/JetFuelExecuteAvailableFunctions.png)
+![screenshot](https://github.com/deepakcdo/JetFuelView/blob/master/src/main/resources/doc/JetFuel-Execute.png)
 
 2) Test a function - this is so useful
-![screenshot](http://headfront.co.uk/JetFuelExecuteTestFunction.png)
+![screenshot](https://github.com/deepakcdo/JetFuelView/blob/master/src/main/resources/doc/JetFuel-Execute_Test.png)
 
 3) View the full Request/Response message - your support team will love you
-![screenshot](http://headfront.co.uk/JetFuelExecuteAudit.png)
+![screenshot](https://github.com/deepakcdo/JetFuelView/blob/master/src/main/resources/doc/JetFuelExecuteAudit.png)
 
 # Testing Support
 JetFuelExecute was written with testing in mind. These two features help you test your app easily
