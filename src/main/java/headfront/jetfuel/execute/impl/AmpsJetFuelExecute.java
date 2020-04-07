@@ -726,7 +726,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                         LOG.info("Detected a disconnection and reconnection to amps. We will republish all functions again");
                         Runnable republishFunctions = () -> {
                             try {
-                                Thread.sleep(4000); // sleep 4 seconds for amps to reconnect fully
+                                Thread.sleep(50000); // sleep 50 seconds for amps to reconnect fully
                                 // clear received functions.
                                 functionsReceivedFromAmps.clear();
                                 //subscribe to functions
