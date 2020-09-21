@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import headfront.jetfuel.execute.*;
 import headfront.jetfuel.execute.functions.*;
 import headfront.jetfuel.execute.utils.FunctionUtils;
+import headfront.jetfuel.execute.utils.NamedThreadFactory;
 import headfront.jetfuel.execute.utils.SameThreadExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,6 +50,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
     private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
     private final ActiveSubscriptionRegistry subscriptionRegistry = new AmpsActiveSubscriptionRegistry();
+    private AmpsDisconnectionService disconnectionService = null;
+    private final List<OwnConnectionListener> ownConnectionListeners = new ArrayList<>();
+    private final ExecutorService jetFuelOwnConnectionProcessorThread = Executors.newSingleThreadExecutor(
+            new NamedThreadFactory("JetFuelOwnConnectionProcessorThread"));
 
     private Consumer<String> onFunctionAddedListener = name -> {
     };
@@ -61,6 +64,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private int noOfProcessingThreads = 10;
     private String functionTopic = "JETFUEL_EXECUTE";
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
+    private String loginTopic = "/AMPS/ClientStatus";
     private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
 
     public AmpsJetFuelExecute(HAClient ampsClient, ObjectMapper jsonMapper) {
@@ -107,10 +111,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 // Initialise executors
                 processingThreadFactory = new SameThreadExecutor(noOfProcessingThreads);
 
-                // Disable this for now as this info is only available per instance.
-                // Listen for disconnection so functions that need to know about dsconnections can act on it
-                // And use it keep a copy of available functions. e.g when publisher disconnects we can remove the functions it published
-                // subscribeToDisconnections();
+                // Listen for client disconnections so functions that need to know about disconnections can act on it
+                disconnectionService = new AmpsDisconnectionService(ampsClient, loginTopic, jsonMapper);
 
                 // Add disconnection and reconnection for our selves
                 ampsClient.addConnectionStateListener(new AmpsConnectionListener());
@@ -140,8 +142,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 unPublishFunction(function);
             });
             if (ampsClient != null) {
-                Set<CommandId> copyOfSubscritpions = new HashSet<>(jetFuelActiveSubscriptions);
-                copyOfSubscritpions.forEach(command -> {
+                Set<CommandId> copyOfSubscriptions = new HashSet<>(jetFuelActiveSubscriptions);
+                copyOfSubscriptions.forEach(command -> {
                     try {
                         ampsClient.unsubscribe(command);
                     } catch (DisconnectedException e) {
@@ -229,6 +231,21 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         } else {
             LOG.error("Got a request to cancel subscription request for id " + callId + " but there was no active subscription.");
         }
+    }
+
+    @Override
+    public void registerForClientDisconnections(String connectionName, ClientDisconnectionListener listener) {
+        disconnectionService.registerForDisconnections(connectionName, listener);
+    }
+
+    @Override
+    public void deRegisterForClientDisconnections(String connectionName) {
+        disconnectionService.deRegisterForDisconnections(connectionName);
+    }
+
+    @Override
+    public void registerOwnConnectionListener(OwnConnectionListener connectionListener) {
+        ownConnectionListeners.add(connectionListener);
     }
 
     @Override
@@ -734,14 +751,18 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                                 // republish function descriptions
                                 Set<JetFuelFunction> functionsToProcess = new HashSet<>(functionsPublishedToAmps.values());
                                 functionsToProcess.forEach(AmpsJetFuelExecute.this::rePublishFunctionDesc);
+                                ownConnectionListeners.forEach(listener -> listener.connected());
                             } catch (Exception e) {
                                 LOG.error("Unable to republish functions", e);
                             }
                         };
-                        new Thread(republishFunctions).start();
+                        jetFuelOwnConnectionProcessorThread.submit(republishFunctions);
                     }
                 } else if (state == ConnectionStateListener.Disconnected) {
                     connected.set(false);
+                    jetFuelOwnConnectionProcessorThread.submit(() -> {
+                        ownConnectionListeners.forEach(listener -> listener.disconnected());
+                    });
                 }
             }
         }
@@ -750,6 +771,10 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     public void setNoOfProcessingThreads(int noOfProcessingThreads) {
         this.noOfProcessingThreads = noOfProcessingThreads;
+    }
+
+    public void setLoginTopic(String loginTopic) {
+        this.loginTopic = loginTopic;
     }
 
     public void setFunctionTopic(String functionTopic) {

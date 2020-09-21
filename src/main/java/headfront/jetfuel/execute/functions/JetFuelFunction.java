@@ -25,7 +25,6 @@ public class JetFuelFunction {
     private String fullFunctionName;
     private Class returnType;
     private FunctionProcessor executor;
-    private Class<? extends Runnable> onClientDisconnect = null;
     private String functionDescription;
     private String functionPublisherName;
     private String publisherHostname;
@@ -136,15 +135,6 @@ public class JetFuelFunction {
 
     public FunctionExecutionType getExecutionType() {
         return executionType;
-    }
-
-    // not used for now
-    public Class<? extends Runnable> getOnClientDisconnect() {
-        return onClientDisconnect;
-    }
-
-    public void setOnClientDisconnect(Class<? extends Runnable> onClientDisconnect) {
-        this.onClientDisconnect = onClientDisconnect;
     }
 
     public String isValidToPublish() {

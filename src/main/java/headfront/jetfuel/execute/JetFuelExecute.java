@@ -132,4 +132,23 @@ public interface JetFuelExecute {
      */
     void setFunctionIDGenerator(Function<String, String> functionIDGenerator);
 
+    /**
+     * Register for client Disconnections
+     * @param connectionName
+     * @param listener
+     */
+    void registerForClientDisconnections(String connectionName, ClientDisconnectionListener listener);
+
+    /**
+     * DeRegister for client Disconnections
+     * @param connectionName
+     */
+    void deRegisterForClientDisconnections(String connectionName);
+
+    /**
+     * Register a lister for our own connection and disconnection
+     * @param connectionListener
+     */
+    void registerOwnConnectionListener(OwnConnectionListener connectionListener);
+
 }

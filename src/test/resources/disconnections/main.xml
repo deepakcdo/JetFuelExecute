@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       					   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+       default-autowire="byName">
+
+    <context:property-placeholder location="classpath*:shared.properties,disconnections/main.properties"/>
+
+    <import resource="classpath:amps.xml"/>
+
+    <bean id="client1" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="client1"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="false"/>
+    </bean>
+
+    <bean id="client2" class="com.crankuptheamps.client.HAClient"
+          factory-bean="haClientFactory"
+          factory-method="createHaClient">
+        <constructor-arg index="0" value="client2"/>
+        <constructor-arg index="1" value="${appConnectionUrl}"/>
+        <constructor-arg index="2" value="false"/>
+    </bean>
+
+    <bean id="ampsDisconnector" class="regressiontest.util.AmpsDisconnector">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" value="${ampConnectionTopic}"/>
+        <constructor-arg index="2" ref="jsonMapper"/>
+        <constructor-arg index="3" value="${appConnectionUrl}"/>
+        <constructor-arg index="4" value="${adminPort}"/>
+    </bean>
+
+    <bean id="ampsDisconnectionService" class="headfront.jetfuel.execute.impl.AmpsDisconnectionService">
+        <constructor-arg index="0" ref="haClient"/>
+        <constructor-arg index="1" value="${ampConnectionTopic}"/>
+        <constructor-arg index="2" ref="jsonMapper"/>
+    </bean>
+
+</beans>
