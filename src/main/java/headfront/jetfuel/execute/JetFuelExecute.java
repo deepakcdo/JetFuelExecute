@@ -133,20 +133,8 @@ public interface JetFuelExecute {
     void setFunctionIDGenerator(Function<String, String> functionIDGenerator);
 
     /**
-     * Register for client Disconnections
-     * @param connectionName
-     * @param listener
-     */
-    void registerForClientDisconnections(String connectionName, ClientDisconnectionListener listener);
-
-    /**
-     * DeRegister for client Disconnections
-     * @param connectionName
-     */
-    void deRegisterForClientDisconnections(String connectionName);
-
-    /**
-     * Register a lister for our own connection and disconnection
+     * Register a listener for our own connection and disconnection. If this components connection to AMPS is lost
+     * and then reconnected, all its subsctiptions will still be active.
      * @param connectionListener
      */
     void registerOwnConnectionListener(OwnConnectionListener connectionListener);

@@ -136,8 +136,10 @@ Since function calls goes through amps topics, stats of each function call is av
 # MultiExecute of Functions
 Ability to make a function call which is executed by several publishers. E.g. if you have BankOff function published by 5 different function publishers, you can call this once and each of the 5 publisher will execute this. This is very powerful feature and needs to be understood and used very carefully.
 
+# Handle disconnections from Amps
+The ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
+
 # Features coming very soon.
-* The ability to handle client disconnects. e.g. if a client calls function like QuoteOn and then disconnects after a few minutes, the function publisher that processed the QuoteOn request will realise the client disconnected and execute a clean-up action. Here a clean- up action could pull all the quotes from the market for the disconnected user.
 * API’s in different languages e.g. Javascript and C. This means JetFuelExecute functions can be published and called from multiple languages.
 
 # JetFuelExecute demo using JetFuelExplorer 

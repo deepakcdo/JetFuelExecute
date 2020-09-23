@@ -10,23 +10,7 @@
 
     <import resource="classpath:amps.xml"/>
 
-    <bean id="client1" class="com.crankuptheamps.client.HAClient"
-          factory-bean="haClientFactory"
-          factory-method="createHaClient">
-        <constructor-arg index="0" value="client1"/>
-        <constructor-arg index="1" value="${appConnectionUrl}"/>
-        <constructor-arg index="2" value="false"/>
-    </bean>
-
-    <bean id="client2" class="com.crankuptheamps.client.HAClient"
-          factory-bean="haClientFactory"
-          factory-method="createHaClient">
-        <constructor-arg index="0" value="client2"/>
-        <constructor-arg index="1" value="${appConnectionUrl}"/>
-        <constructor-arg index="2" value="false"/>
-    </bean>
-
-    <bean id="ampsDisconnector" class="regressiontest.util.AmpsDisconnector">
+    <bean id="ampsDisconnector" class="headfront.jetfuel.execute.connection.AmpsDisconnector">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" value="${ampConnectionTopic}"/>
         <constructor-arg index="2" ref="jsonMapper"/>
@@ -34,7 +18,7 @@
         <constructor-arg index="4" value="${adminPort}"/>
     </bean>
 
-    <bean id="ampsDisconnectionService" class="headfront.jetfuel.execute.impl.AmpsDisconnectionService">
+    <bean id="ampsDisconnectionService" class="headfront.jetfuel.execute.connection.AmpsConnectionStatusServiceImpl">
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" value="${ampConnectionTopic}"/>
         <constructor-arg index="2" ref="jsonMapper"/>

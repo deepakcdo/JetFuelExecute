@@ -1,9 +1,9 @@
-package headfront.jetfuel.execute;
+package headfront.jetfuel.execute.connection;
 
 /**
  * Interface to listen for amps client connection and disconnections.
  */
-public interface ClientDisconnectionListener {
+public interface AmpsConnectionListener {
 
     void connected(String ampsConnectionName);
 

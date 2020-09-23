@@ -1,9 +1,10 @@
-package regressiontest.util;
+package headfront.jetfuel.execute.connection;
 
 import com.crankuptheamps.client.HAClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import regressiontest.util.WebQuery;
 
 import java.util.List;
 import java.util.Map;
@@ -25,12 +26,6 @@ public class AmpsDisconnector {
         this.adminUrl = getAmpsUrl(server, adminPort, false);
         LOG.info("Going to use adminUrl " + adminUrl);
         LOG.info("Waiting Rest service to update");
-        // wait as we are using  the rest service that updates every 5 sec
-        try {
-            Thread.sleep(14000);
-        } catch (InterruptedException e) {
-            //ignore
-        }
     }
 
 

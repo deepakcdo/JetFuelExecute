@@ -1,7 +1,6 @@
 package headfront.jetfuel.execute.impl;
 
 import headfront.jetfuel.execute.ActiveSubscriptionRegistry;
-import headfront.jetfuel.execute.ClientDisconnectionListener;
 import headfront.jetfuel.execute.JetFuelExecute;
 import headfront.jetfuel.execute.OwnConnectionListener;
 import headfront.jetfuel.execute.functions.FunctionResponseListener;
@@ -180,12 +179,6 @@ public class DefaultJetFuelExecuteService implements JetFuelExecute {
     public void setExecuteOnDifferentThread(boolean executeOnDifferentThread) {
         this.executeOnDifferentThread = executeOnDifferentThread;
     }
-
-    @Override
-    public void registerForClientDisconnections(String connectionName, ClientDisconnectionListener listener){}
-
-    @Override
-    public void deRegisterForClientDisconnections(String connectionName){}
 
     @Override
     public void registerOwnConnectionListener(OwnConnectionListener connectionListener){}

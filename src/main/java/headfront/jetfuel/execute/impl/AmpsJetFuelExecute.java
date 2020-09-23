@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static headfront.jetfuel.execute.JetFuelExecuteConstants.CANCEL_REQ_MESSAGE;
-import static headfront.jetfuel.execute.JetFuelExecuteConstants.CLIENT_STATUS_TOPIC;
 import static headfront.jetfuel.execute.utils.AssertChecks.notNull;
 
 /**
@@ -40,7 +39,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final String ampsConnectionName;
     private String hostName;
     private boolean checkFunctionOwner = false;
-    private AtomicBoolean initalised = new AtomicBoolean(false);
+    private AtomicBoolean initialised = new AtomicBoolean(false);
     private final Map<String, JetFuelFunction> functionsReceivedFromAmps = new ConcurrentHashMap<>();
     private final Map<String, JetFuelFunction> functionsPublishedToAmps = new ConcurrentHashMap<>();
     private final Map<String, FunctionResponseListener> callBackBackLog = new ConcurrentHashMap<>();
@@ -50,8 +49,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final String AMPS_OPTIONS = Message.Options.SendKeys + Message.Options.NoEmpties;
     private final String AMPS_OPTIONS_WITH_OOF = Message.Options.SendKeys + Message.Options.NoEmpties + Message.Options.OOF;
     private final ActiveSubscriptionRegistry subscriptionRegistry = new AmpsActiveSubscriptionRegistry();
-    private AmpsDisconnectionService disconnectionService = null;
-    private final List<OwnConnectionListener> ownConnectionListeners = new ArrayList<>();
+    private final List<OwnConnectionListener> ownConnectionListeners = new CopyOnWriteArrayList<>();
     private final ExecutorService jetFuelOwnConnectionProcessorThread = Executors.newSingleThreadExecutor(
             new NamedThreadFactory("JetFuelOwnConnectionProcessorThread"));
 
@@ -84,7 +82,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public boolean unPublishFunction(JetFuelFunction jetFuelFunction) {
-        checkInitalised();
+        checkInitialised();
         try {
             String deleteKey = "/ID='" + jetFuelFunction.getFullFunctionName() + "'";
             ampsClient.sowDelete(getFunctionTopic(), deleteKey, 1000);
@@ -105,14 +103,11 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public void initialise() {
-        if (!initalised.get()) {
+        if (!initialised.get()) {
             try {
 
                 // Initialise executors
                 processingThreadFactory = new SameThreadExecutor(noOfProcessingThreads);
-
-                // Listen for client disconnections so functions that need to know about disconnections can act on it
-                disconnectionService = new AmpsDisconnectionService(ampsClient, loginTopic, jsonMapper);
 
                 // Add disconnection and reconnection for our selves
                 ampsClient.addConnectionStateListener(new AmpsConnectionListener());
@@ -123,7 +118,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                 // Listen for function callbacks
                 subscribeToFunctionCallbacks();
 
-                initalised.set(true);
+                initialised.set(true);
 
             } catch (Exception e) {
                 LOG.error("Unable to initialise FunctionPublisher", e);
@@ -189,7 +184,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public boolean publishFunction(JetFuelFunction jetFuelFunction) {
-        checkInitalised();
+        checkInitialised();
         jetFuelFunction.setTransientFunctionDetatils(ampsConnectionName, hostName, FunctionUtils.getIsoDateTime());
         final String validToPublish = jetFuelFunction.isValidToPublish();
         if (validToPublish != null) {
@@ -212,13 +207,13 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
     @Override
     public String executeFunction(String functionName, Object[] functionParameters, FunctionResponseListener response) {
-        checkInitalised();
+        checkInitialised();
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.RequestResponse);
     }
 
     @Override
     public String executeSubscriptionFunction(String functionName, Object[] functionParameters, SubscriptionFunctionResponseListener response) {
-        checkInitalised();
+        checkInitialised();
         return checkAndExecuteFunction(functionName, functionParameters, response, FunctionExecutionType.Subscription);
     }
 
@@ -231,16 +226,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         } else {
             LOG.error("Got a request to cancel subscription request for id " + callId + " but there was no active subscription.");
         }
-    }
-
-    @Override
-    public void registerForClientDisconnections(String connectionName, ClientDisconnectionListener listener) {
-        disconnectionService.registerForDisconnections(connectionName, listener);
-    }
-
-    @Override
-    public void deRegisterForClientDisconnections(String connectionName) {
-        disconnectionService.deRegisterForDisconnections(connectionName);
     }
 
     @Override
@@ -259,7 +244,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     }
 
     private void rePublishFunctionDesc(JetFuelFunction jetFuelFunction) {
-        checkInitalised();
+        checkInitialised();
         try {
             String deleteKey = "/ID='" + jetFuelFunction.getFullFunctionName() + "'";
             ampsClient.sowDelete(getFunctionTopic(), deleteKey, 1000);
@@ -417,29 +402,6 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
             LOG.error("Unable to call function " + functionSignature + " with parameter " + Arrays.toString(functionParameters) + " as it does not exist", e);
             response.onError(callID, "Function " + functionSignature + " is not available", e);
             return callID;
-        }
-    }
-
-    private void subscribeToDisconnections() throws Exception {
-        final CommandId subscribe = ampsClient.subscribe(this::listenForClientDisconnections, CLIENT_STATUS_TOPIC,
-                "/ClientStatus/event='disconnect'", 10000);
-        jetFuelActiveSubscriptions.add(subscribe);
-        LOG.info("Subscribed to disconnection topic");
-    }
-
-    private void listenForClientDisconnections(Message m) {
-        String data = m.getData().trim();
-        if (data.length() > 0) {
-            if (data.contains("disconnect")) {
-                try {
-                    Map map = jsonMapper.readValue(data, Map.class);
-                    Map clientStatus = (Map) map.get("ClientStatus");
-                    Object client_name = clientStatus.get("client_name");
-//                    fireClientDisconnected(client_name.toString());
-                } catch (Exception e) {
-                    LOG.error("Unable to process disconnection " + data, e);
-                }
-            }
         }
     }
 
@@ -793,8 +755,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         return functionBusTopic;
     }
 
-    private void checkInitalised() {
-        if (!initalised.get()) {
+    private void checkInitialised() {
+        if (!initialised.get()) {
             LOG.warn("AmpsJetFuelExecute was not initialised. Initializing it now.");
             initialise();
         }
