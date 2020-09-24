@@ -19,10 +19,15 @@ public class AmpsDisconnector {
     private WebQuery webquery = new WebQuery();
 
     public AmpsDisconnector(HAClient amps, String connectionTopic,
-                            ObjectMapper objectMapper, String server, String adminPort) {
+                            ObjectMapper objectMapper, String server, boolean primaryOnlyTesting,
+                            String primaryAdminPort, String backupAdminPort) {
         this.amps = amps;
         this.connectionTopic = connectionTopic;
         this.objectMapper = objectMapper;
+        String adminPort = backupAdminPort;
+        if (primaryOnlyTesting) {
+            adminPort = primaryAdminPort;
+        }
         this.adminUrl = getAmpsUrl(server, adminPort, false);
         LOG.info("Going to use adminUrl " + adminUrl);
         LOG.info("Waiting Rest service to update");
@@ -45,10 +50,10 @@ public class AmpsDisconnector {
         Map<Object, Object> amps = (Map<Object, Object>) map.get("amps");
         Map<Object, Object> instance = (Map<Object, Object>) amps.get("instance");
         List<Map<Object, Object>> clients = (List<Map<Object, Object>>) instance.get("clients");
-        LOG.info("Got "  + clients.size() + " connections");
+        LOG.info("Got " + clients.size() + " connections with " + urlAllUsers);
         for (Map<Object, Object> client : clients) {
             String connection_name = (String) client.get("client_name");
-            LOG.info("Checking "  + connection_name);
+            LOG.info("Checking " + connection_name);
             if (connectionName.equals(connection_name)) {
                 Object id = client.get("id");
                 String disconnectUrl = adminUrl + "/amps/administrator/clients/" + id + "/disconnect";

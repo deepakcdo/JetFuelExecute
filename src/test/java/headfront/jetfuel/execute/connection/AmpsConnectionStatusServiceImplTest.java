@@ -27,8 +27,14 @@ public class AmpsConnectionStatusServiceImplTest {
     @Autowired
     HaClientFactory haClientFactory;
 
-    @Value("${appConnectionUrl}")
-    private String ampsConnectionUrl;
+    @Value("${backupAppConnectionUrl}")
+    private String backupAppConnectionUrl;
+
+    @Value("${primaryAppConnectionUrl}")
+    private String primaryAppConnectionUrl;
+
+    @Value("${primaryOnlyTesting}")
+    private boolean primaryOnlyTesting;
 
     private String TEST_CONNECTION_NAME_1 = "client1";
     private String TEST_CONNECTION_NAME_2 = "client2";
@@ -91,7 +97,6 @@ public class AmpsConnectionStatusServiceImplTest {
         connectedUsers.add(TEST_CONNECTION_NAME_1);
         connectedUsers.add(TEST_CONNECTION_NAME_2);
         connectedUsers.add(TEST_CONNECTION_NAME_3);
-        Thread.sleep(3000);
         TestAmpsConnectionListener ampsDisconnectionListener = new TestAmpsConnectionListener();
         ampsConnectionStatusServiceImpl.registerAmpsConnectionListener(ampsDisconnectionListener);
         Thread.sleep(1500);
@@ -138,6 +143,10 @@ public class AmpsConnectionStatusServiceImplTest {
     }
 
     private HAClient createHaClient(String connectionName) throws Exception {
+        String ampsConnectionUrl = backupAppConnectionUrl;
+        if(primaryOnlyTesting){
+            ampsConnectionUrl = primaryAppConnectionUrl;
+        }
         return haClientFactory.createHaClient(connectionName, ampsConnectionUrl, false);
     }
 
