@@ -32,17 +32,24 @@ public class AmpsConnectionStatusServiceImpl implements AmpsConnectionStatusServ
      * @param connectionTopic - Statustopic for amps. use headfront.jetfuel.execute.JetFuelExecuteConstants#CLIENT_STATUS_TOPIC as default
      * @param objectMapper    - json decoder
      */
-    public AmpsConnectionStatusServiceImpl(HAClient amps, String connectionTopic, ObjectMapper objectMapper) {
+    public AmpsConnectionStatusServiceImpl(HAClient amps, String connectionTopic,
+                                           ObjectMapper objectMapper, boolean withHistory) {
         jetFuelDisconnectionProcessorThread = Executors.newSingleThreadExecutor(
                 new NamedThreadFactory("JetFuelDisconnectionProcessorThread"));
         try {
-            amps.subscribe(message -> {
-                String data = message.getData();
-                if (data != null) {
-                    processMessage(objectMapper, data);
-                }
-
-            }, connectionTopic, " /ClientStatus/event in ('disconnect','logon')", 10000);
+            if (withHistory) {
+                amps.sowAndSubscribe(message ->
+                                processMessage(objectMapper, message.getData()),
+                        connectionTopic,
+                        " /ClientStatus/event in ('disconnect','logon')", 1000,
+                        10000);
+            } else {
+                amps.subscribe(message ->
+                                processMessage(objectMapper, message.getData()),
+                        connectionTopic,
+                        " /ClientStatus/event in ('disconnect','logon')",
+                        10000);
+            }
             LOG.info("Subscribed to Connection event on topic " + connectionTopic);
         } catch (Exception e) {
             LOG.error("Unable to subscribe to " + connectionTopic, e);
@@ -51,22 +58,24 @@ public class AmpsConnectionStatusServiceImpl implements AmpsConnectionStatusServ
     }
 
     private void processMessage(ObjectMapper objectMapper, String data) {
-        try {
-            Map map = objectMapper.readValue(data, Map.class);
-            Object clientStatus = map.get("ClientStatus");
-            if (clientStatus != null) {
-                Map clientStatusDetails = (Map) clientStatus;
-                String event = clientStatusDetails.get("event").toString();
-                String clientName = clientStatusDetails.get("client_name").toString();
-                if (event.equalsIgnoreCase("disconnect")) {
-                    handleDisconnect(clientName);
+        if (data != null) {
+            try {
+                Map map = objectMapper.readValue(data, Map.class);
+                Object clientStatus = map.get("ClientStatus");
+                if (clientStatus != null) {
+                    Map clientStatusDetails = (Map) clientStatus;
+                    String event = clientStatusDetails.get("event").toString();
+                    String clientName = clientStatusDetails.get("client_name").toString();
+                    if (event.equalsIgnoreCase("disconnect")) {
+                        handleDisconnect(clientName);
+                    }
+                    if (event.equalsIgnoreCase("logon")) {
+                        handleConnect(clientName);
+                    }
                 }
-                if (event.equalsIgnoreCase("logon")) {
-                    handleConnect(clientName);
-                }
+            } catch (IOException e) {
+                LOG.error("Unable to decode " + data, e);
             }
-        } catch (IOException e) {
-            LOG.error("Unable to decode " + data, e);
         }
     }
 

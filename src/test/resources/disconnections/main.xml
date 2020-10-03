@@ -24,6 +24,7 @@
         <constructor-arg index="0" ref="haClient"/>
         <constructor-arg index="1" value="${ampConnectionTopic}"/>
         <constructor-arg index="2" ref="jsonMapper"/>
+        <constructor-arg index="3" value="false"/>
     </bean>
 
 </beans>
