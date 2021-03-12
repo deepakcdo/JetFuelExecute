@@ -6,10 +6,7 @@ import com.crankuptheamps.client.HAClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Deepak on 09/04/2017.
@@ -49,13 +46,21 @@ public class HaClientFactory {
         @Override
         public void reportFailure(Exception exception, ConnectionInfo info) throws Exception {
             super.reportFailure(exception, info);
-            LOG.error("Disconnected from amps  " + info.toString(), exception);
+            LOG.error("Disconnected from amps  " + removePassword(info).toString(), exception);
         }
 
         @Override
         public void reportSuccess(ConnectionInfo info) {
             super.reportSuccess(info);
-            LOG.info("Connected to amps " + info.toString());
+            LOG.info("Connected to amps " + removePassword(info).toString());
+        }
+
+        private ConnectionInfo removePassword(ConnectionInfo info){
+            String key = "client.uri";
+            String url = "" +info.get(key);
+            String cleaned = url.replaceAll(":[^////].*@", ":*****@");
+            info.put(key,cleaned);
+            return info;
         }
     }
 
