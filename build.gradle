@@ -2,7 +2,6 @@ repositories {
     mavenCentral()
 }
 apply plugin: 'java'
-apply plugin: 'idea'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
@@ -43,6 +42,11 @@ task testJar(type: Jar) {
     from sourceSets.test.output
 }
 
+task runJetFuelTestServer(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.junit.runner.JUnitCore'
+    args 'regressiontest.JetFuelExecuteServerTest'
+}
 
 task runJetFuelExecuteSubServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath

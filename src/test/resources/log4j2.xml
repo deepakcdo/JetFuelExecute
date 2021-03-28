@@ -2,8 +2,8 @@
 <Configuration>
     <Appenders>
         <RollingFile name="fileAppender" append="true"
-                     fileName="log/publisher.log"
-                     filePattern="log/ampsclient.%d{yyyy-MM-dd}.%i.log">
+                     fileName="log/TestLog.log"
+                     filePattern="log/TestLog.%d{yyyy-MM-dd}.%i.log">
             <PatternLayout pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %-5p [%c{3}] %m%n"/>
             <Policies>
                 <OnStartupTriggeringPolicy/>

@@ -52,6 +52,8 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private final List<OwnConnectionListener> ownConnectionListeners = new CopyOnWriteArrayList<>();
     private final ExecutorService jetFuelOwnConnectionProcessorThread = Executors.newSingleThreadExecutor(
             new NamedThreadFactory("JetFuelOwnConnectionProcessorThread"));
+    private final ScheduledExecutorService scheduledFunctionDescService = Executors.newSingleThreadScheduledExecutor(
+            new NamedThreadFactory("JetFuelFunctionDescProcessorThread"));
 
     private Consumer<String> onFunctionAddedListener = name -> {
     };
@@ -64,6 +66,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     private String functionBusTopic = "JETFUEL_EXECUTE_BUS";
     private String loginTopic = "/AMPS/ClientStatus";
     private Function<String, String> functionIDGenerator = FunctionUtils::getNextID;
+    private int functionRepublishTime = 5;
 
     public AmpsJetFuelExecute(HAClient ampsClient, ObjectMapper jsonMapper) {
         notNull(ampsClient, "ampsClient cannot be null");
@@ -117,6 +120,12 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
 
                 // Listen for function callbacks
                 subscribeToFunctionCallbacks();
+
+                // Republish all functions again if configured to do so 
+                if(functionRepublishTime > 0) {
+                    scheduledFunctionDescService.scheduleAtFixedRate(() -> this.republishAllFunctionDescWithoutDelete(),
+                            2, functionRepublishTime, TimeUnit.MINUTES);
+                }
 
                 initialised.set(true);
 
@@ -258,6 +267,11 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
         } catch (Exception e) {
             LOG.error("Unable to re publish Function " + jetFuelFunction.getFunctionName() + " with ID " + jetFuelFunction.getFullFunctionName(), e);
         }
+    }
+
+    private void republishAllFunctionDescWithoutDelete(){
+        Set<JetFuelFunction> functionsToProcess = new HashSet<>(functionsPublishedToAmps.values());
+        functionsToProcess.forEach(AmpsJetFuelExecute.this::publishFunctionDesc);
     }
 
     @Override
@@ -734,6 +748,11 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
     public void setNoOfProcessingThreads(int noOfProcessingThreads) {
         this.noOfProcessingThreads = noOfProcessingThreads;
     }
+
+     public void setFunctionRepublishTime(int functionRepublishTime) {
+        this.functionRepublishTime = functionRepublishTime;
+    }
+
 
     public void setLoginTopic(String loginTopic) {
         this.loginTopic = loginTopic;
