@@ -52,25 +52,25 @@ task runJetFuelTestServer(type: JavaExec) {
 task runJetFuelExecuteSubServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'headfront.jetfuel.execute.example.JetFuelExecuteSubServer'
-    jvmArgs '-Dlog4j.configurationFile=/Users/Deepak/Documents/MySpace/Dev/JetFuelExecute/src/test/resources/log4j2.xml'
+    jvmArgs '-Dlog4j.configurationFile=C:\\MySpace\\Dev\\Git\\JetFuel\\JetFuelExecute\\src\\test\\resources\\log4j2.xml'
 }
 
 task runJetFuelExecuteSubClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'headfront.jetfuel.execute.example.JetFuelExecuteSubClient'
-    jvmArgs '-Dlog4j.configurationFile=/Users/Deepak/Documents/MySpace/Dev/JetFuelExecute/src/test/resources/log4j2.xml'
+    jvmArgs '-Dlog4j.configurationFile=C:\\MySpace\\Dev\\Git\\JetFuel\\JetFuelExecute\\src\\test\\resources\\log4j2.xml'
 }
 
 task runJetFuelExecuteServer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'headfront.jetfuel.execute.example.JetFuelExecuteServer'
-    jvmArgs '-Dlog4j.configurationFile=/Users/Deepak/Documents/MySpace/Dev/JetFuelExecute/src/test/resources/log4j2.xml'
+    jvmArgs '-Dlog4j.configurationFile=C:\\MySpace\\Dev\\Git\\JetFuel\\JetFuelExecute\\src\\test\\resources\\log4j2.xml'
 }
 
 task runJetFuelExecuteClient(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'headfront.jetfuel.execute.example.JetFuelExecuteClient'
-    jvmArgs '-Dlog4j.configurationFile=/Users/Deepak/Documents/MySpace/Dev/JetFuelExecute/src/test/resources/log4j2.xml'
+    jvmArgs '-Dlog4j.configurationFile=C:\\MySpace\\Dev\\Git\\JetFuel\\JetFuelExecute\\src\\test\\resources\\log4j2.xml'
 }
 
 task runNewBbgGateway(type: JavaExec) {
