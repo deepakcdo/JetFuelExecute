@@ -394,7 +394,7 @@ public class AmpsJetFuelExecute implements JetFuelExecute {
                     functionCall.put(JetFuelExecuteConstants.MSG_CREATION_NAME, ampsConnectionName);
                     String jsonMsg = jsonMapper.writeValueAsString(functionCall);
                     log("Sending JetFuelExecuteFunction execution request with id " +
-                            callID + " to topic " + getFunctionBusTopic() + " function " + jetFuelFunction.getFullFunctionName() +
+                            callID + " to topic " + getFunctionBusTopic() + " function " + functionName +
                             " with parameters " + Arrays.toString(functionParameters), " request " + jsonMsg);
                     ampsClient.publish(getFunctionBusTopic(), jsonMsg);
                     callBackBackLog.put(callID, response);
