@@ -1,0 +1,42 @@
+so in summary 
+1) client side validation
+2) coerc int to long
+3) is "NaN" to Double.NaN
+
+  public static <T> T wideningCoercion(Class<T> expectedClassType, Object value) {
+        if ( expectedClassType.isInstance(value)) {
+            return expectedClassType.cast(value);
+        } else if (value instanceof Integer && Long.class.equals(expectedClassType)) {
+            Integer v = (Integer)value;
+            return expectedClassType.cast(v.longValue());
+        } else if (value instanceof Short && Long.class.equals(expectedClassType)){
+            Short s = (Short)value;
+            return expectedClassType.cast(s.longValue());
+        } else if (value instanceof Short && Integer.class.equals(expectedClassType)) {
+            Short s = (Short)value;
+            expectedClassType.cast(s.intValue());
+        } if (value instanceof Float && Double.class.equals(expectedClassType)) {
+            Float f = (Float) value;
+            return expectedClassType.cast(f.doubleValue());
+        }// here we should thrown an exception as expectedClassType is not releaated to value
+        return null;
+    }
+
+     public static Object wideningCoercion(Class<?> expectedClassType, Object value) {
+            if ( expectedClassType.isInstance(value)) {
+                return value;
+            } else if (value instanceof Integer && Long.class.equals(expectedClassType)) {
+                Integer v = (Integer)value;
+                return v.longValue();
+            } else if (value instanceof Short && Long.class.equals(expectedClassType)){
+                Short s = (Short)value;
+                return s.longValue();
+            } else if (value instanceof Short && Integer.class.equals(expectedClassType)) {
+                Short s = (Short)value;
+                return s.intValue();
+            } if (value instanceof Float && Double.class.equals(expectedClassType)) {
+                Float f = (Float) value;
+                return f.doubleValue();
+            }
+            return value;
+        }
